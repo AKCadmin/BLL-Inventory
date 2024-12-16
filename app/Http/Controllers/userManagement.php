@@ -47,9 +47,9 @@ class userManagement extends Controller
             'current_status' => 'required|boolean',
         ]);
 
-        // $databaseName = str_replace(' ', '_', strtolower($company->name));
+        $databaseName = str_replace(' ', '_', strtolower($company->name));
 
-        // $existingDeploy = Deploy::where('db_name', $databaseName)->first();
+        $existingDeploy = Deploy::where('db_name', $databaseName)->first();
 
         // if ($existingDeploy) {
         //     return response()->json(['success' => false, 'message' => 'A database with the same name already exists.']);
@@ -73,28 +73,30 @@ class userManagement extends Controller
 
             DB::commit();
 
-            if($user){
-                return response()->json(['success' => true, 'user' => $request->input(), 'message' => 'User created successfully!']);
-            }
-
-            // if (!$existingDeploy) {
-
-            //     $deployTable = deploy::create([
-            //         'user_id' => $user->id,
-            //         'db_name' => $databaseName,
-            //         'status' => 1,
-            //     ]);
-
-            //     // Attempt to create the database outside of the transaction
-            //     try {
-                   
-            //         DB::statement("CREATE DATABASE \"$databaseName\"");
-            //         return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
-            //     } catch (\Exception $e) {
-            //         // Handle database creation failure
-            //         return response()->json(['success' => false, 'message' => 'User created successfully and database created!']);
-            //     }
+            // if($user){
+            //     return response()->json(['success' => true, 'user' => $request->input(), 'message' => 'User created successfully!']);
             // }
+
+            if (!$existingDeploy) {
+
+                $deployTable = deploy::create([
+                    'user_id' => $user->id,
+                    'db_name' => $databaseName,
+                    'status' => 1,
+                ]);
+
+                // Attempt to create the database outside of the transaction
+                try {
+                   
+                    DB::statement("CREATE DATABASE \"$databaseName\"");
+                    return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
+                } catch (\Exception $e) {
+                    // Handle database creation failure
+                    return response()->json(['success' => false, 'message' => 'User created successfully and database created!']);
+                }
+            }else{
+                return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!','note'=>'already exist']);
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
