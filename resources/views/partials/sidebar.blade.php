@@ -27,7 +27,7 @@ if (!empty($_SESSION['lang'])) {
                  
                 <!-- <li class="menu-title" key="t-apps"><?php echo $lang['Apps']; ?></li> -->
 
-                @if(auth()->user()->role != 1)
+                @if(auth()->user()->role == 1)
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -57,7 +57,7 @@ if (!empty($_SESSION['lang'])) {
                     </a>
                 </li>
 
-                @elseif(auth()->user()->role == 6)
+                @elseif(auth()->user()->role == 2)
 
  
 
@@ -95,7 +95,7 @@ if (!empty($_SESSION['lang'])) {
                     </ul>
                 </li>
 
-                @elseif(auth()->user()->role == 7)
+                @elseif(auth()->user()->role == 3)
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>

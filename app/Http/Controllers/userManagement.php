@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdvanceModuleMaster;
-use App\Models\deploy;
-use App\Models\role;
+use App\Models\Deploy;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
