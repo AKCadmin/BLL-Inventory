@@ -40,36 +40,36 @@ class LoginController extends Controller
 
                         if (Auth::attempt($request->only('email', 'password'))) {
 
-                            $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
-                            if ($deploy) {
+                            // $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
+                            // if ($deploy) {
 
-                                $dbName = $deploy->db_name;
+                            //     $dbName = $deploy->db_name;
 
-                                // Update the database configuration
-                                config(['database.connections.pgsql.database' => $dbName]);
+                            //     // Update the database configuration
+                            //     config(['database.connections.pgsql.database' => $dbName]);
 
-                                // Purge the connection to force a reset
-                                DB::purge('pgsql');
+                            //     // Purge the connection to force a reset
+                            //     DB::purge('pgsql');
 
-                                // Reconnect to the database
-                                DB::reconnect('pgsql');
+                            //     // Reconnect to the database
+                            //     DB::reconnect('pgsql');
 
-                                // Verify the connection
-                                DB::connection('pgsql')->getPdo();
+                            //     // Verify the connection
+                            //     DB::connection('pgsql')->getPdo();
 
-                                \Log::info('Connected to the database: ', ['db' => $dbName]);
+                            //     \Log::info('Connected to the database: ', ['db' => $dbName]);
 
-                                session(['db_name' => $dbName]);
+                            //     session(['db_name' => $dbName]);
+                            //     $token = Str::random(60);
+                            //     Cache::put('api_token', $token);
+                            //     Cache::put('api_token_' . $token, $user, 10800);
+                            //     return redirect('/home');
+                            // } else {
                                 $token = Str::random(60);
                                 Cache::put('api_token', $token);
                                 Cache::put('api_token_' . $token, $user, 10800);
                                 return redirect('/home');
-                            } else {
-                                $token = Str::random(60);
-                                Cache::put('api_token', $token);
-                                Cache::put('api_token_' . $token, $user, 10800);
-                                return redirect('/home');
-                            }
+                            // }
                         }
                     } else {
 

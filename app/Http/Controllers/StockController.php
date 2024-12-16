@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Session;
 
 class StockController extends Controller
 {
-    public function __construct()
-    {
-        $this->setupDatabaseConnection();
-    }
+    // public function __construct()
+    // {
+    //     $this->setupDatabaseConnection();
+    // }
 
     public function index()
     {
@@ -51,21 +51,21 @@ class StockController extends Controller
     {
         try {
            
-            $databseName = Session::get('db_name');
-            config(['database.connections.pgsql.database' => 'bll_inventory']);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
+            // $databseName = Session::get('db_name');
+            // config(['database.connections.pgsql.database' => 'bll_inventory']);
+            // DB::purge('pgsql');
+            // DB::connection('pgsql')->getPdo();
            
             
 
-            if (!$databseName) {
-                return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
-            }
+            // if (!$databseName) {
+            //     return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+            // }
             // if($request->db_name){
-                $dbName = $databseName;
-                config(['database.connections.pgsql.database' => $dbName]);
-                DB::purge('pgsql');
-                DB::connection('pgsql')->getPdo();
+               // $dbName = $databseName;
+                // config(['database.connections.pgsql.database' => $dbName]);
+                // DB::purge('pgsql');
+                // DB::connection('pgsql')->getPdo();
             // }
 
             // $batches = json_decode($request->input('batches'), true);

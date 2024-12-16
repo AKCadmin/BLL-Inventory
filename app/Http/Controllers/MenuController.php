@@ -27,12 +27,12 @@ class MenuController extends Controller
 
     public function toggleStatus(Request $request)
     {
-        if($request->db_name){
-            $dbName = $request->db_name;
-            config(['database.connections.pgsql.database' => $dbName]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
-        }
+        // if($request->db_name){
+        //     $dbName = $request->db_name;
+        //     config(['database.connections.pgsql.database' => $dbName]);
+        //     DB::purge('pgsql');
+        //     DB::connection('pgsql')->getPdo();
+        // }
         $menu = Menu::find($request->id);
         if ($menu) {
             $menu->status = $request->status;
@@ -45,12 +45,12 @@ class MenuController extends Controller
 
     public function addNewMenu(Request $request)
     {
-        if($request->db_name){
-            $dbName = $request->db_name;
-            config(['database.connections.pgsql.database' => $dbName]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
-        }
+        // if($request->db_name){
+        //     $dbName = $request->db_name;
+        //     config(['database.connections.pgsql.database' => $dbName]);
+        //     DB::purge('pgsql');
+        //     DB::connection('pgsql')->getPdo();
+        // }
     
         $request->validate([
             'menu_name' => 'required|string|unique:menus,menu_name|regex:/^[A-Za-z0-9_]+$/',
@@ -283,12 +283,12 @@ class MenuController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if($request->db_name){
-            $dbName = $request->db_name;
-            config(['database.connections.pgsql.database' => $dbName]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
-        }  
+        // if($request->db_name){
+        //     $dbName = $request->db_name;
+        //     config(['database.connections.pgsql.database' => $dbName]);
+        //     DB::purge('pgsql');
+        //     DB::connection('pgsql')->getPdo();
+        // }  
         $menu = Menu::find($id);
         if ($menu->is_deletable == 1) {
             try {
