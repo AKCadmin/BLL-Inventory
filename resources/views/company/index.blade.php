@@ -240,21 +240,26 @@
             let appUrl = $("#appUrl").val();
             let url = appUrl + '/company/' + companyId;
 
-            if (confirm('Are you sure you want to delete this company?')) {
-                ajaxRequest(url, 'POST', {}, 
-                    function (response) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
                         if (response.success) {
-                            toastr.success('Company deleted successfully!');
-                            location.reload();
+                            toastr.success('Product deleted successfully!');
                             loadCompanies();
                         } else {
                             toastr.error('Error: ' + response.message);
                         }
                     },
-                    function () {
-                        toastr.error('An error occurred while trying to delete the company.');
+                    error: function() {
+                        toastr.error(
+                            'An error occurred while trying to delete the product.');
                     }
-                );
+                });
             }
         });
 

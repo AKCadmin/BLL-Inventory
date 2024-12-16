@@ -15,7 +15,7 @@ $(document).ready(function() {
                 if(response.status === 200){
                     toastr.success(response.message)
                     $('#myModal').hide();
-                    loaction.reload();
+                    location.reload();
                     $('#permissionForm')[0].reset();
                   
                 } else {

@@ -1045,7 +1045,7 @@
                     const result = await response.json();
                     toastr.success("Form submitted successfully!");
                     console.log(result);
-                    // location.reload();
+                    location.reload();
                 } else {
                     const error = await response.json();
                     toastr.error(`Error: ${error.error}<br>File: ${error.file}<br>Line: ${error.line}`);

@@ -224,22 +224,22 @@
             appUrl + "/company/data",
             "GET",
             null,
-            function (data) {
+            function(data) {
                 console.log(data, "data");
                 $("#companyId")
                     .empty()
                     .append('<option value="">Select a company</option>');
-                $.each(data.companies, function (index, company) {
+                $.each(data.companies, function(index, company) {
                     $("#companyId").append(
                         '<option value="' +
-                            company.id +
-                            '">' +
-                            company.name +
-                            "</option>"
+                        company.id +
+                        '">' +
+                        company.name +
+                        "</option>"
                     );
                 });
             },
-            function (error) {
+            function(error) {
                 console.log("Error fetching categories:", error);
             }
         );
@@ -266,7 +266,7 @@
                     }
                 },
                 function(error) {
-                     toastr.error( error.responseJSON.error);
+                    toastr.error(error.responseJSON.error);
                 }
             );
         });
@@ -282,6 +282,16 @@
                 function(response) {
                     if (response.success) {
                         $('#productModal').show();
+                        console.log(response,"response")
+                        $('#companyId').val(response.product.company_id)
+                        $('#companyId option').each(function() {
+                            console.log($(this).val(),"anaan",response.product.company_id)
+                            if ($(this).val() == response.product.company_id) {
+                                $(this).prop('selected', true);
+                            } else {
+                                $(this).prop('selected', false);
+                            }
+                        });
                         $('#product_id').val(response.product.id);
                         $('#sku').val(response.product.sku);
                         $('#name').val(response.product.name);
