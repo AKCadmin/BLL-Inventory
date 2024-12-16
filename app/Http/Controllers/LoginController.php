@@ -85,7 +85,7 @@ class LoginController extends Controller
             }
         } catch (\PDOException $e) {
             // Handle PDO-specific exceptions (e.g., connection issues)
-            Log::error("PDOException: " . $e->getMessage());
+            \Log::error("PDOException: " . $e->getMessage());
             echo "Database connection failed: " . $e->getMessage();
         } catch (\Exception $e) {
             return redirect('login')->withErrors(['email' => $e->getMessage()]);
