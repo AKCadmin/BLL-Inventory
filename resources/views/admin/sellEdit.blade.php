@@ -28,10 +28,10 @@
             <div class="container-fluid">
 
                 <?php includeFileWithVariables('partials/page-title.php', ['pagetitle' => 'Tables', 'title' => 'Data Tables']); ?>
-                <form action="{{ route('sell.update', ['sell' => $sell->id]) }}" method="POST">
+                <form action="{{ route('sell.updateSell', ['sell' => $sell->id]) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    <input type="text" id="sellId" value="{{ old('id', $sell->id) }}">
+                    <input type="hidden" id="sellId" value="{{ old('id', $sell->id) }}">
 
                     <h4 class="mt-4">Update Sell</h4>
 
@@ -221,7 +221,7 @@
             var sellId = $('#sellId').val();
 
             $.ajax({
-                url: "{{ route('sell.update', ['sell' => ':id']) }}".replace(':id',
+                url: "{{ route('sell.updateSell', ['sell' => ':id']) }}".replace(':id',
                     sellId),
                 type: 'POST',
                 headers: {
