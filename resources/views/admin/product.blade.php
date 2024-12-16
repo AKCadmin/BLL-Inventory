@@ -337,29 +337,34 @@
 
         // Load Products
         function loadProducts() {
-            ajaxRequest('{{ route('product.getData') }}', 'GET', {},
-                function(response) {
-                    let rows = '';
-                    response.products.forEach(function(product) {
-                        rows += `
-                            <tr>
-                                <td>${product.id}</td>
-                                 <td>${product?.company?.name ?? ''}</td>
-                                <td>${product.sku}</td>
-                                <td>${product.name}</td>
-                                <td>${product.description}</td>
-                                <td>${product.status == 'available' ? 'available' : 'unavailable'}</td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm edit-product" data-id="${product.id}">Edit</button>
-                                    <button class="btn btn-danger btn-sm delete-product" data-id="${product.id}">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    $('#datatable tbody').html(rows);
-                }
-            );
-        }
+    ajaxRequest('{{ route('product.getData') }}', 'GET', {}, function (response) {
+        let rows = '';
+        response.products.forEach(function (product) {
+            const charLimit = 10; 
+            const truncatedDescription =
+                product.description.length > charLimit
+                    ? product.description.substring(0, charLimit) + '...'
+                    : product.description;
+
+            rows += `
+                <tr>
+                    <td>${product.id}</td>
+                    <td>${product?.company?.name ?? ''}</td>
+                    <td>${product.sku}</td>
+                    <td>${product.name}</td>
+                    <td title="${product.description}">${truncatedDescription}</td>
+                    <td>${product.status == 'available' ? 'available' : 'unavailable'}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm edit-product" data-id="${product.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-product" data-id="${product.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+        $('#datatable tbody').html(rows);
+    });
+}
+
 
         loadProducts();
     });

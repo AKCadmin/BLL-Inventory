@@ -264,29 +264,34 @@
         });
 
         function loadCompanies() {
-            ajaxRequest('{{ route('company.getData') }}', 'GET', {}, 
-                function (response) {
-                    let rows = '';
-                    response.companies.forEach(function (company) {
-                        rows += `
-                            <tr>
-                                <td>${company.id}</td>
-                                <td>${company.name}</td>
-                                <td>${company.address}</td>
-                                <td>${company.contact_email}</td>
-                                 <td>${company.phone_no}</td>
-                                <td>${company.status ? 'Active' : 'Inactive'}</td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm edit-company" data-id="${company.id}">Edit</button>
-                                    <button class="btn btn-danger btn-sm delete-company" data-id="${company.id}">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    $('#datatable tbody').html(rows);
-                }
-            );
-        }
+    ajaxRequest('{{ route('company.getData') }}', 'GET', {}, function (response) {
+        let rows = '';
+        response.companies.forEach(function (company) {
+            const charLimit = 10; 
+            const truncatedAddress =
+                company.address.length > charLimit
+                    ? company.address.substring(0, charLimit) + '...'
+                    : company.address;
+
+            rows += `
+                <tr>
+                    <td>${company.id}</td>
+                    <td>${company.name}</td>
+                    <td title="${company.address}">${truncatedAddress}</td>
+                    <td>${company.contact_email}</td>
+                    <td>${company.phone_no}</td>
+                    <td>${company.status ? 'Active' : 'Inactive'}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm edit-company" data-id="${company.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-company" data-id="${company.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+        $('#datatable tbody').html(rows);
+    });
+}
+
         loadCompanies();
     });
 </script>
