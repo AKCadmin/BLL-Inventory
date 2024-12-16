@@ -12,8 +12,6 @@ class CreateCompaniesTable extends Migration
             $table->string('name')->unique()->notNullable();
             $table->text('address')->notNullable();
             $table->string('contact_email')->nullable();
-            $table->integer('phone_no')->nullable();
-            $table->integer('status');
             $table->timestamps();
         });
     }
