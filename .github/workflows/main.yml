@@ -1,0 +1,44 @@
+name: Deploy Laravel to Digital Ocean
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pgsql, dom, filter, gd, json, mbstring, pdo
+        
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        
+    - name: Install sshpass
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sshpass
+        
+    - name: Deploy to Digital Ocean
+      env:
+        SERVER_PASSWORD: 'mML*dh%kN!5j8&Th'
+        HOST: '139.59.17.81'
+        USERNAME: 'root'
+      run: |
+        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $USERNAME@$HOST '
+          cd /var/www/laravel &&
+          git pull origin main &&
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev &&
+          php artisan config:cache &&
+          php artisan route:cache &&
+          php artisan view:cache &&
+          php artisan migrate --force &&
+          chown -R www-data:www-data . &&
+          chmod -R 775 storage bootstrap/cache
+        '
