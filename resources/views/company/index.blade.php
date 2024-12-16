@@ -199,6 +199,7 @@
                     if (response.success) {
                         toastr.success('Company saved successfully!');
                         $('#companyModal').hide();
+                        location.reload();
                         loadCompanies();
                     } else {
                         toastr.error('Error: ' + response.message);
@@ -244,6 +245,7 @@
                     function (response) {
                         if (response.success) {
                             toastr.success('Company deleted successfully!');
+                            location.reload();
                             loadCompanies();
                         } else {
                             toastr.error('Error: ' + response.message);
