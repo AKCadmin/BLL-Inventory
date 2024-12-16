@@ -49,7 +49,7 @@ class RegistrationController extends Controller
            
         //         $message->to($data['email'])->subject($data['title']);
         //     });
-        Mail::to($data['email'])->send(new ActivateAccountMail($data));
+        // Mail::to($data['email'])->send(new ActivateAccountMail($data));
 
 
             User::create([
