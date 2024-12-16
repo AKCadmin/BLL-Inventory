@@ -80,10 +80,11 @@ $(document).ready(function () {
                 .done(function (response) {
                     if (response.success) {
                         toastr.success(response.message);
+                        loaction.reload();
                         $("#global-loader").fadeOut();
                         $("#myModal").hide();
                         $("#userForm")[0].reset();
-                        loaction.reload();
+                       
                         // Make second API call only if the first one was successful
                         // $.ajax({
                         //     url: appUrl + "/api/user/migration",

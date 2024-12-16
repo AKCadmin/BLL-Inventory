@@ -74,7 +74,7 @@ class userManagement extends Controller
             DB::commit();
 
             if($user){
-                return response()->json(['success' => true, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
+                return response()->json(['success' => true, 'user' => $request->input(), 'message' => 'User created successfully!']);
             }
 
             // if (!$existingDeploy) {
