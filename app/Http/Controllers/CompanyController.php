@@ -28,8 +28,8 @@ class CompanyController extends Controller
             $company->phone_no = $request->phone_no;
             $company->status = $request->company_status;
             $company->save();
-            $databaseName = str_replace(' ', '_', strtolower($request->company_name));
-            \DB::statement("CREATE DATABASE \"$databaseName\"");
+            // $databaseName = str_replace(' ', '_', strtolower($request->company_name));
+            // \DB::statement("CREATE DATABASE \"$databaseName\"");
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
@@ -64,13 +64,13 @@ class CompanyController extends Controller
     public function productDataGet(Request $request) {
         try {
            
-            if (auth()->user()->role == 1) {
+            // if (auth()->user()->role == 1) {
                 $products = Product::with('company')->orderBy('id', 'desc')->get();
-            } else {
-                $products = Product::where('company_id', auth()->user()->company_id)
-                                   ->orderBy('id', 'desc')
-                                   ->get();
-            }
+            // } else {
+            //     $products = Product::where('company_id', auth()->user()->company_id)
+            //                        ->orderBy('id', 'desc')
+            //                        ->get();
+            // }
             // dd($products);
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
