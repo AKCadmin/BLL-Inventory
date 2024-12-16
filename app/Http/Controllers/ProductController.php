@@ -52,14 +52,14 @@ class ProductController extends Controller
             $product->save();
     
            
-            $company = Company::findOrFail($request->company_id);
-            $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
+            // $company = Company::findOrFail($request->company_id);
+            // $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
            
-            config(['database.connections.pgsql.database' => $normalizedCompanyName]);
+            // config(['database.connections.pgsql.database' => $normalizedCompanyName]);
     
             
-            DB::purge('pgsql');
-            DB::reconnect('pgsql');
+            // DB::purge('pgsql');
+            // DB::reconnect('pgsql');
     
             $secondaryProduct = new Product();
             $secondaryProduct->setConnection('pgsql'); 
