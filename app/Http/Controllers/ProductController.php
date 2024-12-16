@@ -61,13 +61,13 @@ class ProductController extends Controller
             // DB::purge('pgsql');
             // DB::reconnect('pgsql');
     
-            $secondaryProduct = new Product();
-            $secondaryProduct->setConnection('pgsql'); 
-            $secondaryProduct->sku = $request->sku;
-            $secondaryProduct->name = $request->name;
-            $secondaryProduct->description = $request->description;
-            $secondaryProduct->status = $request->status;
-            $secondaryProduct->save();
+            // $secondaryProduct = new Product();
+            // $secondaryProduct->setConnection('pgsql'); 
+            // $secondaryProduct->sku = $request->sku;
+            // $secondaryProduct->name = $request->name;
+            // $secondaryProduct->description = $request->description;
+            // $secondaryProduct->status = $request->status;
+            // $secondaryProduct->save();
     
             return response()->json([
                 'success' => true,
