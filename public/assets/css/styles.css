@@ -1,0 +1,10 @@
+h1 {
+  color: rgb(174, 0, 255);
+}
+
+.text-smaller {
+  font-size: 85%;
+  /* 25% smaller than the default size */
+}
+
+

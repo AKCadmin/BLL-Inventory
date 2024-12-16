@@ -1,0 +1,96 @@
+
+.RoleTableHeader {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  :root {
+    --scale-factor: 0.64;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: calc(60px * var(--scale-factor));
+    height: calc(34px * var(--scale-factor));
+    vertical-align: middle;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: calc(34px * var(--scale-factor)); /* Make sure the slider is rounded */
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: calc(26px * var(--scale-factor));
+    width: calc(26px * var(--scale-factor));
+    left: calc(4px * var(--scale-factor));
+    top: calc(4px * var(--scale-factor)); /* Adjust to center vertically */
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%; /* Make sure the slider handle is rounded */
+  }
+  
+  input:checked + .slider {
+    background-color: #556ee6;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #556ee6;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(calc(26px * var(--scale-factor)));
+    -ms-transform: translateX(calc(26px * var(--scale-factor)));
+    transform: translateX(calc(26px * var(--scale-factor)));
+  }
+  
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.close {
+    font-size: 3em !important;
+    color: #556ee6;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #485ec4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#popup_row{
+  width: 120%;
+}

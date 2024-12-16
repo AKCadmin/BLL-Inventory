@@ -1,0 +1,211 @@
+
+.RoleTableHeader {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  :root {
+    --scale-factor: 0.64;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: calc(60px * var(--scale-factor));
+    height: calc(34px * var(--scale-factor));
+    vertical-align: middle;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: calc(34px * var(--scale-factor)); /* Make sure the slider is rounded */
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: calc(26px * var(--scale-factor));
+    width: calc(26px * var(--scale-factor));
+    left: calc(4px * var(--scale-factor));
+    top: calc(4px * var(--scale-factor)); /* Adjust to center vertically */
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%; /* Make sure the slider handle is rounded */
+  }
+  
+  input:checked + .slider {
+    background-color: #556ee6;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #556ee6;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(calc(26px * var(--scale-factor)));
+    -ms-transform: translateX(calc(26px * var(--scale-factor)));
+    transform: translateX(calc(26px * var(--scale-factor)));
+  }
+  
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.close {
+    font-size: 3em !important;
+    color: #556ee6;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #485ec4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#popup_row{
+  width: 120%;
+}
+
+
+.checkbox-wrapper-39 *,
+.checkbox-wrapper-39 *::before,
+.checkbox-wrapper-39 *::after {
+  box-sizing: border-box;
+}
+
+.checkbox-wrapper-39 label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-wrapper-39 input {
+  visibility: hidden;
+  display: none;
+}
+
+.checkbox-wrapper-39 input:checked ~ .checkbox {
+ transform: rotate(45deg);
+ width: 7.7px; /* 45% smaller than the original 14px */
+ margin-left: 6.6px; /* Adjusted for the smaller size */
+ border-color: #24c78e;
+ border-top-color: transparent;
+ border-left-color: transparent;
+ border-radius: 0;
+}
+
+.checkbox-wrapper-39 .checkbox {
+  display: block;
+  width: 19.25px; /* 45% smaller than the original 35px */
+  height: 19.25px; /* 45% smaller than the original 35px */
+  border: 1.65px solid #434343; /* 45% smaller than the original 3px */
+  border-radius: 4px;
+  transition: all 0.425s;
+}
+
+.checkbox-wrapper-39 label span {
+  margin-left: 5.5px; /* Adjust space between checkbox and role name */
+}
+
+/* Custom Modal Styles */
+.custom-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+  align-items: center; /* Center modal content vertically */
+  justify-content: center; /* Center modal content horizontally */
+}
+
+.custom-modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Width of the modal */
+  max-width: 500px; /* Max width of the modal */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s; /* Slide-in animation for modal */
+}
+
+/* Slide-in animation for the modal */
+@keyframes slideIn {
+  from {
+      transform: translateY(-50px);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+/* Modal Buttons */
+.custom-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.custom-modal-buttons .btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Confirm button styles */
+.custom-modal-buttons .btn-danger {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+}
+
+.custom-modal-buttons .btn-danger:hover {
+  background-color: #c9302c;
+}
+
+/* Cancel button styles */
+.custom-modal-buttons .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.custom-modal-buttons .btn-secondary:hover {
+  background-color: #5a6268;
+}
