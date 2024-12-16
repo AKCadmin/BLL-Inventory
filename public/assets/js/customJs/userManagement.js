@@ -79,27 +79,32 @@ $(document).ready(function () {
             })
                 .done(function (response) {
                     if (response.success) {
+                        toastr.success(response.message);
+                        $("#global-loader").fadeOut();
+                        $("#myModal").hide();
+                        $("#userForm")[0].reset();
+                        loaction.reload();
                         // Make second API call only if the first one was successful
-                        $.ajax({
-                            url: appUrl + "/api/user/migration",
-                            type: "POST",
-                            data: {
-                                db_name: response.db_name,
-                                user: response.user,
-                            },
-                        })
-                            .done(function (response) {
-                                if (response.success) {
-                                    toastr.success(response.message);
-                                    $("#global-loader").fadeOut();
-                                    $("#myModal").hide();
-                                    $("#userForm")[0].reset();
-                                    loaction.reload();
-                                } else {
-                                    toastr.error("Database migration failed.");
-                                }
-                            })
-                            .fail(handleError);
+                        // $.ajax({
+                        //     url: appUrl + "/api/user/migration",
+                        //     type: "POST",
+                        //     data: {
+                        //         db_name: response.db_name,
+                        //         user: response.user,
+                        //     },
+                        // })
+                        //     .done(function (response) {
+                        //         if (response.success) {
+                        //             toastr.success(response.message);
+                        //             $("#global-loader").fadeOut();
+                        //             $("#myModal").hide();
+                        //             $("#userForm")[0].reset();
+                        //             loaction.reload();
+                        //         } else {
+                        //             toastr.error("Database migration failed.");
+                        //         }
+                        //     })
+                        //     .fail(handleError);
                     } else {
                         toastr.error(response.message);
                     }
