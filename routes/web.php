@@ -108,7 +108,7 @@ Route::group(['middleware' => 'auth'], function () {
     //stock
     Route::resource('company',CompanyController::class);
     Route::get('company/edit/{company}', [CompanyController::class, 'edit'])->name('company.editCompany');
-    Route::delete('company/{company}', [CompanyController::class, 'destroy']);
+    Route::Post('company/{company}', [CompanyController::class, 'destroy']);
     Route::get('company/data', [CompanyController::class,'companyData'])->name('company.getData');
     Route::resource('product',ProductController::class);
     Route::get('/product/data/get', [CompanyController::class,'productDataGet'])->name('product.getData');

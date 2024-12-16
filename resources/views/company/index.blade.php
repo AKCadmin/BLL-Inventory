@@ -213,7 +213,7 @@
        
         $('#datatable').on('click', '.edit-company', function () {
             let companyId = $(this).data('id');
-            let url = `{{ route('company.edit', '') }}/${companyId}`;
+            let url = `{{ route('company.editCompany', '') }}/${companyId}`;
 
             ajaxRequest(url, 'GET', {}, 
                 function (response) {
@@ -240,7 +240,7 @@
             let url = appUrl + '/company/' + companyId;
 
             if (confirm('Are you sure you want to delete this company?')) {
-                ajaxRequest(url, 'DELETE', {}, 
+                ajaxRequest(url, 'POST', {}, 
                     function (response) {
                         if (response.success) {
                             toastr.success('Company deleted successfully!');

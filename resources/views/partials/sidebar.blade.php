@@ -27,7 +27,7 @@ if (!empty($_SESSION['lang'])) {
                  
                 <!-- <li class="menu-title" key="t-apps"><?php echo $lang['Apps']; ?></li> -->
 
-                @if(auth()->user()->role != 1)
+                @if(auth()->user()->role != 2 || auth()->user()->role != 3)
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
