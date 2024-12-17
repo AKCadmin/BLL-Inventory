@@ -63,7 +63,7 @@
                         <div class="navbar-brand-box">
                             <a href="index.html" class="logo logo-dark">
                                 <span class="logo-sm">
-                                    <img src="assets/images/logo.svg" alt=""
+                                    <img src="assets/images/logo.png" alt=""
                                         height="22">
                                 </span>
                                 <span class="logo-lg">
@@ -74,7 +74,7 @@
 
                             <a href="index.html" class="logo logo-light">
                                 <span class="logo-sm">
-                                    <img src="assets/images/logo-light.svg"
+                                    <img src="assets/images/logo.png"
                                         alt="" height="22">
                                 </span>
                                 <span class="logo-lg">

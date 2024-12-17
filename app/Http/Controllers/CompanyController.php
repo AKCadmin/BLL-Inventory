@@ -82,6 +82,20 @@ class CompanyController extends Controller
         }
     }
 
+    public function productDataForSaleGet(Request $request) {
+        try {
+                $products = Product::with('company')->orderBy('id', 'desc')->get();
+           
+            return response()->json(['products' => $products]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching products.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // Edit company
     public function edit($id)
     {

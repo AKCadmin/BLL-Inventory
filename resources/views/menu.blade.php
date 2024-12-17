@@ -138,7 +138,7 @@
                                             <a href="menu">
                                                 <div class="avatar-md profile-user-wid mb-4">
                                                     <span class="avatar-title rounded-circle bg-light">
-                                                        <img src="assets/images/logo.svg" alt=""
+                                                        <img src="assets/images/logo.png" alt=""
                                                             class="rounded-circle" height="34">
                                                     </span>
                                                 </div>

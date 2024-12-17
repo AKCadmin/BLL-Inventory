@@ -116,13 +116,20 @@ class SellController extends Controller
         try {
             $sell = Sell::findOrFail($id);
 
+            $batch = Batch::where('batch_number', $request->batch_no)->first();
+
+            if (!$batch) {
+                return response()->json(['success' => false, 'message' => 'Invalid batch number.'], 422);
+            }
+        
+            $buyPrice = $batch->buy_price;
             // Validate the incoming data
             $validatedData = $request->validate([
                 'sku' => 'required|string',
                 'batch_no' => 'required|string',
-                'hospital_price' => 'required|numeric',
-                'wholesale_price' => 'required|numeric',
-                'retail_price' => 'required|numeric',
+                'hospital_price' => ['required', 'numeric', 'min:' . $buyPrice],
+                'wholesale_price' => ['required', 'numeric', 'min:' . $buyPrice],
+                'retail_price' => ['required', 'numeric', 'min:' . $buyPrice],
                 'valid_from' => 'required|date',
                 'valid_to' => [
                     'required',
@@ -136,7 +143,7 @@ class SellController extends Controller
             ]);
 
             // Update the record
-            $sell->update($validatedData);
+             $sell->update($validatedData);
 
             // Return success response
             return response()->json([

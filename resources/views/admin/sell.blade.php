@@ -104,57 +104,53 @@
     $(document).ready(function() {
         $('.select2').select2({
             placeholder: "Select an option",
-            allowClear: true 
+            allowClear: true
         });
-      
-        $('#validFrom').on('change', function () {
+
+        $('#validFrom').on('change', function() {
             const validFrom = $(this).val();
             if (validFrom) {
                 $('#validTo').attr('min', validFrom);
             } else {
-                $('#validTo').removeAttr('min'); 
+                $('#validTo').removeAttr('min');
             }
         });
 
-        // Restrict price inputs to numbers only
-        $('.price-input').on('input', function () {
+
+        $('.price-input').on('input', function() {
             this.value = this.value.replace(/[^0-9.]/g, '');
         });
 
         function loadProducts() {
-            ajaxRequest('{{ route('product.getData') }}', 'GET', {},
-                function(response) {
-                    var products = response.products;
-                    var skuSelect = $('#skuSelect');
+            ajaxRequest('{{ route('product.getData') }}', 'GET', {}, function(response) {
+                var products = response.products;
+                var skuSelect = $('#skuSelect');
 
-                    skuSelect.empty();
-                    skuSelect.append('<option value="" disabled selected>SKU</option>');
+                skuSelect.empty();
+                skuSelect.append('<option value="" disabled selected>SKU</option>');
 
-                   
-                    products.forEach(function(product) {
-                        skuSelect.append('<option value="' + product.sku + '">' + product.sku +
-                            ' - ' + product.name + '</option>');
-                    });
-
-                }
-            );
+                products.forEach(function(product) {
+                    skuSelect.append('<option value="' + product.sku + '">' + product.sku +
+                        ' - ' + product.name + '</option>');
+                });
+            });
         }
 
         function loadBatches(sku) {
-           
             $.ajax({
                 url: '{{ url('/sell/batches') }}/' + sku,
                 type: 'GET',
                 success: function(response) {
                     var batchSelect = $('#batchNoSelect');
-                    batchSelect.empty(); 
+                    batchSelect.empty();
 
                     batchSelect.append('<option value="" disabled selected>Batch No</option>');
 
                     if (response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
                             batchSelect.append('<option value="' + batch.batch_number +
-                                '">' + batch.batch_number + '</option>');
+                                '" data-buy-price="' + batch.buy_price + '">' +
+                                batch.batch_number + '</option>');
                         });
                     } else {
                         batchSelect.append(
@@ -175,14 +171,25 @@
         loadProducts();
 
         $('#skuSelect').on('change', function() {
-            var selectedSku = $(this).val(); // Get the selected SKU
+            var selectedSku = $(this).val();
 
-            // Check if an SKU is selected
             if (selectedSku) {
-                loadBatches(selectedSku); // Fetch the batches for the selected SKU
+                loadBatches(selectedSku);
             } else {
                 $('#batchNoSelect').empty().append(
-                    '<option value="" disabled selected>Batch No</option>'); // Clear batch options
+                    '<option value="" disabled selected>Batch No</option>');
+            }
+        });
+
+        
+        $('#batchNoSelect').on('change', function() {
+            var selectedBatch = $(this).find(':selected');
+            var buyPrice = selectedBatch.data('buy-price');
+
+            if (buyPrice) {
+                $('#hospitalPrice, #wholesalePrice, #retailPrice').attr('min', buyPrice);
+            } else {
+                $('#hospitalPrice, #wholesalePrice, #retailPrice').removeAttr('min');
             }
         });
 
@@ -199,9 +206,19 @@
                 valid_to: $('#validTo').val(),
             };
 
+            var buyPrice = $('#batchNoSelect').find(':selected').data('buy-price');
+            if (
+                parseFloat(formData.hospital_price) < parseFloat(buyPrice) ||
+                parseFloat(formData.wholesale_price) < parseFloat(buyPrice) ||
+                parseFloat(formData.retail_price) < parseFloat(buyPrice)
+            ) {
+                toastr.error('Prices cannot be less than the Buy Price: ' + buyPrice);
+                return false;
+            }
+
             // Send AJAX request
             $.ajax({
-                url: '{{ route('sell.store') }}', 
+                url: '{{ route('sell.store') }}',
                 type: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': "{{ csrf_token() }}"
@@ -221,8 +238,6 @@
                 }
             });
         });
-
-
     });
 </script>
 

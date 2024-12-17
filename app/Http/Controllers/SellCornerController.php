@@ -494,7 +494,7 @@ class SellCornerController extends Controller
         )
             ->leftJoin('sell_carton', 'sell_counter.id', '=', 'sell_carton.sell_id')
             ->whereNotNull('sell_counter.order_id')
-            ->Join('invoice', DB::raw('CAST(sell_counter.order_id AS VARCHAR)'), '=', 'invoice.order_id') // Explicit type casting
+            ->Join('invoice', DB::raw('CAST(sell_counter.order_id AS VARCHAR)'), '=', DB::raw('CAST(invoice.order_id AS VARCHAR)'))
             ->groupBy(
                 'sell_counter.order_id',
                 'sell_counter.customer',

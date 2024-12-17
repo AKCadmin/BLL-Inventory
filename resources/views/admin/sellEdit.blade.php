@@ -159,7 +159,7 @@
         }
 
         function loadBatches(sku) {
-          
+
             $.ajax({
                 url: '{{ url('/batches') }}/' + sku,
                 type: 'GET',
@@ -195,12 +195,12 @@
         $('#skuSelect').on('change', function() {
             var selectedSku = $(this).val();
 
-          
+
             if (selectedSku) {
-                loadBatches(selectedSku); 
+                loadBatches(selectedSku);
             } else {
                 $('#batchNoSelect').empty().append(
-                    '<option value="" disabled selected>Batch No</option>'); 
+                    '<option value="" disabled selected>Batch No</option>');
             }
         });
 
@@ -238,13 +238,23 @@
                         toastr.error('Failed to update sell. Please try again.');
                     }
                 },
-                error: function() {
-                    toastr.error('An error occurred while processing the request.');
+                error: function(xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        // Display each validation error using toastr
+                        const errors = xhr.responseJSON.errors;
+                        for (const field in errors) {
+                            if (errors[field]) {
+                                errors[field].forEach(errorMessage => {
+                                    toastr.error(errorMessage);
+                                });
+                            }
+                        }
+                    } else {
+                        toastr.error('An error occurred while processing the request.');
+                    }
                 }
             });
         });
-
-
 
     });
 </script>
