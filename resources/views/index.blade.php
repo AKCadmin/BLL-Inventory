@@ -67,7 +67,7 @@
                                         height="22">
                                 </span>
                                 <span class="logo-lg">
-                                    <img src="assets/images/logo-dark.png"
+                                    <img src="assets/images/logo.png"
                                         alt="" height="17">
                                 </span>
                             </a>
@@ -78,7 +78,7 @@
                                         alt="" height="22">
                                 </span>
                                 <span class="logo-lg">
-                                    <img src="assets/images/logo-light.png"
+                                    <img src="assets/images/logo.png"
                                         alt="" height="19">
                                 </span>
                             </a>

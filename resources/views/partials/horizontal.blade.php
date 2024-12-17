@@ -16,7 +16,7 @@
                         <img src="{{ asset('assets/images/logo.png')}}" alt="" height="22">
                     </span>
                     <span class="logo-lg">
-                        <img src="{{ asset('assets/images/logo-dark.png')}}" alt="" height="17">
+                        <img src="{{ asset('assets/images/logo.png')}}" alt="" height="17">
                     </span>
                 </a>
 
@@ -25,7 +25,7 @@
                         <img src="{{ asset('assets/images/logo-light.svg')}}" alt="" height="22">
                     </span>
                     <span class="logo-lg">
-                        <img src="{{ asset('assets/images/logo-light.png')}}" alt="" height="19">
+                        <img src="{{ asset('assets/images/logo.png')}}" alt="" height="19">
                     </span>
                 </a>
             </div>

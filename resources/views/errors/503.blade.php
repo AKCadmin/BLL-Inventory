@@ -32,9 +32,9 @@
                     <div class="home-wrapper">
                         <div class="mb-5">
                             <a href="index.html" class="d-block auth-logo">
-                                <img src="assets/images/logo-dark.png" alt="" height="20"
+                                <img src="assets/images/logo.png" alt="" height="20"
                                     class="auth-logo-dark mx-auto">
-                                <img src="assets/images/logo-light.png" alt="" height="20"
+                                <img src="assets/images/logo.png" alt="" height="20"
                                     class="auth-logo-light mx-auto">
                             </a>
                         </div>
