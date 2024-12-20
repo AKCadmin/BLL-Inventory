@@ -26,38 +26,59 @@ if (!empty($_SESSION['lang'])) {
                 
                  
                 <!-- <li class="menu-title" key="t-apps"><?php echo $lang['Apps']; ?></li> -->
+                @php
+                    $menusAccess = App\Models\Permission::select('menus')->where('role_id',Auth()->user()->role)->first();
+                    $menus = $menusAccess ? json_decode($menusAccess->menus, true) : [];
+                @endphp
 
-                @if(auth()->user()->role != 2 && auth()->user()->role != 3)
 
+
+                {{-- @if(auth()->user()->role != 2 && auth()->user()->role != 3) --}}
+                @can('settings')
+                    
+                
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
                         <span key="t-maps">Settings</span>
                     </a>
+                             
                     <ul class="sub-menu" aria-expanded="false">
+                        @can('role_management')
                         <li><a href="role-manager" key="t-role-manager">Role Manager</a></li>
-                        
-                        <li><a href="permission-manager" key="t-permission-manager">Permission Manager</a></li>                   
+                        @endcan
+                        @can('permission_manager')
+                        <li><a href="permission-manager" key="t-permission-manager">Permission Manager</a></li> 
+                        @endcan                  
 
                     </ul>
+        
                 </li>
+                @endcan
+                @can('user_management')
                 <li>
                     <a href="{{route('user.management')}}" class="">
                         <i class="bx bx-user-circle"></i>
                         <span key="t-dashboards">User Management</span>
                     </a>
                 </li>
-
+                @endcan
+                @can('company')
                 <li><a href="{{route('company.index')}}" key="t-role-manager">Company</a></li>
+                @endcan
+                @can('product')
                 <li><a href="{{route('product.index')}}" key="t-role-manager">Product</a></li>
+                @endcan
+                @can('stock_list')
                 <li>
                     <a href="{{route('stock.list')}}" class="">
                        
                         <span key="t-dashboards">Stock List</span>
                     </a>
                 </li>
+                @endcan
 
-                @elseif(auth()->user()->role == 2)
+                {{-- @if(auth()->user()->role == 2) --}}
 
  
 
@@ -66,57 +87,72 @@ if (!empty($_SESSION['lang'])) {
                         <i class="bx bx-cog"></i>
                         <span key="t-maps">Purchase Stock</span>
                     </a>
+                                
                     <ul class="sub-menu" aria-expanded="false">
+                        @can('add_purchase')
                         <li><a href="{{route('stock.index')}}" key="t-role-manager"> Add Purchase</a></li>
+                        @endcan
+                        @can('purchase_list')
                         <li><a href="{{route('stock.list')}}" key="t-role-manager">Purchase List</a></li>
+                        @endcan
                     </ul>
                 </li>
 
+                @can('sell_stock')
                 <li>
+
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
                         <span key="t-maps">Sell Stock</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
+                        @can('add_sell')
                         <li>
                             <a href="{{route('sell.index')}}" class="">
                                 
                                 <span key="t-dashboards">Add Sell</span>
                             </a>
                         </li>
-                        
+                        @endcan
+                        @can('sell_list')
                         <li>
                             <a href="{{route('sell.list')}}" class="">
                                
                                 <span key="t-dashboards">Sell List</span>
                             </a>
                         </li>
+                        @endcan
 
                     </ul>
                 </li>
+                @endcan
 
-                @elseif(auth()->user()->role == 3)
+                {{-- @elseif(auth()->user()->role == 3) --}}
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
                         <span key="t-maps">Sell Management</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
+                        @can('add_sell_counter')
                         <li>
                             <a href="{{route('sellCounter.index')}}" class="">
                                 <span key="t-dashboards">Add Sell</span>
                             </a>
                         </li>
+                        @endcan
+                        @can('order_list')
                         <li>
                             <a href="{{route('sell.orders.list')}}" class="">
                                 <span key="t-dashboards">Order List</span>
                             </a>
                         </li>
+                        @endcan
                     </ul>
                 </li>
                 
 
-                @endif
+                {{-- @endif --}}
             </ul>
         </div>
         <!-- Sidebar -->

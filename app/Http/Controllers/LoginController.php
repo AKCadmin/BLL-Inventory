@@ -29,7 +29,7 @@ class LoginController extends Controller
                 'email' => 'required|email|max:255',
                 'password' => 'required|string|max:255|min:6',
             ]);
-
+            $remember = $request->has('remember');
             $user = User::where('email', $request->email)->first();
 
             if ($user) {
@@ -38,7 +38,7 @@ class LoginController extends Controller
 
                     if (Hash::check($request->password, $user->password)) {
 
-                        if (Auth::attempt($request->only('email', 'password'))) {
+                        if (Auth::attempt($request->only('email', 'password'),$remember)) {
 
                             // $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
                             // if ($deploy) {

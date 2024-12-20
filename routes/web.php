@@ -51,7 +51,7 @@ Route::get('/optimize', function () {
 // Guest middleware for unauthenticated users
 Route::group(['middleware' => 'guest'], function () {
 
-    Route::get('/', [FrontController::class, 'index'])->name('index'); // Root should use `/` instead of an empty string
+    Route::get('/', [FrontController::class, 'index'])->name('index');// Root should use `/` instead of an empty string
 
     // Registration routes
     Route::get('/register', [RegistrationController::class, 'register_index'])->name('register');
@@ -78,7 +78,7 @@ Route::group(['middleware' => 'guest'], function () {
 // Auth middleware for authenticated users only
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('/home', [FrontController::class, 'home'])->name('home');
+    Route::get('/home', [FrontController::class, 'home'])->name('home')->middleware('can:dashboard');
 
     // Logout routes
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // POST is better practice for logout
@@ -103,21 +103,22 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     //user management routes
-    Route::get('/management', [userManagement::class, 'show'])->name('user.management');
+    Route::get('/management', [userManagement::class, 'show'])->name('user.management')->middleware('can:user_management');
 
     //stock
-    Route::resource('company',CompanyController::class);
-    Route::get('company/edit/{company}', [CompanyController::class, 'edit'])->name('company.editCompany');
-    Route::Post('company/{company}', [CompanyController::class, 'destroy']);
+    Route::resource('company',CompanyController::class)->middleware('can:company');
+    Route::get('company/edit/{company}', [CompanyController::class, 'edit'])->name('company.editCompany')->middleware('can:company');
+    Route::Post('company/{company}', [CompanyController::class, 'destroy'])->middleware('can:company');
+
     Route::get('company/data', [CompanyController::class,'companyData'])->name('company.getData');
-    Route::resource('product',ProductController::class);
+    Route::resource('product',ProductController::class)->middleware('can:product');
     Route::get('/product/data/get', [CompanyController::class,'productDataGet'])->name('product.getData');
-    Route::resource('stock', StockController::class);
+    Route::resource('stock', StockController::class)->middleware('can:add_purchase');
     Route::resource('invoice',InvoiceController::class);
     Route::resource('report',ReportController::class);
 
     // Sell Management routes
-    Route::resource('sell', SellController::class);
+    Route::resource('sell', SellController::class)->middleware('can:add_sell');
     Route::get('sellList',[SellController::class,'list'])->name('sell.list');
      Route::post('/sell/update/{sell}', [SellController::class, 'update'])->name('sell.updateSell');
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
@@ -126,12 +127,13 @@ Route::group(['middleware' => 'auth'], function () {
     // Stock Management routes
     Route::get('stockList',[StockController::class,'list'])->name('stock.list');
 
-    Route::resource('sellCounter', SellCornerController::class);
+    Route::resource('sellCounter', SellCornerController::class)->middleware('can:sell_stock');
     Route::get('/sellcounter/batches/{sku}', [SellCornerController::class, 'getSellcounterBatchesBySku'])->name('batch.getSellCounterBatchesBySku');
     Route::get('/sellcounter/product/data/get', [SellCornerController::class,'sellProductDataGet'])->name('sell.product.getData');
     Route::get('/sellcounter/cartons/{batch}', [SellCornerController::class, 'getSellcounterCartonsByBatch'])->name('batch.getSellCounterCartonsByBatch');
     route::view('stockEdit','admin.edit')->name('stock.editStock');
     route::post('/stock/update/batch',[StockController::class,'update'])->name('stock.batch.update');
     Route::get('/sellcounter/orders', [SellCornerController::class, 'orderList'])->name('sell.orders.list');
+    route::get('sellcounteredit/{id}',[SellCornerController::class,'editSellCounter']);
 
 });

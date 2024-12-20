@@ -88,6 +88,8 @@ Route::middleware([BearerTokenMiddleware::class])->group(function () {
 
     //permission routes
     Route::post('/add-new-permission', [PermissionController::class, 'addNewPermission'])->name('permissions.add');
+    Route::put('/update-permission/{id}', [PermissionController::class, 'updatePermission'])->name('permissions.update');
+    Route::get('/available-roles/{id}', [PermissionController::class, 'getAvailableRoles'])->name('availableRoles');
     Route::post('/permissions/toggle-status', [PermissionController::class, 'toggleStatus'])->name('permissions.toggleStatus'); 
 
     //user management

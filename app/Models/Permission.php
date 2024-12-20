@@ -14,6 +14,7 @@ class permission extends Model
     protected $fillable = [
         'role_id',
         'status',
+        'menus',
         'created_at',
         'updated_at',
         'deleted_at',
