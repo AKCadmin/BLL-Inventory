@@ -193,10 +193,10 @@ $(document).ready(function () {
                 type: "DELETE",
                 success: function (response) {
                     if (response.success) {
-                        alert(response.message);
+                        toastr.success(response.message);
                         $(`button[data-id="${userId}"]`).closest("tr").remove();
                     } else {
-                        alert(response.message);
+                        toastr.error(response.message);
                     }
                 },
                 error: function (xhr) {

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->string('activation_token')->nullable();
             $table->string('verification_token')->nullable();
+            $table->integer('company_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

@@ -19,6 +19,9 @@ class SellCornerController extends Controller
      */
     public function index()
     {
+        if (auth()->user()->cannot('view-sell-counter')) {
+            abort(403); 
+        }
         return view('admin.sellCounter');
     }
 
@@ -219,7 +222,9 @@ class SellCornerController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
+        if (auth()->user()->cannot('add-sell-counter')) {
+            abort(403); 
+        }
         $data = $request->all();
 
         DB::beginTransaction();
@@ -397,6 +402,9 @@ class SellCornerController extends Controller
     public function update(Request $request, $id)
     {
      
+        if (auth()->user()->cannot('edit-sell-counter')) {
+            abort(403); 
+        }
         // Fetch all rows with the same order_id
 
       DB::beginTransaction();
@@ -621,7 +629,9 @@ class SellCornerController extends Controller
 
     public function orderList()
     {
-        // dd("hello");
+        if (auth()->user()->cannot('view-order')) {
+            abort(403); 
+        }
         $orders = SellCounter::select(
             'sell_counter.order_id',
             'sell_counter.customer',
@@ -651,6 +661,9 @@ class SellCornerController extends Controller
 
     public function editSellCounter($orderId)
     {
+        if (auth()->user()->cannot('edit-sell-counter')) {
+            abort(403); 
+        }
         // Step 1: Retrieve the order details based on the orderId
         $sellCounters = SellCounter::where('order_id', $orderId)->get();
 

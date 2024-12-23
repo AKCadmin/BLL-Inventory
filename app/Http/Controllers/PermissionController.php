@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Permission;
 use App\Models\Module;
 use App\Models\AdvanceModuleMaster;
+use App\Models\Page;
+use App\Models\UserPagePermission;
+use App\Models\PagePermission;
 use Illuminate\Support\Facades\DB;
 
 class PermissionController extends Controller
@@ -93,7 +96,7 @@ class PermissionController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status' => 422,
-                'message' => 'Validation failed.',
+                'message' => 'Permission Already Exist',
                 'errors' => $e->errors(),
             ]);
         } catch (\Exception $e) {
@@ -109,14 +112,14 @@ class PermissionController extends Controller
     public function updatePermission(Request $request, $menuId)
     {
         try {
-         
+
             $request->validate([
                 'role_id' => 'required|integer|exists:roles,id',
                 'current_status' => 'required|in:0,1',
                 'menu_options' => 'array|nullable',
             ]);
 
-            $permission = Permission::findOrFail($menuId); 
+            $permission = Permission::findOrFail($menuId);
 
             $permission->role_id = $request->input('role_id');
             if ($request->has('menu_options')) {
@@ -153,7 +156,7 @@ class PermissionController extends Controller
     public function getAvailableRoles($currentRole = null)
     {
         try {
-          
+
             $roles = Role::orderBy('id', 'asc')->get();
             $assignedRoleIds = Permission::pluck('role_id')->toArray();
             if ($currentRole) {
@@ -166,10 +169,135 @@ class PermissionController extends Controller
         } catch (\Exception $e) {
             // Log the error and return an error response
             \Log::error('Error fetching available roles: ' . $e->getMessage());
-    
+
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while fetching available roles.',
+            ], 500);
+        }
+    }
+
+    public function assignPermissions()
+    {
+        $users = User::all();
+
+        $pages = Page::all();
+
+        return view('userPermissions', compact('users', 'pages'));
+    }
+
+
+    // public function savePermissions(Request $request)
+    // {
+    //     dd($request->all());
+    //     // Get the selected user
+    //     $user = User::find($request->user_id);
+
+    //     // Loop through the selected permissions for each page
+    //     foreach ($request->permissions as $pageId => $permissions) {
+    //         // Find the page by ID
+    //         $page = Page::find($pageId);
+
+    //         // Loop through the permissions and store each one in the user_page_permissions table
+    //         foreach ($permissions as $permissionSlug => $permissionValue) {
+    //             $permission = PagePermission::where('name', $permissionSlug)->first();
+
+    //             if ($permission) {
+    //                 // Check if permission already exists for this user, page, and permission
+    //                 $userPagePermission = UserPagePermission::where('user_id', $user->id)
+    //                     ->where('page_id', $page->id)
+    //                     ->where('permission_id', $permission->id)
+    //                     ->first();
+
+    //                 if ($userPagePermission) {
+    //                     // If record exists, update it
+    //                     $userPagePermission->update([
+    //                         'permission_id' => $permission->id,
+    //                     ]);
+    //                 } else {
+    //                     // If record doesn't exist, create a new one
+    //                     UserPagePermission::create([
+    //                         'user_id' => $user->id,
+    //                         'page_id' => $page->id,
+    //                         'permission_id' => $permission->id,
+    //                         // 'company_id' => $request->company_id, // Assuming company_id is part of the form
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // Redirect or return a success message
+    //     return redirect()->route('permissions.index')->with('success', 'Permissions updated successfully.');
+    // }
+
+    public function savePermissions(Request $request)
+    {
+        try {
+            // Validate the request
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'permissions' => 'required|array',
+                'permissions.*' => 'array',  // Ensure each page has an array of permission values
+                'permissions.*.*' => 'in:1,2,3,4',  // Only allow values 1, 2, 3, 4 (representing view, add, edit, delete)
+            ]);
+    
+            // Loop through the permissions array and store each one
+            foreach ($validated['permissions'] as $pageId => $permission) {
+                DB::table('user_page_permissions')->updateOrInsert(
+                    ['user_id' => $validated['user_id'], 'page_id' => $pageId],
+                    ['page_permission' => json_encode($permission)]
+                );
+            }
+    
+            return response()->json(['success'=>200,'message' => 'Permissions saved successfully.']);
+        } catch (\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation Error',
+                'details' => $e->errors()
+            ], 422);
+        } catch (\QueryException $e) {
+            return response()->json([
+                'error' => 'Database Error',
+                'details' => $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function getUserPermissions(Request $request)
+    {
+        try {
+            // Validate the request
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+            ]);
+    
+            $userId = $validated['user_id'];
+    
+            $pages = Page::with(['permissions' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])->get();
+    
+            return response()->json($pages, 200);
+        } catch (\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation Error',
+                'details' => $e->errors()
+            ], 422);
+        } catch (\QueryException $e) {
+            return response()->json([
+                'error' => 'Database Error',
+                'details' => $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+                'details' => $e->getMessage()
             ], 500);
         }
     }

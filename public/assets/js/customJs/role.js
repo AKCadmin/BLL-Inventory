@@ -1,13 +1,13 @@
 $(document).ready(function() {
     var appUrl = $('#appUrl').val();
     $('#roleForm').submit(function(e) {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault();
         
-        var formData = $(this).serialize(); // Serialize form data
+        var formData = $(this).serialize(); 
         let route = appUrl+"/add-new-role"
         $.ajax({
             type: 'POST',
-            url: route, // Your form action route
+            url: route, 
             data: formData,
             success: function(response) {
                 if(response.status == 200){
@@ -22,9 +22,10 @@ $(document).ready(function() {
                 
                 let response = JSON.parse(xhr.responseText);
                 if (response.message) {
-                    alert('Error: ' + response.message);
+                    toastr.error(response.message);
+                    
                 } else {
-                    alert('An unknown error occurred.');
+                    toastr.error('An unknown error occurred.');
                 }
             }
         });
@@ -55,22 +56,15 @@ $(document).on('change', '.toggle-status', function() {
             // The new status
             status: status
         },
-       
-        // Function to call if the request succeeds
         success: function(response) {
-            // If the server response indicates success
             if (response.success) {
-                // Show a success message to the user
-                alert('Status updated successfully');
+                toastr.success('Status updated successfully');
             } else {
-                // Show an error message if the status update failed
-                alert('Failed to update status');
+                toastr.error('Failed to update status');
             }
         },
-        // Function to call if the request fails
         error: function() {
-            // Show a generic error message
-            alert('Error updating status');
+            toastr.error('Error updating status');
         }
     });
 });

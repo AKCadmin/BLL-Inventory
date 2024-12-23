@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('packaging_type');
             $table->integer('provided_no_of_cartons');
             $table->integer('price');
-            $table->integer('oeder_id');
+            $table->integer('order_id');
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

@@ -14,9 +14,11 @@ class ProductController extends Controller
      */
     public function index()
     {
+        
         $companies = Company::all();
+        $products = Product::orderBy('id', 'desc')->get();
        
-        return view('admin.product',compact('companies'));
+        return view('admin.product',compact('companies','products'));
     }
 
     /**
@@ -33,6 +35,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
+
            
             $validated = $request->validate([
                 'company_id' => 'required|integer|exists:companies,id',
@@ -52,22 +55,22 @@ class ProductController extends Controller
             $product->save();
     
            
-            // $company = Company::findOrFail($request->company_id);
-            // $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
+            $company = Company::findOrFail($request->company_id);
+            $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
            
-            // config(['database.connections.pgsql.database' => $normalizedCompanyName]);
+            config(['database.connections.pgsql.database' => $normalizedCompanyName]);
     
             
-            // DB::purge('pgsql');
-            // DB::reconnect('pgsql');
+            DB::purge('pgsql');
+            DB::reconnect('pgsql');
     
-            // $secondaryProduct = new Product();
-            // $secondaryProduct->setConnection('pgsql'); 
-            // $secondaryProduct->sku = $request->sku;
-            // $secondaryProduct->name = $request->name;
-            // $secondaryProduct->description = $request->description;
-            // $secondaryProduct->status = $request->status;
-            // $secondaryProduct->save();
+            $secondaryProduct = new Product();
+            $secondaryProduct->setConnection('pgsql'); 
+            $secondaryProduct->sku = $request->sku;
+            $secondaryProduct->name = $request->name;
+            $secondaryProduct->description = $request->description;
+            $secondaryProduct->status = $request->status;
+            $secondaryProduct->save();
     
             return response()->json([
                 'success' => true,
@@ -85,6 +88,7 @@ class ProductController extends Controller
 
     public function show(string $id)
     {
+        
         try {
             $products = Product::orderBy('id', 'desc')->get();
             
@@ -117,7 +121,11 @@ class ProductController extends Controller
     // Edit product
     public function edit($id)
     {
+      
         try {
+            if (auth()->user()->cannot('edit-purchase')) {
+                abort(403); 
+            }
             $product = Product::find($id);
 
             if ($product) {
@@ -138,6 +146,9 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         try {
+            if (auth()->user()->cannot('edit-purchase')) {
+                abort(403); 
+            }
             $validated = $request->validate([
                 'company_id' => 'required|integer',
                 'sku' => 'required|unique:products,sku,' . $id . '|max:50',
@@ -168,6 +179,9 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try {
+            if (auth()->user()->cannot('delete-purchase')) {
+                abort(403); 
+            }
             $product = Product::find($id);
 
             if ($product) {
@@ -181,6 +195,33 @@ class ProductController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while deleting the product.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'status' => 'required',
+        ]);
+
+        try {
+
+            $Product = Product::findOrFail($request->id);
+            $Product->status = $request->status;
+            $Product->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product status updated successfully.',
+                'data' => $Product,
+            ]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
             ], 500);
         }
     }

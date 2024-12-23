@@ -24,7 +24,12 @@ File: Datatables Js File
 $(document).ready(function() {
     // Initialize DataTable for the main table
     $('#datatable').DataTable({
-        order: [[0, 'desc']] // Adjust the index (0) to the appropriate column index for your date or ID column
+        order: [[0, 'desc']], // Adjust the index (0) to the appropriate column index for your date or ID column
+        pageLength: 10,       // Number of entries per page
+        lengthMenu: [5, 10, 25, 50], // Options for page length
+        language: {
+            emptyTable: "No data available in table", // Custom message when table is empty
+        }
     });
 
     //Buttons examples

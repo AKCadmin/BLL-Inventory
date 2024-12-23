@@ -229,6 +229,7 @@
                         toastr.success('Sell added successfully!');
 
                         $('form')[0].reset();
+                        window.location.href = '{{ route('sell.list') }}';
                     } else {
                         toastr.error('Failed to add sell. Please try again.');
                     }

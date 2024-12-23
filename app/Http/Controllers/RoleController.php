@@ -69,7 +69,7 @@ class RoleController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 "status" => 422,
-                "message" => "Validation error.",
+                "message" => "Role Already Exist",
                 "errors" => $e->errors(),
             ], 422);
         } catch (\Exception $e) {

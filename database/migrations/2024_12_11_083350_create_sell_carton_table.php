@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sell_carton', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('carton_id');
-            $table->integer('no_of_items');
+            $table->integer('no_of_cartons');
             $table->integer('no_of_items_sell');
             $table->integer('sell_id');
             $table->integer('order_id');

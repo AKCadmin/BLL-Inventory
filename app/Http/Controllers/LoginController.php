@@ -40,36 +40,44 @@ class LoginController extends Controller
 
                         if (Auth::attempt($request->only('email', 'password'),$remember)) {
 
-                            // $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
-                            // if ($deploy) {
+                            $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
+                            $companyName = DB::table('users')
+                            ->select('users.company_id as companyId', 'users.email', 'users.id as userId', 'companies.name as companyName')
+                            ->join('companies', 'users.company_id', '=', 'companies.id')
+                            ->where('users.email', '=', $request->email)
+                            ->first();
+                        
+                        
+                        
+                            if ($companyName->companyName) {
 
-                            //     $dbName = $deploy->db_name;
+                                $dbName = $companyName->companyName;
 
-                            //     // Update the database configuration
-                            //     config(['database.connections.pgsql.database' => $dbName]);
+                                // Update the database configuration
+                                config(['database.connections.pgsql.database' => $dbName]);
 
-                            //     // Purge the connection to force a reset
-                            //     DB::purge('pgsql');
+                                // Purge the connection to force a reset
+                                DB::purge('pgsql');
 
-                            //     // Reconnect to the database
-                            //     DB::reconnect('pgsql');
+                                // Reconnect to the database
+                                DB::reconnect('pgsql');
 
-                            //     // Verify the connection
-                            //     DB::connection('pgsql')->getPdo();
+                                // Verify the connection
+                                DB::connection('pgsql')->getPdo();
 
-                            //     \Log::info('Connected to the database: ', ['db' => $dbName]);
+                                \Log::info('Connected to the database: ', ['db' => $dbName]);
 
-                            //     session(['db_name' => $dbName]);
-                            //     $token = Str::random(60);
-                            //     Cache::put('api_token', $token);
-                            //     Cache::put('api_token_' . $token, $user, 10800);
-                            //     return redirect('/home');
-                            // } else {
+                                session(['db_name' => $dbName]);
                                 $token = Str::random(60);
                                 Cache::put('api_token', $token);
                                 Cache::put('api_token_' . $token, $user, 10800);
                                 return redirect('/home');
-                            // }
+                            } else {
+                                $token = Str::random(60);
+                                Cache::put('api_token', $token);
+                                Cache::put('api_token_' . $token, $user, 10800);
+                                return redirect('/home');
+                            }
                         }
                     } else {
 

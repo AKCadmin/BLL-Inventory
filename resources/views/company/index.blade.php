@@ -46,21 +46,39 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- @foreach ($companies as $company)
+                                        @foreach ($companies as $company)
+                                            @php
+                                                $addressLimit = 15; // Set the character limit for truncating the address
+                                                $truncatedAddress =
+                                                    strlen($company->address) > $addressLimit
+                                                        ? substr($company->address, 0, $addressLimit) . '...'
+                                                        : $company->address;
+                                            @endphp
                                             <tr>
                                                 <td>{{ $company->id }}</td>
                                                 <td>{{ $company->name }}</td>
-                                                <td>{{ $company->email }}</td>
-                                                <td>{{ $company->phone }}</td>
+                                                <td>
+                                                    <span title="{{ $company->address }}" data-toggle="tooltip"
+                                                        data-placement="top">
+                                                        {{ $truncatedAddress }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $company->contact_email }}</td>
+                                                <td>{{ $company->phone_no }}</td>
                                                 <td>{{ $company->status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
-                                                    <a href="#" class="btn btn-sm btn-warning edit-company-btn" data-id="{{ $company->id }}">Edit</a>
-                                                    <button class="btn btn-sm btn-danger delete-company-btn" data-id="{{ $company->id }}">Delete</button>
+                                                    @if(Gate::allows('edit-company'))
+                                                    <a href="#" class="btn btn-sm btn-warning edit-company-btn"
+                                                        data-id="{{ $company->id }}">Edit</a>
+                                                    @endif
+                                                    <button class="btn btn-sm btn-danger delete-company-btn"
+                                                        data-id="{{ $company->id }}">Delete</button>
                                                 </td>
                                             </tr>
-                                        @endforeach --}}
+                                        @endforeach
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
                     </div>
@@ -104,7 +122,8 @@
                                                 @endif
                                             </div>
 
-                                            <form id="companyForm" method="post" action="{{ route('company.store') }}">
+                                            <form id="companyForm" method="post"
+                                                action="{{ route('company.store') }}">
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="company_id"
                                                     name="company_id" value="">
@@ -163,61 +182,84 @@
         @include('partials.footer')
     </div> <!-- end main content -->
 
-</div> 
+</div>
 
 @include('partials.right-sidebar')
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script>
-    $(document).ready(function () {
-       
-        $('#openModalBtn').on('click', function () {
+    $(document).ready(function() {
+
+        $('#openModalBtn').on('click', function() {
             $('#companyModal').show();
             $('#company_id').val('');
             $('#companyForm')[0].reset();
             $('#modal_header').text('Add New Company');
         });
 
-       
-        $('.close').on('click', function () {
+
+        $('.close').on('click', function() {
             $('#companyModal').hide();
         });
 
-        
-        $('#companyForm').on('submit', function (e) {
+
+        $('#companyForm').on('submit', function(e) {
             e.preventDefault();
 
             let companyId = $('#company_id').val();
+            let companyName = $('#company_name').val();
             let formData = $(this).serialize();
-            let url = companyId
-                ? '{{ route('company.update', ':id') }}'.replace(':id', companyId)
-                : '{{ route('company.store') }}';
+            let user = @json(auth()->user());
+            let url = companyId ?
+                '{{ route('company.update', ':id') }}'.replace(':id', companyId) :
+                '{{ route('company.store') }}';
             let requestType = companyId ? 'PUT' : 'POST';
 
-            ajaxRequest(url, requestType, formData, 
-                function (response) {
+            $.ajax({
+                    url: url,
+                    type: requestType,
+                    data: formData,
+                })
+                .done(function(response) {
                     if (response.success) {
-                        toastr.success('Company saved successfully!');
-                        $('#companyModal').hide();
-                        location.reload();
-                        loadCompanies();
+
+                        $.ajax({
+                                url: "/api/company/migration",
+                                type: "POST",
+                                dataType: 'json',
+                                data: {
+                                    db_name: companyName,
+                                    user: user,
+                                },
+                            })
+                            .done(function(response) {
+                                if (response.success) {
+
+                                    toastr.success('Company saved successfully!');
+                                    $('#companyModal').hide();
+                                    $("#global-loader").fadeOut();
+
+                                    location.reload();
+                                } else {
+                                    toastr.error("Database migration failed.");
+                                }
+                            })
+                            .fail(handleError);
+                        // loadCompanies();
                     } else {
-                        toastr.error('Error: ' + response.message);
+                        toastr.error(response.message);
                     }
-                },
-                function () {
-                    toastr.error('An error occurred while processing the request.');
-                }
-            );
+                })
+                .fail(handleError);
         });
 
-       
-        $('#datatable').on('click', '.edit-company', function () {
+
+        $('#datatable').on('click', '.edit-company-btn', function() {
             let companyId = $(this).data('id');
             let url = `{{ route('company.editCompany', '') }}/${companyId}`;
 
-            ajaxRequest(url, 'GET', {}, 
-                function (response) {
+            ajaxRequest(url, 'GET', {},
+                function(response) {
                     if (response.success) {
                         $('#companyModal').show();
                         $('#company_id').val(response.company.id);
@@ -234,8 +276,8 @@
             );
         });
 
-       
-        $('#datatable').on('click', '.delete-company', function () {
+
+        $('#datatable').on('click', '.delete-company-btn', function() {
             let companyId = $(this).data('id');
             let appUrl = $("#appUrl").val();
             let url = appUrl + '/company/' + companyId;
@@ -250,7 +292,8 @@
                     success: function(response) {
                         if (response.success) {
                             toastr.success('Product deleted successfully!');
-                            loadCompanies();
+                            location.reload();
+                            // loadCompanies();
                         } else {
                             toastr.error('Error: ' + response.message);
                         }
@@ -263,36 +306,36 @@
             }
         });
 
-        function loadCompanies() {
-    ajaxRequest('{{ route('company.getData') }}', 'GET', {}, function (response) {
-        let rows = '';
-        response.companies.forEach(function (company) {
-            const charLimit = 10; 
-            const truncatedAddress =
-                company.address.length > charLimit
-                    ? company.address.substring(0, charLimit) + '...'
-                    : company.address;
+        //         function loadCompanies() {
+        //     ajaxRequest('{{ route('company.getData') }}', 'GET', {}, function (response) {
+        //         let rows = '';
+        //         response.companies.forEach(function (company) {
+        //             const charLimit = 10; 
+        //             const truncatedAddress =
+        //                 company.address.length > charLimit
+        //                     ? company.address.substring(0, charLimit) + '...'
+        //                     : company.address;
 
-            rows += `
-                <tr>
-                    <td>${company.id}</td>
-                    <td>${company.name}</td>
-                    <td title="${company.address}">${truncatedAddress}</td>
-                    <td>${company.contact_email}</td>
-                    <td>${company.phone_no}</td>
-                    <td>${company.status ? 'Active' : 'Inactive'}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm edit-company" data-id="${company.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-company" data-id="${company.id}">Delete</button>
-                    </td>
-                </tr>
-            `;
-        });
-        $('#datatable tbody').html(rows);
-    });
-}
+        //             rows += `
+        //                 <tr>
+        //                     <td>${company.id}</td>
+        //                     <td>${company.name}</td>
+        //                     <td title="${company.address}">${truncatedAddress}</td>
+        //                     <td>${company.contact_email}</td>
+        //                     <td>${company.phone_no}</td>
+        //                     <td>${company.status ? 'Active' : 'Inactive'}</td>
+        //                     <td>
+        //                         <button class="btn btn-warning btn-sm edit-company" data-id="${company.id}">Edit</button>
+        //                         <button class="btn btn-danger btn-sm delete-company" data-id="${company.id}">Delete</button>
+        //                     </td>
+        //                 </tr>
+        //             `;
+        //         });
+        //         $('#datatable tbody').html(rows);
+        //     });
+        // }
 
-        loadCompanies();
+        // loadCompanies();
     });
 </script>
 

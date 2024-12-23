@@ -21,19 +21,22 @@ class userManagement extends Controller
 
     public function show()
     {
-
+        if (auth()->user()->cannot('view-user-management')) {
+            abort(403); 
+        }
         $roles = role::orderBy('id', 'asc')->get();
         $companies = Company::all();
-        $moduleusers = User::with('roles')->whereNot('id',Auth::user()->id)->orderBy('id', 'asc')->get();
+        $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
         // dd($moduleusers[0]->roles->role_name);
-       
-        return view('usersManagement.index', compact('roles', 'moduleusers','companies'));
+
+        return view('usersManagement.index', compact('roles', 'moduleusers', 'companies'));
     }
 
     public function create(Request $request)
     {
-       
-        $company = Company::find($request->company_id);
+        if (auth()->user()->cannot('add-user-management')) {
+            abort(403); 
+        }
         $validatedData = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'role_id' => 'required|integer|exists:roles,id',
@@ -46,14 +49,6 @@ class userManagement extends Controller
             'confirm_password' => 'required',
             'current_status' => 'required|boolean',
         ]);
-
-        // $databaseName = str_replace(' ', '_', strtolower($company->name));
-
-        // $existingDeploy = Deploy::where('db_name', $databaseName)->first();
-
-        // if ($existingDeploy) {
-        //     return response()->json(['success' => false, 'message' => 'A database with the same name already exists.']);
-        // }
 
         DB::beginTransaction();
 
@@ -73,30 +68,9 @@ class userManagement extends Controller
 
             DB::commit();
 
-            if($user){
+            if ($user) {
                 return response()->json(['success' => true, 'user' => $request->input(), 'message' => 'User created successfully!']);
             }
-
-            // if (!$existingDeploy) {
-
-            //     $deployTable = deploy::create([
-            //         'user_id' => $user->id,
-            //         'db_name' => $databaseName,
-            //         'status' => 1,
-            //     ]);
-
-            //     // Attempt to create the database outside of the transaction
-            //     try {
-                   
-            //         DB::statement("CREATE DATABASE \"$databaseName\"");
-            //         return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
-            //     } catch (\Exception $e) {
-            //         // Handle database creation failure
-            //         return response()->json(['success' => false, 'message' => $e->getMessage()]);
-            //     }
-            // }else{
-            //     return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!','note'=>'already exist']);
-            // }
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json([
@@ -131,7 +105,7 @@ class userManagement extends Controller
             DB::reconnect('pgsql'); // Reconnect to the new database
             $currentDatabase = DB::connection('pgsql')->getDatabaseName();
 
-            
+
             if ($currentDatabase !== $dbName) {
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
@@ -140,7 +114,7 @@ class userManagement extends Controller
             // $userRole = '/database\migrations\2024_08_08_003839_add_role_to_users_table.php';
             $permissionmasterMigrationPath = '/database\migrations\2024_08_09_014220_create_permissions_table.php';
             $rolesMigrationPath = '/database/migrations/2024_10_15_131421_roles.php';
-            $permissionsMigrationPath = '/database/migrations/2024_08_09_014220_create_permissions_table.php';        
+            $permissionsMigrationPath = '/database/migrations/2024_08_09_014220_create_permissions_table.php';
             $companyMigrationPath = '/database\migrations\2024_12_03_101211_create_companies_table.php';
             $productMigrationPath = '/database\migrations\2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = '/database\migrations\2024_12_03_101421_create_batches_table.php';
@@ -239,6 +213,9 @@ class userManagement extends Controller
     public function edit($id)
     {
         try {
+            if (auth()->user()->cannot('edit-user-management')) {
+                abort(403); 
+            }
             $user = User::findOrFail($id);
             return response()->json(['success' => true, 'user' => $user], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -247,11 +224,13 @@ class userManagement extends Controller
             return response()->json(['success' => false, 'message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
-    
+
     public function update(Request $request)
     {
         try {
-
+            if (auth()->user()->cannot('edit-user-management')) {
+                abort(403); 
+            }
             $user = User::findOrFail($request->user_id);
 
             $validatedData = $request->validate([
@@ -307,7 +286,9 @@ class userManagement extends Controller
     public function delete($id)
     {
         try {
-            
+            if (auth()->user()->cannot('delete-user-management')) {
+                abort(403); 
+            }
             $user = User::findOrFail($id);
 
             $user->delete();

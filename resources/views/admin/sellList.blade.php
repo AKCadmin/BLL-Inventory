@@ -53,8 +53,12 @@
                                                 <td>{{ $sell->valid_from }}</td>
                                                 <td>{{ $sell->valid_to }}</td>
                                                 <td>
+                                                    @can('edit-sell')
                                                     <a href="{{ route('sell.edit', ['sell' => $sell->id]) }}" class="btn btn-sm btn-primary edit-sell-btn" data-id="{{ $sell->id }}">Edit</a>
+                                                    @endcan
+                                                    @can('delete-sell')
                                                     <button class="btn btn-sm btn-danger delete-sell-btn" data-id="{{ $sell->id }}">Delete</button>
+                                                    @endcan
                                                 </td>
                                             </tr>
                                         @endforeach

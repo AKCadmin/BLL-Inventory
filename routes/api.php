@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccommodationController;
 use App\Http\Controllers\AdvanceModuleController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\paymentController;
@@ -79,7 +80,7 @@ Route::post('/generate-token', [TokenController::class, 'generateToken']);
 
 
 
-Route::middleware([BearerTokenMiddleware::class])->group(function () {
+// Route::middleware([BearerTokenMiddleware::class])->group(function () {
     //role routes
     // Route::middleware([PermissionMiddleware::class.':create_user'])->group(function () {
     // Route::post('/add-new-role', [RoleController::class, 'addNewRole'])->name('roles.add');
@@ -95,7 +96,7 @@ Route::middleware([BearerTokenMiddleware::class])->group(function () {
     //user management
     Route::post('/user/create', [userManagement::class, 'create'])->name('user.create');
     Route::post('/user/status', [userManagement::class, 'status'])->name('user.toggleStatus');
-    Route::post('/user/migration', [userManagement::class, 'userMigration'])->name('user.migration');
+    Route::post('/company/migration', [CompanyController::class, 'companyMigration'])->name('company.migration');
     Route::get('/user/{id}/edit', [userManagement::class, 'edit'])->name('user.edit');
     Route::post('/user/update', [userManagement::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [userManagement::class, 'delete'])->name('users.delete');
@@ -103,4 +104,4 @@ Route::middleware([BearerTokenMiddleware::class])->group(function () {
     Route::post('/add-new-menu', [MenuController::class, 'addNewMenu'])->name('menus.add');
     Route::post('/menus/toggle-status', [MenuController::class, 'toggleStatus'])->name('menus.toggleStatus'); // URL should be kebab-case for consistency
     Route::delete('/menus/{id}', [MenuController::class, 'destroy'])->name('menus.destroy');
-});
+// });

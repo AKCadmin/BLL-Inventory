@@ -22,14 +22,14 @@ $(document).ready(function () {
                     location.reload(); // Reload the page
                     $("#permissionForm")[0].reset(); // Reset the form
                 } else {
-                    alert("Something went wrong. Please try again.");
+                    toastr.error("Something went wrong. Please try again.");
                 }
             },
             error: function (xhr, status, error) {
                 // Handle the error response here
                 var errorMessage =
                     xhr.responseJSON.message || "An error occurred";
-                alert("Error: " + errorMessage);
+                    toastr.error(errorMessage);
             },
         });
     });
@@ -85,21 +85,18 @@ $(document).ready(function () {
     // Use event delegation to handle events for dynamically added elements
     // This listens for a change event on any element with the class 'toggle-status'
     $(document).on("change", ".toggle-status", function () {
-        // Get the permission ID from the data-id attribute of the changed element
         var permissionId = $(this).data("id");
-        // Determine the status based on whether the checkbox is checked or not
         var status = $(this).prop("checked") ? "1" : "0";
 
         $.ajax({
-            // The URL to send the request to, generated using a Laravel route helper
+           
             url: appUrl + "/api/permissions/toggle-status",
-            // The HTTP method to use for the request
+          
             type: "POST",
-            // The data to send with the request
+           
             data: {
-                // The permission ID
+               
                 id: permissionId,
-                // The new status
                 status: status,
             },
             success: function (response) {
@@ -107,11 +104,11 @@ $(document).ready(function () {
                     toastr.success("Status updated successfully");
                     loaction.reload();
                 } else {
-                    toastr.success("Failed to update status");
+                    toastr.error("Failed to update status");
                 }
             },
             error: function () {
-                toastr.success("Error updating status");
+                toastr.error("Error updating status");
             },
         });
     });

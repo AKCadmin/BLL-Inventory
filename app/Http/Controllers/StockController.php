@@ -50,17 +50,21 @@ class StockController extends Controller
     public function store(Request $request)
     {
         try {
-           
-            // $databseName = Session::get('db_name');
-            // config(['database.connections.pgsql.database' => 'bll_inventory']);
-            // DB::purge('pgsql');
-            // DB::connection('pgsql')->getPdo();
+                      
+            if (auth()->user()->cannot('add-purchase')) {
+                abort(403); 
+            }
+            $databaseName = Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            DB::purge('pgsql');
+            DB::connection('pgsql')->getPdo();
            
             
 
-            // if (!$databseName) {
-            //     return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
-            // }
+            if (!$databaseName) {
+                return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+            }
             // if($request->db_name){
                // $dbName = $databseName;
                 // config(['database.connections.pgsql.database' => $dbName]);
@@ -166,6 +170,13 @@ class StockController extends Controller
 
     public function list()
     {
+
+        $databaseName = Session::get('db_name');
+        // dd($databaseName);
+        config(['database.connections.pgsql.database' => $databaseName]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
+
         $stocks = DB::table('batches')
             ->join('products', 'batches.product_id', '=', 'products.id')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
@@ -196,6 +207,12 @@ class StockController extends Controller
      */
     public function show(string $id)
     {
+        $databaseName = \Session::get('db_name');
+        // dd($databaseName);
+        config(['database.connections.pgsql.database' => $databaseName]);
+        \DB::purge('pgsql');
+        \DB::connection('pgsql')->getPdo();
+
         $batchData = DB::table('batches')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
             ->where('batches.id', $id)
@@ -328,6 +345,12 @@ class StockController extends Controller
 
     public function update(Request $request)
     {
+        $databaseName = \Session::get('db_name');
+        // dd($databaseName);
+        config(['database.connections.pgsql.database' => $databaseName]);
+        \DB::purge('pgsql');
+        \DB::connection('pgsql')->getPdo();
+
         DB::beginTransaction(); 
 
         try {

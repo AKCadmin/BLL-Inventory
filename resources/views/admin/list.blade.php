@@ -71,17 +71,24 @@
                                                 <td>{{ $stock->total_items }}</td>
                                                 <td>{{ $stock->missing_items }}</td>
                                                 <td>
+                                                    @can('edit-purchase')
+                                                        
+                                                   
                                                     <a href="{{ $batchExists ? '#' : route('stock.show', ['stock' => $stock->batch_id]) }}"
                                                         class="btn btn-sm btn-warning edit-stock-btn"
                                                         data-id="{{ $stock->batch_id }}"
                                                         @if ($batchExists) style="pointer-events: none; opacity: 0.6;" @endif>
                                                         Edit
                                                     </a>
+                                                    @endcan
+                                                    @can('delete-purchase')
+                                                                                      
                                                     <button class="btn btn-sm btn-danger delete-stock-btn"
                                                         data-id="{{ $stock->batch_id }}"
                                                         @if ($batchExists) disabled @endif>
                                                         Delete
                                                     </button>
+                                                    @endcan
                                                 </td>
                                             </tr>
                                         @endforeach

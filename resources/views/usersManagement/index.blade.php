@@ -35,12 +35,14 @@
                             <div class="card-body">
                                 <div class="RoleTableHeader">
                                     <h4 class="card-title"></h4>
-
+                                    <a href="{{route('assign.permissions')}}" class="btn btn-secondary waves-effect waves-light btn-sm" id="assignPermissionBtn">
+                                        Assign Permission
+                                        <i class="mdi mdi-shield-key ms-1"></i>
+                                    </a>
                                     <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
                                         id="openModalBtn">Create a user
                                         <i class="mdi mdi-arrow-right ms-1"></i>
                                     </a>
-
 
                                 </div><br>
                                 <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">

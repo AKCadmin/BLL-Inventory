@@ -12,6 +12,7 @@ class CreateProductsTable extends Migration
             $table->string('sku')->unique()->notNullable();
             $table->string('name')->notNullable();
             $table->text('description')->nullable();
+            $table->integer('company_id')->after('status')->nullable();
             $table->enum('status', ['available', 'unavailable'])->default('available');
             $table->timestamps();
         });

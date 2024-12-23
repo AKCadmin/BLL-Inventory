@@ -56,31 +56,45 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- @foreach ($products as $item)
+                                        @foreach ($products as $product)
+                                            @php
+                                                $charLimit = 10; // Set the character limit for truncating the description
+                                                $truncatedDescription =
+                                                    strlen($product->description) > $charLimit
+                                                        ? substr($product->description, 0, $charLimit) . '...'
+                                                        : $product->description;
+                                            @endphp
                                             <tr>
-                                                <td>{{ $item->sku }}</td>
-                                                <td>{{ $item->name }}</td>
-                                                <td>{{ $item->description }}</td>
+                                                <td>{{ $product->id }}</td>
+                                                <td>{{ $product->company ? $product->company->name : 'N/A' }}</td>
+                                                <td>{{ $product->sku }}</td>
+                                                <td>{{ $product->name }}</td>
+                                                <td>
+                                                    <span title="{{ $product->description }}" data-toggle="tooltip"
+                                                        data-placement="top">
+                                                        {{ $truncatedDescription }}
+                                                    </span>
+                                                </td>
                                                 <td>
                                                     <label class="switch">
                                                         <input type="checkbox" class="toggle-status"
-                                                            data-id="{{ $item->id }}" data-toggle="toggle"
+                                                            data-id="{{ $product->id }}" data-toggle="toggle"
                                                             data-on="Available" data-off="Unavailable"
-                                                            {{ $item->status == '1' ? 'checked' : '' }}>
+                                                            {{ $product->status == 'available' ? 'checked' : '' }}>
                                                         <span class="slider round"></span>
                                                     </label>
                                                 </td>
                                                 <td>
                                                     <a href="#" class="btn btn-sm btn-warning edit-product-btn"
-                                                        data-id="{{ $item->id }}">Edit</a>
+                                                        data-id="{{ $product->id }}">Edit</a>
                                                     <button class="btn btn-sm btn-danger delete-product-btn"
-                                                        data-id="{{ $item->id }}">Delete</button>
+                                                        data-id="{{ $product->id }}">Delete</button>
                                                 </td>
-
                                             </tr>
-                                        @endforeach --}}
+                                        @endforeach
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
                     </div> <!-- end col -->
@@ -260,7 +274,8 @@
                     if (response.success) {
                         toastr.success('Product saved successfully!');
                         $('#productModal').hide();
-                        loadProducts();
+                        location.reload();
+                        // loadProducts();
                     } else {
                         toastr.error('Error: ' + response.error);
                     }
@@ -272,7 +287,7 @@
         });
 
         // Edit Product
-        $('#datatable').on('click', '.edit-product', function() {
+        $(document).on('click', '.edit-product-btn', function() {
 
             let productId = $(this).data('id');
             let appUrl = $("#appUrl").val();
@@ -282,10 +297,10 @@
                 function(response) {
                     if (response.success) {
                         $('#productModal').show();
-                        console.log(response,"response")
+                        console.log(response, "response")
                         $('#companyId').val(response.product.company_id)
                         $('#companyId option').each(function() {
-                            console.log($(this).val(),"anaan",response.product.company_id)
+                            console.log($(this).val(), "anaan", response.product.company_id)
                             if ($(this).val() == response.product.company_id) {
                                 $(this).prop('selected', true);
                             } else {
@@ -306,7 +321,7 @@
         });
 
         // Delete Product
-        $('#datatable').on('click', '.delete-product', function() {
+        $('#datatable').on('click', '.delete-product-btn', function() {
             let productId = $(this).data('id');
             let appUrl = $("#appUrl").val();
             let url = appUrl + '/product/' + productId;
@@ -321,7 +336,8 @@
                     success: function(response) {
                         if (response.success) {
                             toastr.success('Product deleted successfully!');
-                            loadProducts();
+                            location.reload();
+                            // loadProducts();
                         } else {
                             toastr.error('Error: ' + response.message);
                         }
@@ -334,39 +350,70 @@
             }
         });
 
+        $(document).on("change", ".toggle-status", function() {
+            var permissionId = $(this).data("id");
+            var status = $(this).prop("checked") ? "available" : "unavailable";
+
+            $.ajax({
+                url: "/product/toggle-status",
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                data: {
+                    id: permissionId,
+                    status: status,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $("#global-loader").fadeOut();
+                        toastr.success("Status updated successfully");
+                        loaction.reload();
+                    } else {
+                        $("#global-loader").fadeOut();
+                        toastr.error("Failed to update status");
+                    }
+                },
+                error: function() {
+                    $("#global-loader").fadeOut();
+                    toastr.error("Error updating status");
+                },
+            });
+        });
+
 
         // Load Products
-        function loadProducts() {
-    ajaxRequest('{{ route('product.getData') }}', 'GET', {}, function (response) {
-        let rows = '';
-        response.products.forEach(function (product) {
-            const charLimit = 10; 
-            const truncatedDescription =
-                product.description.length > charLimit
-                    ? product.description.substring(0, charLimit) + '...'
-                    : product.description;
+        // function loadProducts() {
+        //     ajaxRequest('{{ route('product.getData') }}', 'GET', {}, function(response) {
+        //         let rows = '';
+        //         response.products.forEach(function(product) {
+        //             const charLimit = 10;
+        //             const truncatedDescription =
+        //                 product.description.length > charLimit ?
+        //                 product.description.substring(0, charLimit) + '...' :
+        //                 product.description;
 
-            rows += `
-                <tr>
-                    <td>${product.id}</td>
-                    <td>${product?.company?.name ?? ''}</td>
-                    <td>${product.sku}</td>
-                    <td>${product.name}</td>
-                    <td title="${product.description}">${truncatedDescription}</td>
-                    <td>${product.status == 'available' ? 'available' : 'unavailable'}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm edit-product" data-id="${product.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-product" data-id="${product.id}">Delete</button>
-                    </td>
-                </tr>
-            `;
-        });
-        $('#datatable tbody').html(rows);
-    });
-}
+        //             rows += `
+        //         <tr>
+        //             <td>${product.id}</td>
+        //             <td>${product?.company?.name ?? ''}</td>
+        //             <td>${product.sku}</td>
+        //             <td>${product.name}</td>
+        //             <td title="${product.description}">${truncatedDescription}</td>
+        //             <td>${product.status == 'available' ? 'available' : 'unavailable'}</td>
+        //             <td>
+        //                 <button class="btn btn-warning btn-sm edit-product" data-id="${product.id}">Edit</button>
+        //                 <button class="btn btn-danger btn-sm delete-product" data-id="${product.id}">Delete</button>
+        //             </td>
+        //         </tr>
+        //     `;
+        //         });
+        //         $('#datatable tbody').html(rows);
+        //     });
+        // }
 
 
-        loadProducts();
+        // loadProducts();
     });
 </script>
 

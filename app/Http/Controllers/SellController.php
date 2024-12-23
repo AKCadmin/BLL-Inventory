@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sell;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SellController extends Controller
 {
@@ -14,6 +15,10 @@ class SellController extends Controller
      */
     public function index()
     {
+       
+        if (auth()->user()->cannot('view-sell')) {
+            abort(403); 
+        }
         return view('admin.sell');
     }
 
@@ -31,6 +36,14 @@ class SellController extends Controller
     public function store(Request $request)
     {
         try {
+            if (auth()->user()->cannot('add-sell')) {
+                abort(403); 
+            }
+            $databaseName = \Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            \DB::purge('pgsql');
+            \DB::connection('pgsql')->getPdo();
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'sku' => 'required|string',
@@ -83,6 +96,7 @@ class SellController extends Controller
      */
     public function show(string $id)
     {
+        
         return view('admin.sellList');
     }
 
@@ -91,6 +105,19 @@ class SellController extends Controller
      */
     public function edit(string $id)
     {
+        
+        if (auth()->user()->cannot('edit-sell')) {
+            abort(403); 
+        }
+
+        $databaseName = \Session::get('db_name');
+        // dd($databaseName);
+        config(['database.connections.pgsql.database' => $databaseName]);
+        \DB::purge('pgsql');
+        \DB::connection('pgsql')->getPdo();
+
+        DB::beginTransaction(); 
+    
         $sell = Sell::findOrFail($id);
         $products = Product::all();  
         $batches = [];
@@ -114,6 +141,18 @@ class SellController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            if (auth()->user()->cannot('edit-sell')) {
+                abort(403); 
+            }
+
+            $databaseName = \Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            \DB::purge('pgsql');
+            \DB::connection('pgsql')->getPdo();
+    
+            DB::beginTransaction(); 
+
             $sell = Sell::findOrFail($id);
 
             $batch = Batch::where('batch_number', $request->batch_no)->first();
@@ -178,6 +217,18 @@ class SellController extends Controller
     {
         try {
            
+            if (auth()->user()->cannot('delete-sell')) {
+                abort(403); 
+            }
+
+            $databaseName = \Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            \DB::purge('pgsql');
+            \DB::connection('pgsql')->getPdo();
+    
+            DB::beginTransaction(); 
+
             $sell = Sell::findOrFail($id); 
            
             $sell->delete();
@@ -205,7 +256,13 @@ class SellController extends Controller
 
     public function getBatchesBySku($sku)
     {
+        
         try {
+            $databaseName = \Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            \DB::purge('pgsql');
+            \DB::connection('pgsql')->getPdo();
           
             $product = Product::where('sku', $sku)->first();
 
@@ -237,7 +294,13 @@ class SellController extends Controller
 
     public function getSellBatchesBySku($sku)
     {
+        
         try {
+            $databaseName = \Session::get('db_name');
+            // dd($databaseName);
+            config(['database.connections.pgsql.database' => $databaseName]);
+            \DB::purge('pgsql');
+            \DB::connection('pgsql')->getPdo();
             
             $product = Product::where('sku', $sku)->first();
 
@@ -275,6 +338,12 @@ class SellController extends Controller
 
     public function list()
     {
+        $databaseName = \Session::get('db_name');
+        // dd($databaseName);
+        config(['database.connections.pgsql.database' => $databaseName]);
+        \DB::purge('pgsql');
+        \DB::connection('pgsql')->getPdo();
+
         $sells = sell::orderBy('id','desc')->get();
 
         return view('admin.sellList', compact('sells'));

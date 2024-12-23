@@ -51,7 +51,7 @@ Route::get('/optimize', function () {
 // Guest middleware for unauthenticated users
 Route::group(['middleware' => 'guest'], function () {
 
-    Route::get('/', [FrontController::class, 'index'])->name('index');// Root should use `/` instead of an empty string
+    Route::get('/', [FrontController::class, 'index'])->name('index'); // Root should use `/` instead of an empty string
 
     // Registration routes
     Route::get('/register', [RegistrationController::class, 'register_index'])->name('register');
@@ -78,62 +78,60 @@ Route::group(['middleware' => 'guest'], function () {
 // Auth middleware for authenticated users only
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('/home', [FrontController::class, 'home'])->name('home')->middleware('can:dashboard');
-
-    // Logout routes
+    Route::get('/home', [FrontController::class, 'home'])->name('home')->middleware('can:view-dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // POST is better practice for logout
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout.get'); // In case GET is needed, but not recommended
-
-    // Role management routes
     Route::get('/role-manager', [RoleController::class, 'roleManager'])->name('role-manager');
-    // Route::middleware([PermissionMiddleware::class . ':add_role'])->group(function () {
-      
-        Route::post('/add-new-role', [RoleController::class, 'addNewRole'])->name('roles.add');
-    // });
-    //Route::post('/add-new-role', [RoleController::class, 'addNewRole'])->name('roles.add');
-
-    // Permission management routes
+    Route::post('/add-new-role', [RoleController::class, 'addNewRole'])->name('roles.add');
     Route::get('/permission-manager', [PermissionController::class, 'permissionManager'])->name('permission-manager');
-    // URL should be kebab-case for consistency
     // Route::post('/add-new-permission', [PermissionController::class, 'addNewPermission'])->name('permissions.add');
-
-
-    // Menu management routes
     Route::get('/menu', [MenuController::class, 'menu'])->name('menu');
 
 
     //user management routes
-    Route::get('/management', [userManagement::class, 'show'])->name('user.management')->middleware('can:user_management');
+    Route::get('/user-management', [userManagement::class, 'show'])->name('user.management');
 
-    //stock
-    Route::resource('company',CompanyController::class)->middleware('can:company');
-    Route::get('company/edit/{company}', [CompanyController::class, 'edit'])->name('company.editCompany')->middleware('can:company');
-    Route::Post('company/{company}', [CompanyController::class, 'destroy'])->middleware('can:company');
+    //company routes
+    Route::resource('company', CompanyController::class);
+    Route::get('company/edit/{company}', [CompanyController::class, 'edit'])->name('company.editCompany')->middleware('can:edit-company');
+    Route::Post('company/{company}', [CompanyController::class, 'destroy']);
+    Route::get('company/data', [CompanyController::class, 'companyData'])->name('company.getData');
 
-    Route::get('company/data', [CompanyController::class,'companyData'])->name('company.getData');
-    Route::resource('product',ProductController::class)->middleware('can:product');
-    Route::get('/product/data/get', [CompanyController::class,'productDataGet'])->name('product.getData');
-    Route::resource('stock', StockController::class)->middleware('can:add_purchase');
-    Route::resource('invoice',InvoiceController::class);
-    Route::resource('report',ReportController::class);
+    //products routes
+    Route::resource('product', ProductController::class);
+    Route::post('/product/toggle-status', [ProductController::class, 'toggleStatus'])->name('product.toggleStatus');
+    Route::get('/product/data/get', [CompanyController::class, 'productDataGet'])->name('product.getData');
+
+    //stock routes
+    Route::resource('stock', StockController::class);
+    Route::get('stockList', [StockController::class, 'list'])->name('stock.list');
+    route::view('stockEdit', 'admin.edit')->name('stock.editStock');
+    route::post('/stock/update/batch', [StockController::class, 'update'])->name('stock.batch.update');
 
     // Sell Management routes
-    Route::resource('sell', SellController::class)->middleware('can:add_sell');
-    Route::get('sellList',[SellController::class,'list'])->name('sell.list');
-     Route::post('/sell/update/{sell}', [SellController::class, 'update'])->name('sell.updateSell');
+    Route::resource('sell', SellController::class);
+    Route::get('sellList', [SellController::class, 'list'])->name('sell.list');
+    Route::post('/sell/update/{sell}', [SellController::class, 'update'])->name('sell.updateSell');
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
     Route::get('/batches/{sku}', [SellController::class, 'getBatchesBySku'])->name('batch.getBatchesBySku');
 
-    // Stock Management routes
-    Route::get('stockList',[StockController::class,'list'])->name('stock.list');
-
-    Route::resource('sellCounter', SellCornerController::class)->middleware('can:sell_stock');
-    Route::get('/sellcounter/batches/{sku}', [SellCornerController::class, 'getSellcounterBatchesBySku'])->name('batch.getSellCounterBatchesBySku');
-    Route::get('/sellcounter/product/data/get', [SellCornerController::class,'sellProductDataGet'])->name('sell.product.getData');
-    Route::get('/sellcounter/cartons/{batch}', [SellCornerController::class, 'getSellcounterCartonsByBatch'])->name('batch.getSellCounterCartonsByBatch');
-    route::view('stockEdit','admin.edit')->name('stock.editStock');
-    route::post('/stock/update/batch',[StockController::class,'update'])->name('stock.batch.update');
+    // sell counter Management routes
+    Route::resource('sellCounter', SellCornerController::class);
     Route::get('/sellcounter/orders', [SellCornerController::class, 'orderList'])->name('sell.orders.list');
-    route::get('sellcounteredit/{id}',[SellCornerController::class,'editSellCounter']);
+    route::get('sellcounteredit/{id}', [SellCornerController::class, 'editSellCounter']);
+    Route::get('/sellcounter/batches/{sku}', [SellCornerController::class, 'getSellcounterBatchesBySku'])->name('batch.getSellCounterBatchesBySku');
+    Route::get('/sellcounter/product/data/get', [SellCornerController::class, 'sellProductDataGet'])->name('sell.product.getData');
+    Route::get('/sellcounter/cartons/{batch}', [SellCornerController::class, 'getSellcounterCartonsByBatch'])->name('batch.getSellCounterCartonsByBatch');
 
+
+    //for user assign permission
+    Route::get('/assign-permissions', [PermissionController::class, 'assignPermissions'])->name('assign.permissions');
+    Route::post('/assign-permissions/save', [PermissionController::class, 'savePermissions'])->name('assign.permissions.save');
+    Route::post('/assign-permissions/get', [PermissionController::class, 'getUserPermissions'])->name('assign.permissions.get');
+
+    //invoice routes
+    Route::resource('invoice', InvoiceController::class);
+
+    //report routes
+    Route::resource('report', ReportController::class);
 });

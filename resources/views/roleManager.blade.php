@@ -102,14 +102,14 @@
                                     <div class="bg-primary-subtle">
 
                                         <div class="row" id="popup_row">
-                                            @can('view-admin-section')
+                                            
                                             <div class="col-7">
                                                 <div class="text-primary p-4">
                                                     <h5 class="text-primary">Add New Role</h5>
                                                     <p>New role with Skote.</p>
                                                 </div>
                                             </div>
-                                            @endcan
+                                           
                                             <div class="col-3">
                                                 <span class="close">×</span>
                                             </div>
