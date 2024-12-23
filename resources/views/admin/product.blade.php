@@ -43,7 +43,22 @@
 
 
                                 </div><br>
-                                <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
+                                <div class="row mb-3">
+                                    <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="input-group">
+                                            <select id="product-filter" class="form-control custom-select">
+                                                <option value="">Select Company</option>
+                                                @foreach ($products->unique(fn($product) => $product->company->name ?? "N/A") as $product)
+                                                    <option value="{{ $product->company->name ?? 'N/A' }}">
+                                                        {{ $product->company->name ?? 'N/A' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <table id="producttable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
@@ -235,7 +250,7 @@
         });
 
         ajaxRequest(
-            appUrl + "/company/data",
+            "/company/data",
             "GET",
             null,
             function(data) {
@@ -380,6 +395,23 @@
                 },
             });
         });
+
+        if (!$.fn.dataTable.isDataTable('#producttable')) {
+            var table = $('#producttable').DataTable({
+                // Optional: Enable the global search box for the entire table if needed
+                // searching: true,
+                order: [[0, 'desc']]
+            });
+
+            $('#product-filter').on('change', function() {
+                var selectedProduct = $(this).val();
+                if (selectedProduct) {
+                    table.column(1).search('^' + selectedProduct + '$', true, false).draw();
+                } else {
+                    table.column(1).search('').draw();
+                }
+            });
+        }
 
 
         // Load Products

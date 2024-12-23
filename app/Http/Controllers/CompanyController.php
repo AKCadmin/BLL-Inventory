@@ -100,7 +100,7 @@ class CompanyController extends Controller
             // $permissionsMigrationPath = '\\database\\migrations\\2024_08_09_014220_create_permissions_table.php';
             // $rolesMigrationPath = '\\database\\migrations\\2024_10_15_131421_roles.php';
             // $menuMigrationPath = '\\database\\migrations\\2024_08_24_222034_create_menu_table.php';
-            $companyMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
+            // $companyMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
             $productMigrationPath = '\\database\\migrations\\2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = '\\database\\migrations\\2024_12_03_101421_create_batches_table.php';
             $cartonsigrationPath = '\\database\\migrations\\2024_12_03_101422_create_cartons_table.php';
@@ -116,7 +116,7 @@ class CompanyController extends Controller
                 // $userRole,
                 // $menuMigrationPath,
                 // $permissionsMigrationPath,
-                $companyMigrationPath,
+                // $companyMigrationPath,
                 $productMigrationPath,
                 $batchMigrationPath,
                 $cartonsigrationPath,

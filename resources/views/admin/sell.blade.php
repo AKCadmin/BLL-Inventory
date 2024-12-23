@@ -10,7 +10,6 @@
     @include('partials.link')
     @include('partials.head-css')
 
-
 </head>
 
 @include('partials.body')
@@ -44,6 +43,19 @@
                             <select id="batchNoSelect" class="form-select select2">
                                 <option value="" disabled selected>Batch No</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="buySelect" class="form-label">Buy Price</label>
+                            <input type="text" id="buyInput" disabled class="form-control price-input">
+                        </div>
+                        <div class="col-md-6">
+                            {{-- <label for="batchNoSelect" class="form-label">Batch No</label>
+                            <select id="batchNoSelect" class="form-select select2">
+                                <option value="" disabled selected>Batch No</option>
+                            </select> --}}
                         </div>
                     </div>
 
@@ -181,10 +193,11 @@
             }
         });
 
-        
+
         $('#batchNoSelect').on('change', function() {
             var selectedBatch = $(this).find(':selected');
             var buyPrice = selectedBatch.data('buy-price');
+             $('#buyInput').val(buyPrice);
 
             if (buyPrice) {
                 $('#hospitalPrice, #wholesalePrice, #retailPrice').attr('min', buyPrice);
