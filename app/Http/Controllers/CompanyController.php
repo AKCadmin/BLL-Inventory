@@ -16,6 +16,7 @@ class CompanyController extends Controller
     // Store new company
     public function store(Request $request)
     {
+       // return response()->json(['success' => true, 'db_name' => "Vardhaman Texttiles", 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
         DB::beginTransaction();
         try {
             $validated = $request->validate([
@@ -77,34 +78,37 @@ class CompanyController extends Controller
     {
 
         $dbName = $request->db_name;
+        $databaseName = str_replace(' ', '_', strtolower($dbName));
+       
         $userData = $request->user;
 
 
         try {
 
-            config(['database.connections.pgsql.database' => $dbName]);
+            config(['database.connections.pgsql.database' => $databaseName]);
             DB::purge('pgsql');  
             DB::reconnect('pgsql');
             $currentDatabase = DB::connection('pgsql')->getDatabaseName();
 
             
-            if ($currentDatabase !== $dbName) {
+            if ($currentDatabase !== $databaseName) {
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
 
-            $usersMigrationPath = '/database\migrations\0001_01_01_000000_create_users_table.php';
-            // $userRole = '/database\migrations\2024_08_08_003839_add_role_to_users_table.php';
-            // $permissionsMigrationPath = '/database\migrations\2024_08_09_014220_create_permissions_table.php';
-            // $rolesMigrationPath = '/database/migrations/2024_10_15_131421_roles.php';
-            // $menuMigrationPath = '/database/migrations/2024_08_24_222034_create_menu_table.php';        
-            $companyMigrationPath = '/database\migrations\2024_12_03_101211_create_companies_table.php';
-            $productMigrationPath = '/database\migrations\2024_12_03_101214_create_products_table.php';
-            $batchMigrationPath = '/database\migrations\2024_12_03_101421_create_batches_table.php';
-            $cartonsigrationPath = '/database\migrations\2024_12_03_101422_create_cartons_table.php';
-            $sellMigrationPath = '/database\migrations\2024_12_07_113412_create_sell_table.php';
-            $sellCounterMigrationPath = '/database\migrations\2024_12_11_082844_create_sell_counter_table.php';
-            $sellCartonMigrationPath = '/database\migrations\2024_12_11_083350_create_sell_carton_table.php';
-            $invoiceMigrationPath = '/database\migrations\2024_12_11_083432_create_invoice_table.php';
+            $usersMigrationPath = '\\database\\migrations\\0001_01_01_000000_create_users_table.php';
+            // $userRole = '\\database\\migrations\\2024_08_08_003839_add_role_to_users_table.php';
+            // $permissionsMigrationPath = '\\database\\migrations\\2024_08_09_014220_create_permissions_table.php';
+            // $rolesMigrationPath = '\\database\\migrations\\2024_10_15_131421_roles.php';
+            // $menuMigrationPath = '\\database\\migrations\\2024_08_24_222034_create_menu_table.php';
+            $companyMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
+            $productMigrationPath = '\\database\\migrations\\2024_12_03_101214_create_products_table.php';
+            $batchMigrationPath = '\\database\\migrations\\2024_12_03_101421_create_batches_table.php';
+            $cartonsigrationPath = '\\database\\migrations\\2024_12_03_101422_create_cartons_table.php';
+            $sellMigrationPath = '\\database\\migrations\\2024_12_07_113412_create_sell_table.php';
+            $sellCounterMigrationPath = '\\database\\migrations\\2024_12_11_082844_create_sell_counter_table.php';
+            $sellCartonMigrationPath = '\\database\\migrations\\2024_12_11_083350_create_sell_carton_table.php';
+            $invoiceMigrationPath = '\\database\\migrations\\2024_12_11_083432_create_invoice_table.php';
+            
 
             $migrations = [
                 $usersMigrationPath,

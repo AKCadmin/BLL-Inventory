@@ -21,9 +21,9 @@ class userManagement extends Controller
 
     public function show()
     {
-        if (auth()->user()->cannot('view-user-management')) {
-            abort(403); 
-        }
+        // if (auth()->user()->cannot('view-user-management')) {
+        //     abort(403); 
+        // }
         $roles = role::orderBy('id', 'asc')->get();
         $companies = Company::all();
         $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
@@ -34,9 +34,9 @@ class userManagement extends Controller
 
     public function create(Request $request)
     {
-        if (auth()->user()->cannot('add-user-management')) {
-            abort(403); 
-        }
+        // if (auth()->user()->cannot('add-user-management')) {
+        //     abort(403); 
+        // }
         $validatedData = $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'role_id' => 'required|integer|exists:roles,id',
@@ -110,16 +110,16 @@ class userManagement extends Controller
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
 
-            $usersMigrationPath = '/database\migrations\0001_01_01_000000_create_users_table.php';
-            // $userRole = '/database\migrations\2024_08_08_003839_add_role_to_users_table.php';
-            $permissionmasterMigrationPath = '/database\migrations\2024_08_09_014220_create_permissions_table.php';
+            $usersMigrationPath = '/database/migrations/0001_01_01_000000_create_users_table.php';
+            $permissionmasterMigrationPath = '/database/migrations/2024_08_09_014220_create_permissions_table.php';
             $rolesMigrationPath = '/database/migrations/2024_10_15_131421_roles.php';
             $permissionsMigrationPath = '/database/migrations/2024_08_09_014220_create_permissions_table.php';
-            $companyMigrationPath = '/database\migrations\2024_12_03_101211_create_companies_table.php';
-            $productMigrationPath = '/database\migrations\2024_12_03_101214_create_products_table.php';
-            $batchMigrationPath = '/database\migrations\2024_12_03_101421_create_batches_table.php';
-            $cartonsigrationPath = '/database\migrations\2024_12_03_101422_create_cartons_table.php';
-            $sellMigrationPath = '/database\migrations\2024_12_07_113412_create_sell_table.php';
+            $companyMigrationPath = '/database/migrations/2024_12_03_101211_create_companies_table.php';
+            $productMigrationPath = '/database/migrations/2024_12_03_101214_create_products_table.php';
+            $batchMigrationPath = '/database/migrations/2024_12_03_101421_create_batches_table.php';
+            $cartonsMigrationPath = '/database/migrations/2024_12_03_101422_create_cartons_table.php';
+            $sellMigrationPath = '/database/migrations/2024_12_07_113412_create_sell_table.php';
+            
 
 
             $migrations = [
@@ -131,7 +131,7 @@ class userManagement extends Controller
                 $companyMigrationPath,
                 $productMigrationPath,
                 $batchMigrationPath,
-                $cartonsigrationPath,
+                $cartonsMigrationPath,
                 $sellMigrationPath,
             ];
 
@@ -145,20 +145,20 @@ class userManagement extends Controller
                     return response()->json(['success' => false, 'message' => 'Failed to apply migrations.', 'error' => Artisan::output()]);
                 }
             }
-            DB::purge('pgsql');
-            DB::reconnect('pgsql');
+            // DB::purge('pgsql');
+            // DB::reconnect('pgsql');
 
-            DB::connection('pgsql')->table('users')->insert([
-                'name' => $userData['admin_firstname'] . ' ' . $userData['admin_lastname'],
-                'username' => $userData['admin_username'],
-                'role' => 'Admin',
-                'phone' => $userData['phone_number'],
-                'email' => $userData['email'],
-                'password' => Hash::make($userData['password']),
-                'status' => $userData['current_status'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // DB::connection('pgsql')->table('users')->insert([
+            //     'name' => $userData['admin_firstname'] . ' ' . $userData['admin_lastname'],
+            //     'username' => $userData['admin_username'],
+            //     'role' => 'Admin',
+            //     'phone' => $userData['phone_number'],
+            //     'email' => $userData['email'],
+            //     'password' => Hash::make($userData['password']),
+            //     'status' => $userData['current_status'],
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ]);
 
 
 
@@ -213,9 +213,9 @@ class userManagement extends Controller
     public function edit($id)
     {
         try {
-            if (auth()->user()->cannot('edit-user-management')) {
-                abort(403); 
-            }
+            // if (auth()->user()->cannot('edit-user-management')) {
+            //     abort(403); 
+            // }
             $user = User::findOrFail($id);
             return response()->json(['success' => true, 'user' => $user], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -228,9 +228,9 @@ class userManagement extends Controller
     public function update(Request $request)
     {
         try {
-            if (auth()->user()->cannot('edit-user-management')) {
-                abort(403); 
-            }
+            // if (auth()->user()->cannot('edit-user-management')) {
+            //     abort(403); 
+            // }
             $user = User::findOrFail($request->user_id);
 
             $validatedData = $request->validate([
@@ -286,9 +286,9 @@ class userManagement extends Controller
     public function delete($id)
     {
         try {
-            if (auth()->user()->cannot('delete-user-management')) {
-                abort(403); 
-            }
+            // if (auth()->user()->cannot('delete-user-management')) {
+            //     abort(403); 
+            // }
             $user = User::findOrFail($id);
 
             $user->delete();

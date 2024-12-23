@@ -46,12 +46,15 @@ class LoginController extends Controller
                             ->join('companies', 'users.company_id', '=', 'companies.id')
                             ->where('users.email', '=', $request->email)
                             ->first();
+                            $databaseName = str_replace(' ', '_', strtolower($companyName->companyName));
+                           
+                            // dd($databaseName);
                         
                         
                         
-                            if ($companyName->companyName) {
+                            if ($databaseName) {
 
-                                $dbName = $companyName->companyName;
+                                $dbName = $databaseName;
 
                                 // Update the database configuration
                                 config(['database.connections.pgsql.database' => $dbName]);
