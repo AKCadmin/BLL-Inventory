@@ -43,37 +43,37 @@
 
 
                                 </div><br>
-                                <div class="row mb-3">
+                                {{-- <div class="row mb-3">
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
                                             <select id="product-filter" class="form-control custom-select">
-                                                <option value="">Select Company</option>
-                                                @foreach ($products->unique(fn($product) => $product->company->name ?? "N/A") as $product)
-                                                    <option value="{{ $product->company->name ?? 'N/A' }}">
-                                                        {{ $product->company->name ?? 'N/A' }}
+                                                <option value="">Select Organization</option>
+                                                @foreach ($products->unique(fn($product) => $product->organization->name ?? 'N/A') as $product)
+                                                    <option value="{{ $product->organization->name ?? 'N/A' }}">
+                                                        {{ $product->organization->name ?? 'N/A' }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                                
+                                </div> --}}
+
                                 <table id="producttable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Company Name</th>
-                                            <th>SKU</th>
+                                            {{-- <th>Organization Name</th> --}}
+                                            {{-- <th>SKU</th> --}}
                                             <th>Name</th>
                                             <th>Description</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="product-table-body">
                                         @foreach ($products as $product)
                                             @php
-                                                $charLimit = 10; // Set the character limit for truncating the description
+                                                $charLimit = 10;
                                                 $truncatedDescription =
                                                     strlen($product->description) > $charLimit
                                                         ? substr($product->description, 0, $charLimit) . '...'
@@ -81,8 +81,8 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $product->id }}</td>
-                                                <td>{{ $product->company ? $product->company->name : 'N/A' }}</td>
-                                                <td>{{ $product->sku }}</td>
+                                                {{-- <td>{{ $product->organization ? $product->organization->name : 'N/A' }}</td> --}}
+                                                {{-- <td>{{ $product->sku }}</td> --}}
                                                 <td>{{ $product->name }}</td>
                                                 <td>
                                                     <span title="{{ $product->description }}" data-toggle="tooltip"
@@ -154,10 +154,10 @@
                                                     name="product_id" value="">
 
                                                 <div class="mb-3">
-                                                    <label for="autoSizingSelect">Select Company</label>
+                                                    <label for="autoSizingSelect">Select Organization</label>
                                                     <select class="form-select company" id="companyId"
                                                         id="autoSizingSelect" name="company_id">
-                                                        <option value="">Select Company &ensp;</option>
+                                                        <option value="">Select Organization &ensp;</option>
                                                         @foreach ($companies as $company)
                                                             <option value="{{ $company->id }}"
                                                                 {{ old('company_id') == $company->id ? 'selected' : '' }}>
@@ -167,12 +167,12 @@
                                                     </select>
                                                 </div>
 
-                                                <div class="mb-3">
+                                                {{-- <div class="mb-3">
                                                     <label for="sku" class="form-label">SKU</label>
                                                     <input type="text" class="form-control" id="sku"
                                                         name="sku" value="{{ old('sku') }}"
                                                         placeholder="Enter Product SKU" required>
-                                                </div>
+                                                </div> --}}
 
                                                 <div class="mb-3">
                                                     <label for="name" class="form-label">Product Name</label>
@@ -249,15 +249,79 @@
             $('#productModal').hide();
         });
 
+        $('#organization-filter').change(function(e) {
+            e.preventDefault();
+            let companyName = $(this).val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchProducts(formattedName)
+
+        });
+
+        function fetchProducts(companyName) {
+            const route = "/product/data/get";
+            $.ajax({
+                url: route,
+                method: "GET",
+                data: {
+                    company: companyName,
+                },
+                success: function(response) {
+                    console.log(response, "response");
+                    const products = response
+                        .products; // Assuming the response has a 'products' array
+                    const tableBody = $('#product-table-body');
+                    tableBody.empty(); // Clear any existing rows
+
+                    products.forEach((product) => {
+                        const truncatedDescription =
+                            product.description.length > 10 ?
+                            product.description.substring(0, 10) + '...' :
+                            product.description;
+
+                        const productRow = `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td>${product.name}</td>
+                        <td>
+                            <span title="${product.description}" data-toggle="tooltip" data-placement="top">
+                                ${truncatedDescription}
+                            </span>
+                        </td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" class="toggle-status"
+                                    data-id="${product.id}" data-toggle="toggle"
+                                    data-on="Available" data-off="Unavailable"
+                                    ${product.status === 'available' ? 'checked' : ''}>
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-warning edit-product-btn" data-id="${product.id}">Edit</a>
+                            <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}">Delete</button>
+                        </td>
+                    </tr>
+                `;
+
+                        tableBody.append(productRow); // Append the row to the table
+                    });
+                },
+                error: function() {
+                    alert("Error fetching product data.");
+                },
+            });
+        }
+
+
         ajaxRequest(
-            "/company/data",
+            "/organization/data",
             "GET",
             null,
             function(data) {
                 console.log(data, "data");
                 $("#companyId")
                     .empty()
-                    .append('<option value="">Select a company</option>');
+                    .append('<option value="">Select Organization</option>');
                 $.each(data.companies, function(index, company) {
                     $("#companyId").append(
                         '<option value="' +
@@ -323,7 +387,7 @@
                             }
                         });
                         $('#product_id').val(response.product.id);
-                        $('#sku').val(response.product.sku);
+                        // $('#sku').val(response.product.sku);
                         $('#name').val(response.product.name);
                         $('#description').val(response.product.description);
                         $('.status').val(response.product.status);
@@ -400,7 +464,9 @@
             var table = $('#producttable').DataTable({
                 // Optional: Enable the global search box for the entire table if needed
                 // searching: true,
-                order: [[0, 'desc']]
+                order: [
+                    [0, 'desc']
+                ]
             });
 
             $('#product-filter').on('change', function() {

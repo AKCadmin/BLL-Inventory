@@ -42,8 +42,8 @@ class LoginController extends Controller
 
                             $deploy = DB::table('deploy')->where('user_id', $user->id)->first();
                             $companyName = DB::table('users')
-                            ->select('users.company_id as companyId', 'users.email', 'users.id as userId', 'companies.name as companyName')
-                            ->join('companies', 'users.company_id', '=', 'companies.id')
+                            ->select('users.company_id as companyId', 'users.email', 'users.id as userId', 'organizations.name as companyName')
+                            ->join('organizations', 'users.organization_id', '=', 'organizations.id')
                             ->where('users.email', '=', $request->email)
                             ->first();
                             $databaseName = str_replace(' ', '_', strtolower($companyName->companyName));

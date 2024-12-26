@@ -29,6 +29,51 @@
             display: block;
         }
     }
+
+    /* Style for the square dropdown */
+    #organization-filter {
+        border: 2px solid #091017;
+        border-radius: 4px;
+        /* Slight rounding for a modern square look */
+        background-color: #f8f9fa;
+        /* Light gray background */
+        padding: 10px 12px;
+        /* Comfortable padding for better usability */
+        font-size: 14px;
+        /* Clean and readable font size */
+        color: #495057;
+        /* Neutral text color */
+        height: 42px;
+        /* Consistent height */
+        outline: none;
+        /* Removes focus outline */
+        transition: all 0.3s ease;
+        /* Smooth transition for hover effects */
+    }
+
+    #organization-filter:hover {
+        background-color: #e9ecef;
+        /* Slight hover effect for better UX */
+        border-color: #0056b3;
+        /* Darker blue on hover */
+    }
+
+    #organization-filter:focus {
+        border-color: #0056b3;
+        /* Focus border color */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        /* Subtle focus glow */
+    }
+
+    /* Input group for proper alignment */
+    /* .input-group {
+        width: 100%;
+        /* Full width */
+        max-width: 300px;
+        /* Set a max width for the dropdown */
+        margin: 0 auto;
+        /* Center align (optional) */
+    } */
 </style>
 <header id="page-topbar">
     <div class="navbar-header">
@@ -63,12 +108,31 @@
             </button>
 
             <!-- App Search-->
-            <form class="app-search d-none d-lg-block">
+            {{-- <form class="app-search d-none d-lg-block">
                 <div class="position-relative">
                     <input type="text" class="form-control" placeholder="Search...">
                     <span class="bx bx-search-alt"></span>
                 </div>
+            </form> --}}
+            @php
+                config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
+                DB::purge('pgsql');
+                DB::connection('pgsql')->getPdo();
+                $organizations = App\Models\Organization::all();
+            @endphp
+            <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
+                @csrf
+                <div class="input-group">
+                    <select id="organization-filter" name="organization" class="form-control custom-select">
+                        <option value="">Select Organization</option>
+                        @foreach ($organizations as $organization)
+                            <option value="{{ $organization->id }}">{{ $organization->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </form>
+
+
         </div>
 
         <div class="d-flex">
@@ -133,7 +197,8 @@
                                     <h6 class="mb-1" key="t-your-order">Your order is placed</h6>
                                     <div class="font-size-12 text-muted">
                                         <p class="mb-1" key="t-grammer">If several languages coalesce the grammar</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span key="t-min-ago">3
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span
+                                                key="t-min-ago">3
                                                 min ago</span></p>
                                     </div>
                                 </div>
@@ -235,3 +300,30 @@
         </div>
     </div>
 </header>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#organization-filter').change(function() {
+            let organizationId = $(this).val(); // Get selected value
+            if (organizationId) {
+                $.ajax({
+                    url: "{{ route('switch.organization') }}", // Your Laravel route
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}", // CSRF token
+                        organization: organizationId
+                    },
+                    success: function(response) {
+
+                    },
+                    error: function(xhr) {
+                        let error = xhr.responseJSON ? xhr.responseJSON.message :
+                            'An error occurred';
+                        $('#errorMessage').text(error).show(); // Show error message
+                        $('#successMessage').hide();
+                    }
+                });
+            }
+        });
+    });
+</script>

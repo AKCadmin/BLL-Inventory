@@ -9,7 +9,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('sku')->unique()->notNullable();
+            // $table->string('sku')->unique()->Nullable();
             $table->string('name')->notNullable();
             $table->text('description')->nullable();
             $table->integer('company_id')->after('status')->nullable();

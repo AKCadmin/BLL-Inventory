@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('company_id')->after('verification_token')->nullable();
+        Schema::create('purchase_history', function (Blueprint $table) {
+            $table->id();
+            $table->string('action');
+            $table->json('details');
+            $table->string('user_id');
+            $table->string('batch_id');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['company_id']);
-        });
+        Schema::dropIfExists('purchase_history');
     }
 };

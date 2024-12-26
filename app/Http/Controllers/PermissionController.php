@@ -18,6 +18,9 @@ class PermissionController extends Controller
     // Function to display Role table
     public function permissionManager()
     {
+        if (auth()->user()->cannot('view-permission-manager')) {
+            abort(403); 
+        }
         $roles = Role::orderBy('id', 'asc')->get();
         $assignedRoleIds = Permission::pluck('role_id')->toArray();
         $availableRoles = $roles->filter(function ($role) use ($assignedRoleIds) {
@@ -74,6 +77,10 @@ class PermissionController extends Controller
 
         try {
 
+            if (auth()->user()->cannot('add-permission-manager')) {
+                abort(403); 
+            }
+
             $request->validate([
                 'role_id' => 'required|integer|exists:roles,id',
                 'current_status' => 'required|in:0,1',
@@ -112,6 +119,9 @@ class PermissionController extends Controller
     public function updatePermission(Request $request, $menuId)
     {
         try {
+            if (auth()->user()->cannot('edit-permission-manager')) {
+                abort(403); 
+            }
 
             $request->validate([
                 'role_id' => 'required|integer|exists:roles,id',

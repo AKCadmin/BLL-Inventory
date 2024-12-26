@@ -43,6 +43,13 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($sells as $sell)
+                                        @php
+                                                // Check if the batch_no is present in the 'Sell' table
+                                                $batchExists = \App\Models\Sell::where(
+                                                    'batch_no',
+                                                    $sell->batch_no,
+                                                )->exists();
+                                            @endphp
                                             <tr>
                                                 <td>{{ $sell->id }}</td>
                                                 <td>{{ $sell->sku }}</td>
@@ -54,7 +61,8 @@
                                                 <td>{{ $sell->valid_to }}</td>
                                                 <td>
                                                     @can('edit-sell')
-                                                    <a href="{{ route('sell.edit', ['sell' => $sell->id]) }}" class="btn btn-sm btn-primary edit-sell-btn" data-id="{{ $sell->id }}">Edit</a>
+                                                    <a href="{{ route('sell.edit', ['sell' => $sell->id]) }}" class="btn btn-sm btn-primary edit-sell-btn" data-id="{{ $sell->id }}" 
+                                                        @if ($batchExists) style="pointer-events: none; opacity: 0.6;" @endif>Edit</a>
                                                     @endcan
                                                     @can('delete-sell')
                                                     <button class="btn btn-sm btn-danger delete-sell-btn" data-id="{{ $sell->id }}">Delete</button>
@@ -85,6 +93,7 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
         // Delete button click event
         $('.delete-sell-btn').click(function(e) {
             e.preventDefault();

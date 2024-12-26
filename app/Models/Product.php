@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
    protected $table = "products";
-    public function company()
+    // public function company()
+    // {
+    //     return $this->hasOne(Company::class,'id','company_id');
+    // }
+    public function organization()
     {
-        return $this->hasOne(Company::class,'id','company_id');
+        return $this->hasOne(Organization::class,'id','company_id');
     }
 }

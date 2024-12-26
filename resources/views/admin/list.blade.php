@@ -27,7 +27,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h4 class="card-title mb-4">Stock List</h4>
-                                <div class="row mb-3">
+                                {{-- <div class="row mb-3">
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
                                             <select id="sku-filter" class="form-control custom-select">
@@ -38,13 +38,13 @@
                                             </select>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>SKU</th>
+                                            {{-- <th>SKU</th> --}}
                                             <th>Batch No</th>
                                             <th>Buy Price</th>
                                             <th>No. of Carton</th>
@@ -64,7 +64,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $stock->batch_id }}</td>
-                                                <td>{{ $stock->sku }}</td>
+                                                {{-- <td>{{ $stock->sku }}</td> --}}
                                                 <td>{{ $stock->batch_no }}</td>
                                                 <td>{{ $stock->buy_price }}</td>
                                                 <td>{{ $stock->cartons }}</td>
@@ -115,6 +115,7 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
         // Check if the table is already initialized before initializing it again
         if (!$.fn.dataTable.isDataTable('#stocktable')) {
             var table = $('#stocktable').DataTable({

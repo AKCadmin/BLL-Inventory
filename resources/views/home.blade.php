@@ -624,6 +624,7 @@
 <script src="assets/js/script.js"></script>
 <script>
     $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
         localStorage.removeItem('db_name');
         let token = "{{Cache::get('api_token')}}";
         let db_name = "{{Session::get('db_name')}}";

@@ -58,7 +58,7 @@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="user-list">
                                         @foreach ($moduleusers as $item)
                                             <tr>
                                                 <td>{{ $item->id }}</td>
@@ -150,14 +150,14 @@
                                                     value="">
 
                                                 <div class="mb-3">
-                                                    <label for="autoSizingSelect">Select Company</label>
-                                                    <select class="form-select company" id="companyId" id="autoSizingSelect"
-                                                        name="company_id">
-                                                        <option value="">Select Company &ensp;</option>
-                                                        @foreach ($companies as $company)
-                                                            <option value="{{ $company->id }}"
-                                                                {{ old('company_id') == $company->id ? 'selected' : '' }}>
-                                                                {{ $company->name }}
+                                                    <label for="autoSizingSelect">Select Organization</label>
+                                                    <select class="form-select organization" id="organizationId" id="autoSizingSelect"
+                                                        name="organization_id">
+                                                        <option value="">Select Organization &ensp;</option>
+                                                        @foreach ($organizations as $organization)
+                                                            <option value="{{ $organization->id }}"
+                                                                {{ old('organization_id') == $organization->id ? 'selected' : '' }}>
+                                                                {{ $organization->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>

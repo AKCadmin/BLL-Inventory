@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Organization;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,10 @@ class ProductController extends Controller
     public function index()
     {
         
-        $companies = Company::all();
+        if (auth()->user()->cannot('view-product')) {
+            abort(403); 
+        }
+        $companies = Organization::all();
         $products = Product::orderBy('id', 'desc')->get();
        
         return view('admin.product',compact('companies','products'));
@@ -36,10 +40,13 @@ class ProductController extends Controller
     {
         try {
 
-           
+            if (auth()->user()->cannot('add-product')) {
+                abort(403); 
+            }
+
             $validated = $request->validate([
-                'company_id' => 'required|integer|exists:companies,id',
-                'sku' => 'required|unique:products,sku|max:50',
+                'company_id' => 'required|integer|exists:organizations,id',
+                // 'sku' => 'required|unique:products,sku|max:50',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status' => 'required|string|max:50',
@@ -48,14 +55,14 @@ class ProductController extends Controller
           
             $product = new Product();
             $product->company_id = $request->company_id;
-            $product->sku = $request->sku;
+            // $product->sku = $request->sku;
             $product->name = $request->name;
             $product->description = $request->description;
             $product->status = $request->status;
             $product->save();
     
            
-            $company = Company::findOrFail($request->company_id);
+            $company = Organization::findOrFail($request->company_id);
             $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
            
             config(['database.connections.pgsql.database' => $normalizedCompanyName]);
@@ -66,7 +73,7 @@ class ProductController extends Controller
     
             $secondaryProduct = new Product();
             $secondaryProduct->setConnection('pgsql'); 
-            $secondaryProduct->sku = $request->sku;
+            // $secondaryProduct->sku = $request->sku;
             $secondaryProduct->name = $request->name;
             $secondaryProduct->description = $request->description;
             $secondaryProduct->status = $request->status;
@@ -88,8 +95,11 @@ class ProductController extends Controller
 
     public function show(string $id)
     {
-        
+        if (auth()->user()->cannot('view-product')) {
+            abort(403); 
+        }
         try {
+           
             $products = Product::orderBy('id', 'desc')->get();
             
             return response()->json(['products' => $products]);
@@ -106,6 +116,7 @@ class ProductController extends Controller
      {
        
         try {
+            
             $products = Product::orderBy('id', 'desc')->get();
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
@@ -123,7 +134,7 @@ class ProductController extends Controller
     {
       
         try {
-            if (auth()->user()->cannot('edit-purchase')) {
+            if (auth()->user()->cannot('edit-product')) {
                 abort(403); 
             }
             $product = Product::find($id);
@@ -146,7 +157,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            if (auth()->user()->cannot('edit-purchase')) {
+            if (auth()->user()->cannot('edit-product')) {
                 abort(403); 
             }
             $validated = $request->validate([
@@ -179,7 +190,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try {
-            if (auth()->user()->cannot('delete-purchase')) {
+            if (auth()->user()->cannot('delete-product')) {
                 abort(403); 
             }
             $product = Product::find($id);

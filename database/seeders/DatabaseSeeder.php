@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => Hash::make('12345678'),
             'is_verified' => 1,
-            'role' => 'Admin',
+            'role' => 1,
             'is_activated' => 1
         ]);
     }

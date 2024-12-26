@@ -14,8 +14,11 @@ use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\AccommodationController;
 use App\Http\Controllers\AdvanceModuleController;
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\paymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
@@ -90,6 +93,29 @@ Route::group(['middleware' => 'auth'], function () {
 
     //user management routes
     Route::get('/user-management', [userManagement::class, 'show'])->name('user.management');
+    Route::get('/user-list', [userManagement::class, 'list'])->name('users.list');
+    Route::get('/purchase/history', [HistoryController::class, 'history'])->name('purchase.history');
+    Route::get('/purchase/get/history', [HistoryController::class, 'getHistory'])->name('purchase.getHistory');
+    Route::get('/puchase/details/{id}/{companyName}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory');
+    //organizations routes
+
+    //sell history routes
+
+    Route::get('/sell/history', [HistoryController::class, 'sellHistory'])->name('sell.history');
+    Route::get('/sell/get/history', [HistoryController::class, 'getSellHistory'])->name('sell.getHistory');
+
+    Route::resource('organization', OrganizationController::class);
+    Route::get('organization/edit/{organization}', [OrganizationController::class, 'edit'])->name('organization.editorganization');
+    Route::Post('organization/{organization}', [OrganizationController::class, 'destroy']);
+    Route::get('organization/data', [OrganizationController::class, 'organizationData'])->name('organization.getData');
+
+    Route::post('/switch-organization', [OrganizationController::class, 'switchOrganization'])->name('switch.organization');
+
+    //brands routes
+    Route::resource('brand', BrandController::class);
+    Route::get('brand/edit/{company}', [BrandController::class, 'edit'])->name('brand.editbrand');
+    Route::Post('brand/{brand}', [BrandController::class, 'destroy']);
+    Route::get('brand/data', [BrandController::class, 'brandData'])->name('brand.getData');
 
     //company routes
     Route::resource('company', CompanyController::class);
@@ -100,13 +126,17 @@ Route::group(['middleware' => 'auth'], function () {
     //products routes
     Route::resource('product', ProductController::class);
     Route::post('/product/toggle-status', [ProductController::class, 'toggleStatus'])->name('product.toggleStatus');
-    Route::get('/product/data/get', [CompanyController::class, 'productDataGet'])->name('product.getData');
+    // Route::get('/product/data/get', [CompanyController::class, 'productDataGet'])->name('product.getData');
+    Route::get('/product/data/get', [OrganizationController::class, 'productDataGet'])->name('product.getData');
 
     //stock routes
     Route::resource('stock', StockController::class);
     Route::get('stockList', [StockController::class, 'list'])->name('stock.list');
+    Route::get('stockList/bycompany', [StockController::class, 'listByCompany'])->name('stocks.bycompany');
+    Route::get('stockList/byproduct', [StockController::class, 'listByProduct'])->name('stocks.byproduct');
     route::view('stockEdit', 'admin.edit')->name('stock.editStock');
     route::post('/stock/update/batch', [StockController::class, 'update'])->name('stock.batch.update');
+   
 
     // Sell Management routes
     Route::resource('sell', SellController::class);

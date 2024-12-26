@@ -1,6 +1,70 @@
 $(document).ready(function () {
     var appUrl = $("#appUrl").val();
 
+
+    $("#organization-filter").change(function (e) {
+        e.preventDefault();
+        let companyName = $(this).val();
+        let formattedName = companyName.toLowerCase().replace(/\s+/g, "_");
+        fetchUserList(formattedName);
+    });
+
+    function fetchUserList(companyName) {
+        const route = "/user-list";
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                company: companyName,
+            },
+            success: function (response) {
+                const data = response.data;
+                const tbody = $("#user-list");
+                tbody.empty(); // Clear any existing rows
+
+                data.forEach((user) => {
+                    const row = `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phone}</td>
+                            <td>${user.roles.role_name}</td>
+                            <td>
+                                <label class="switch">
+                                    <input type="checkbox" class="toggle-status"
+                                           data-id="${
+                                               user.id
+                                           }" data-toggle="toggle"
+                                           data-on="Activated" data-off="Deactivated"
+                                           ${
+                                               user.is_verified === 1
+                                                   ? "checked"
+                                                   : ""
+                                           }>
+                                    <span class="slider round"></span>
+                                </label>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-user-btn" data-id="${
+                                    user.id
+                                }">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-user-btn" data-id="${
+                                    user.id
+                                }">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            },
+            error: function () {
+                alert("Error fetching user data.");
+            },
+        });
+    }
+
     // $("#userForm").on("submit", function (e) {
     //     e.preventDefault();
     //     var formData = $(this).serialize();
@@ -87,8 +151,6 @@ $(document).ready(function () {
                         $("#userForm")[0].reset();
                         // }
 
-                       
-                       
                         // Make second API call only if the first one was successful
                         // $.ajax({
                         //     url: appUrl + "/api/user/migration",
@@ -143,7 +205,7 @@ $(document).ready(function () {
         });
     });
 
-    $(".edit-user-btn").on("click", function (e) {
+    $(document).on("click", ".edit-user-btn", function (e) {
         e.preventDefault();
         const userId = $(this).data("id");
         var appUrl = $("#appUrl").val();
@@ -153,11 +215,12 @@ $(document).ready(function () {
             type: "GET",
             dataType: "json",
             success: function (response) {
+                console.log(response, "response");
                 if (response.success) {
                     const user = response.user;
                     $("#user_id").val(user.id);
                     $("#module_name").val(user.module_name);
-                    $("#companyId").val(user.company_id);
+                    $("#organizationId").val(user.organization_id);
                     $(".role").val(user.role);
                     $("#admin_username").val(user.username);
                     const [firstName, lastName] = user.name.split(" ", 2);
@@ -207,30 +270,31 @@ $(document).ready(function () {
         }
     });
 
-   
-        ajaxRequest(
-            appUrl + "/company/data",
-            "GET",
-            null,
-            function (data) {
-                console.log(data, "data");
-                $("#companyId")
-                    .empty()
-                    .append('<option value="">Select a company</option>');
-                $.each(data.companies, function (index, company) {
-                    $("#companyId").append(
-                        '<option value="' +
-                            company.id +
-                            '">' +
-                            company.name +
-                            "</option>"
-                    );
-                });
-            },
-            function (error) {
-                console.log("Error fetching categories:", error);
-            }
-        );
+    ajaxRequest(
+        appUrl + "/company/data",
+        "GET",
+        null,
+        function (data) {
+            console.log(data, "data");
+            $("#companyId")
+                .empty()
+                .append('<option value="">Select a company</option>');
+            $.each(data.companies, function (index, company) {
+                $("#companyId").append(
+                    '<option value="' +
+                        company.id +
+                        '">' +
+                        company.name +
+                        "</option>"
+                );
+            });
+        },
+        function (error) {
+            console.log("Error fetching categories:", error);
+        }
+    );
+
+
 
     var modal = $("#myModal");
 

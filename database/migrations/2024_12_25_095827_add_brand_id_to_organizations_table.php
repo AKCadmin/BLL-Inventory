@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->integer('status')->after('contact_email');
-            $table->string('phone_no')->nullable()->after('status');
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->onDelete('restrict');
         });
     }
 
@@ -22,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->dropColumn(['status', 'phone_no']);
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->dropForeign(['brand_id']);
+            $table->dropColumn('brand_id');
         });
     }
 };

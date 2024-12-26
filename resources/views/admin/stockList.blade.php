@@ -30,41 +30,47 @@
                                 <div class="row mb-3">
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
-                                            <select id="sku-filter" class="form-control custom-select">
-                                                <option value="">Select SKU</option>
-                                                @foreach ($stocks->unique('sku') as $stock)
-                                                    <option value="{{ $stock->sku }}">{{ $stock->sku }}</option>
+                                            <select id="brand-filter" class="form-control custom-select">
+                                                <option value="">Select Brand</option>
+                                                @foreach ($companies as $company)
+                                                    <option value="{{ $company->name }}">{{ $company->name }}</option>
                                                 @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                   
+                                    <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="input-group">
+                                            <select id="product-filter" class="form-control custom-select">
+                                                <option value="">Select Product</option>
+
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
-                                            <select id="batch-filter" class="form-control custom-select">
-                                                <option value="">Select Batch</option>
-                                                @foreach ($stocks->unique('batch_no') as $stock)
-                                                    <option value="{{ $stock->batch_no }}">{{ $stock->batch_no }}</option>
-                                                @endforeach
-                                            </select>
+                                            <input type="date" id="datePicker" class="form-control">
                                         </div>
                                     </div>
                                 </div>
-                                
+
 
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>SKU</th>
-                                            <th>Batch No</th>
-                                            
-                                            <th>No. of Carton</th>
-                                            <th>Total Item</th>
-                                            
+                                            <th>Brand Name</th>
+                                            <th>Product Name</th>
+                                            <th>Available</th>
+
+                                            <th>Purchased sales</th>
+                                            <th>Status</th>
+
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody></tbody>
+                                    {{-- <tbody>
                                         @foreach ($stocks as $stock)
                                             @php
                                                 // Check if the batch_no is present in the 'Sell' table
@@ -94,7 +100,7 @@
                                                 </td>
                                             </tr>
                                         @endforeach
-                                    </tbody>
+                                    </tbody> --}}
 
                                 </table>
                             </div>
@@ -116,36 +122,142 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script>
+    $(function() {
+        // $('#datePicker').datepicker({
+        //     format: 'mm/dd/yyyy'  // You can customize the format here
+        // });
+
+        // $('#date-range-picker').on('apply.daterangepicker', function(ev, picker) {
+        //     let dateRange = $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+        //     console.log(dateRange,"dateRange")
+        // });
+
+        // $('#date-range-picker').on('cancel.daterangepicker', function(ev, picker) {
+        //     $(this).val('');
+        // });
+    });
+</script>
+
+<script>
     $(document).ready(function() {
-       
+        let table = $('#stocktable').DataTable();
+        $('#company-filter').change(function(e) {
+            e.preventDefault();
+            let companyName = $(this).val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchStocks(formattedName)
+            fetchProducts(formattedName)
+
+        });
+
+        function fetchStocks(companyName, productId) {
+            $.ajax({
+                url: "{{ route('stocks.bycompany') }}",
+                method: "GET",
+                data: {
+                    company: companyName,
+                    productId: productId
+                },
+                success: function(data) {
+                    
+                    var table = $('#stocktable').DataTable();
+                    table.clear();
+
+                    // Append new rows
+                    $.each(data, function(index, stock) {
+                        var batchExists = stock.batch_no ? true : false;
+                        var editButton = batchExists ?
+                            `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
+                            `<a href="{{ route('stock.show', ['stock' => ':batch_id']) }}".replace(':batch_id', stock.batch_id) class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
+
+                        var deleteButton = batchExists ?
+                            `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
+                            `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.batch_id}">Delete</button>`;
+
+                        table.row.add([
+                            stock.batch_id,
+                            stock.name,
+                            stock.batch_no,
+                            stock.cartons,
+                            stock.total_items,
+                            `${editButton} ${deleteButton}`
+                        ]);
+                    });
+
+                    // Redraw the table
+                    table.draw();
+                },
+                error: function() {
+                    alert("Error fetching stock data.");
+                }
+            });
+        }
+
+        // Initialize DataTable once on page load
+        $(document).ready(function() {
+            $('#stocktable').DataTable();
+        });
+
+
+        function fetchProducts(companyName) {
+            $.ajax({
+                url: "{{ route('stocks.byproduct') }}",
+                method: "GET",
+                data: {
+                    company: companyName
+                },
+                success: function(data) {
+                    console.log(data, "data");
+
+                    // Clear the existing options
+                    $('#product-filter').empty();
+
+                    // Add the default "Select Product" option
+                    $('#product-filter').append('<option value="">Select Product</option>');
+
+                    // Loop through the data and add options
+                    data.forEach(function(product) {
+                        $('#product-filter').append(
+                            `<option value="${product.id}">${product.name}</option>`
+                        );
+                    });
+                },
+                error: function() {
+                    alert("Error fetching stock data.");
+                }
+            });
+        }
+
+
+        $('#product-filter').on('change', function(e) {
+            e.preventDefault()
+            var selectedProduct = $(this).val();
+            var companyName = $('#company-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchStocks(formattedName, selectedProduct)
+            // console.log(selectedProduct, "selectedProduct")
+
+            // if (selectedProduct) {
+            //     table.column(1).search('^' + selectedProduct + '$', true, false).draw();
+            // } else {
+            //     table.column(1).search('').draw();
+            // }
+        });
         if (!$.fn.dataTable.isDataTable('#stocktable')) {
-            var table = $('#stocktable').DataTable();
 
-            // SKU Filter dropdown change event
-            $('#sku-filter').on('change', function() {
-                var selectedSku = $(this).val();
 
-                if (selectedSku) {
-                    // Filter the table by SKU (column 1 is the SKU column)
-                    table.column(1).search('^' + selectedSku + '$', true, false).draw();
-                } else {
-                    // Clear the filter if no SKU is selected
-                    table.column(1).search('').draw();
-                }
-            });
+            // // Batch Filter dropdown change event
+            // $('#batch-filter').on('change', function() {
+            //     var selectedBatch = $(this).val();
 
-            // Batch Filter dropdown change event
-            $('#batch-filter').on('change', function() {
-                var selectedBatch = $(this).val();
-
-                if (selectedBatch) {
-                    // Filter the table by Batch (column 2 is the Batch column)
-                    table.column(2).search('^' + selectedBatch + '$', true, false).draw();
-                } else {
-                    // Clear the filter if no Batch is selected
-                    table.column(2).search('').draw();
-                }
-            });
+            //     if (selectedBatch) {
+            //         // Filter the table by Batch (column 2 is the Batch column)
+            //         table.column(2).search('^' + selectedBatch + '$', true, false).draw();
+            //     } else {
+            //         // Clear the filter if no Batch is selected
+            //         table.column(2).search('').draw();
+            //     }
+            // });
         }
     });
 </script>

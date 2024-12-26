@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sell;
+use App\Models\SellHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -39,11 +40,7 @@ class SellController extends Controller
             if (auth()->user()->cannot('add-sell')) {
                 abort(403); 
             }
-            $databaseName = \Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            \DB::purge('pgsql');
-            \DB::connection('pgsql')->getPdo();
+            setDatabaseConnection();
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'sku' => 'required|string',
@@ -65,6 +62,25 @@ class SellController extends Controller
 
             // Create the sell record
             $sell = Sell::create($validatedData);
+
+            SellHistory::create([
+                'batch_no' => $validatedData['batch_no'],
+                'hospital_price' => $validatedData['hospital_price'],
+                'wholesale_price' => $validatedData['wholesale_price'],
+                'retail_price' => $validatedData['retail_price'],
+                'valid_from' => $validatedData['valid_from'],
+                'valid_to' => $validatedData['valid_to'],
+                'user_id' => auth()->user()->id,
+                'action' => 'create',
+            ]);
+
+            // config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
+            // DB::purge('pgsql');
+            // DB::connection('pgsql')->getPdo();
+
+            // $sellSecondary = new Sell($validatedData); 
+            // $sellSecondary->setConnection('pgsql'); 
+            // $sellSecondary->save();
 
             // Return success response
             return response()->json([
@@ -110,11 +126,7 @@ class SellController extends Controller
             abort(403); 
         }
 
-        $databaseName = \Session::get('db_name');
-        // dd($databaseName);
-        config(['database.connections.pgsql.database' => $databaseName]);
-        \DB::purge('pgsql');
-        \DB::connection('pgsql')->getPdo();
+        setDatabaseConnection();
 
         DB::beginTransaction(); 
     
@@ -145,11 +157,7 @@ class SellController extends Controller
                 abort(403); 
             }
 
-            $databaseName = \Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            \DB::purge('pgsql');
-            \DB::connection('pgsql')->getPdo();
+            setDatabaseConnection();
     
             DB::beginTransaction(); 
 
@@ -183,6 +191,34 @@ class SellController extends Controller
 
             // Update the record
              $sell->update($validatedData);
+
+             $sellHistory = SellHistory::create([
+                'batch_no' => $validatedData['batch_no'],
+                'hospital_price' => $validatedData['hospital_price'],
+                'wholesale_price' => $validatedData['wholesale_price'],
+                'retail_price' => $validatedData['retail_price'],
+                'valid_from' => $validatedData['valid_from'],
+                'valid_to' => $validatedData['valid_to'],
+                'user_id' => auth()->user()->id,
+                'action' => 'update',
+            ]);
+
+            if (!$sellHistory) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create sell history.',
+                ], 500);
+            }
+            DB::commit();
+            //  config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
+            //  DB::purge('pgsql');
+            //  DB::connection('pgsql')->getPdo();
+
+             
+            // $sellSecondary = new Sell($validatedData); 
+            // $sellSecondary->setConnection('pgsql'); 
+            // $sellSecondary->update($validatedData);
 
             // Return success response
             return response()->json([
@@ -221,11 +257,7 @@ class SellController extends Controller
                 abort(403); 
             }
 
-            $databaseName = \Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            \DB::purge('pgsql');
-            \DB::connection('pgsql')->getPdo();
+            setDatabaseConnection();
     
             DB::beginTransaction(); 
 
@@ -258,11 +290,7 @@ class SellController extends Controller
     {
         
         try {
-            $databaseName = \Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            \DB::purge('pgsql');
-            \DB::connection('pgsql')->getPdo();
+            setDatabaseConnection();
           
             $product = Product::where('sku', $sku)->first();
 
@@ -296,13 +324,9 @@ class SellController extends Controller
     {
         
         try {
-            $databaseName = \Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            \DB::purge('pgsql');
-            \DB::connection('pgsql')->getPdo();
+            setDatabaseConnection();
             
-            $product = Product::where('sku', $sku)->first();
+            $product = Product::where('id', $sku)->first();
 
             if ($product) {
                 $batches = Batch::where('product_id', $product->id)
@@ -336,13 +360,10 @@ class SellController extends Controller
     }
 
 
-    public function list()
+    public function list(Request $request)
     {
-        $databaseName = \Session::get('db_name');
-        // dd($databaseName);
-        config(['database.connections.pgsql.database' => $databaseName]);
-        \DB::purge('pgsql');
-        \DB::connection('pgsql')->getPdo();
+
+        setDatabaseConnection();
 
         $sells = sell::orderBy('id','desc')->get();
 

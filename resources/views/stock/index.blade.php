@@ -51,9 +51,9 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="selectSku" class="form-label">Select SKU</label>
+                            <label for="selectSku" class="form-label">Select Product</label>
                             <select id="SKU" name="SKU" class="form-select select2">
-                                <option selected disabled>Select Product / SKU</option>
+                                <option selected disabled>Select Product </option>
                             </select>
                         </div>
 
@@ -142,6 +142,7 @@
     <script src="assets/js/customJs/userManagement.js"></script>
     <Script>
         $(document).ready(function() {
+            $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
             $('.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside', ).on('input',
                 function() {
                     $(this).val($(this).val().replace(/[^0-9.]/g, ''));
@@ -237,10 +238,10 @@
             ajaxRequest(url, 'GET', {},
                 function(response) {
                     if (response.products && response.products.length > 0) {
-                        $('#SKU').html('<option selected disabled>Select Product / SKU</option>');
+                        $('#SKU').html('<option selected disabled>Select Product</option>');
                         $.each(response.products, function(index, product) {
                             $('#SKU').append(
-                                `<option value="${product.sku}">${product.name} (${product.sku})</option>`
+                                `<option value="${product.name}">${product.name}</option>`
                             );
                         });
                     }

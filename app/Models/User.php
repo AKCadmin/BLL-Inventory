@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'username',
         'company_id',
+        'organization_id',
         'phone',
         'module_name',
         'activation_token',

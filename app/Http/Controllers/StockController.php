@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Batch;
 use App\Models\Carton;
 use App\Models\Product;
+use App\Models\Company;
+use App\Models\Purchase_History;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,71 +49,255 @@ class StockController extends Controller
     //     dd($decodedBatches);
     // }
 
+    // public function store(Request $request)
+    // {
+    //     try {
+
+    //         if (auth()->user()->cannot('add-purchase')) {
+    //             abort(403); 
+    //         }
+    //         $databaseName = Session::get('db_name');
+    //         // dd($databaseName);
+    //         config(['database.connections.pgsql.database' => $databaseName]);
+    //         DB::purge('pgsql');
+    //         DB::connection('pgsql')->getPdo();
+
+
+
+    //         if (!$databaseName) {
+    //             return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+    //         }
+    //         // if($request->db_name){
+    //            // $dbName = $databseName;
+    //             // config(['database.connections.pgsql.database' => $dbName]);
+    //             // DB::purge('pgsql');
+    //             // DB::connection('pgsql')->getPdo();
+    //         // }
+
+    //         // $batches = json_decode($request->input('batches'), true);
+
+    //         // $rules = [
+    //         //     'SKU' => 'required|string|max:255',
+    //         //     'batches' => 'required|array',
+    //         //     'batches.*.batchNo' => 'required|string|max:255',
+    //         //     'batches.*.manufacturingDate' => 'nullable|date',
+    //         //     'batches.*.expiryDate' => 'nullable|date',
+    //         //     'batches.*.basePrice' => 'required|numeric|min:0',
+    //         //     'batches.*.exchangeRate' => 'required|numeric|min:0',
+    //         //     'batches.*.buyPrice' => 'required|numeric|min:0',
+    //         //     'batches.*.notes' => 'nullable|string',
+    //         //     'batches.*.cartons' => 'required|array',
+    //         //     'batches.*.cartons.*.itemsInside' => 'required|integer|min:0',
+    //         //     'batches.*.cartons.*.missingItems' => 'nullable|integer|min:0',
+    //         // ];
+
+    //         // $validator = Validator::make($request->all(), $rules);
+
+    //         // if ($validator->fails()) {
+    //         //     return response()->json([
+    //         //         'success' => false,
+    //         //         'message' => 'Validation errors.',
+    //         //         'errors' => $validator->errors(),
+    //         //     ], 422);
+    //         // }
+    //         $productSku = $request->input('SKU');
+    //         $product = Product::where('sku', $productSku)->first();
+    //         if (!$product) {
+    //             return response()->json(['success' => false, 'message' => 'Product with the given SKU not found.'], 404);
+    //         }
+
+    //         $batches = $request->input('batches');
+    //         $decodedBatches = [];
+
+    //         foreach ($batches as $batch) {
+    //             $decodedBatches[] = json_decode($batch, true);
+    //         }
+
+    //         DB::beginTransaction();
+
+    //         foreach ($decodedBatches as $batch) {
+    //             $existingBatch = Batch::where('batch_number', $batch['batchNo'])->first();
+    //             if ($existingBatch) {
+    //                 DB::rollBack();
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => "Batch number '{$batch['batchNo']}' already exists."
+    //                 ], 409);
+    //             }
+
+    //             // Create batch
+    //             $batchModel = new Batch();
+    //             $batchModel->batch_number = $batch['batchNo'];
+    //             $batchModel->product_id = $product->id;
+    //             $batchModel->manufacturing_date = $batch['manufacturingDate'] ?: null;
+    //             $batchModel->expiry_date = $batch['expiryDate'] ?: null;
+    //             $batchModel->base_price = $batch['basePrice'];
+    //             $batchModel->exchange_rate = $batch['exchangeRate'];
+    //             $batchModel->buy_price = $batch['buyPrice'];
+    //             $batchModel->notes = $batch['notes'];
+    //             $batchModel->save();
+
+    //             // Create cartons
+    //             foreach ($batch['cartons'] as $index => $carton) {
+    //                 if ($carton['missingItems'] > $carton['itemsInside']) {
+    //                     DB::rollBack();
+    //                     return response()->json([
+    //                         'success' => false,
+    //                         'message' => "Missing items cannot be more than items inside for carton '{$batch['batchNo']}-" . ($index + 1) . "'."
+    //                     ], 422);
+    //                 }
+    //                 $cartonModel = new Carton();
+    //                 $cartonModel->batch_id = $batchModel->id;
+    //                 $cartonModel->carton_number = $batch['batchNo'] . '-' . ($index + 1);
+    //                 $cartonModel->no_of_items_inside = $carton['itemsInside'];
+    //                 $cartonModel->missing_items = $carton['missingItems'] ?: 0;
+    //                 $cartonModel->save();
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json(['success' => true, 'message' => 'Batches and cartons stored successfully.']);
+    //     } catch (\Exception $e) {
+    //         // Rollback transaction on error
+    //         DB::rollBack();
+    //         \Log::error('Error creating stock: ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An unexpected error occurred while creating the stock.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    // public function store(Request $request)
+    // {
+    //     try {
+    //         if (auth()->user()->cannot('add-purchase')) {
+    //             abort(403);
+    //         }
+
+    //         // Get the database name for the primary connection
+    //         $databaseName = Session::get('db_name');
+    //         // dd($databaseName);
+
+    //         if (!$databaseName) {
+    //             return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+    //         }
+
+    //         // Set the primary database connection
+    //         config(['database.connections.pgsql.database' => $databaseName]);
+    //         DB::purge('pgsql');
+    //         DB::connection('pgsql')->getPdo();
+
+    //         $productSku = $request->input('SKU');
+    //         $product = Product::where('name', $productSku)->first();
+    //         // dd($product);
+    //         if (!$product) {
+    //             return response()->json(['success' => false, 'message' => 'Product with the given SKU not found.'], 404);
+    //         }
+
+    //         $batches = $request->input('batches');
+    //         $decodedBatches = [];
+
+    //         foreach ($batches as $batch) {
+    //             $decodedBatches[] = json_decode($batch, true);
+    //         }
+
+    //         // Start transaction for the primary database
+    //         DB::beginTransaction();
+
+    //         foreach ($decodedBatches as $batch) {
+    //             // Check if batch already exists in the primary database
+    //             $existingBatch = Batch::where('batch_number', $batch['batchNo'])->first();
+    //             if ($existingBatch) {
+    //                 DB::rollBack();
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => "Batch number '{$batch['batchNo']}' already exists."
+    //                 ], 409);
+    //             }
+
+    //             // Create batch in the primary database
+    //             $batchModel = new Batch();
+    //             $batchModel->batch_number = $batch['batchNo'];
+    //             $batchModel->product_id = $product->id;
+    //             $batchModel->manufacturing_date = $batch['manufacturingDate'] ?: null;
+    //             $batchModel->expiry_date = $batch['expiryDate'] ?: null;
+    //             $batchModel->base_price = $batch['basePrice'];
+    //             $batchModel->exchange_rate = $batch['exchangeRate'];
+    //             $batchModel->buy_price = $batch['buyPrice'];
+    //             $batchModel->notes = $batch['notes'];
+    //             $batchModel->save();
+
+    //             // Create cartons in the primary database
+    //             foreach ($batch['cartons'] as $index => $carton) {
+    //                 if ($carton['missingItems'] > $carton['itemsInside']) {
+    //                     DB::rollBack();
+    //                     return response()->json([
+    //                         'success' => false,
+    //                         'message' => "Missing items cannot be more than items inside for carton '{$batch['batchNo']}-" . ($index + 1) . "'."
+    //                     ], 422);
+    //                 }
+    //                 $cartonModel = new Carton();
+    //                 $cartonModel->batch_id = $batchModel->id;
+    //                 $cartonModel->carton_number = $batch['batchNo'] . '-' . ($index + 1);
+    //                 $cartonModel->no_of_items_inside = $carton['itemsInside'];
+    //                 $cartonModel->missing_items = $carton['missingItems'] ?: 0;
+    //                 $cartonModel->save();
+    //             }
+    //         }
+
+    //         // Commit the transaction for the primary database
+    //         DB::commit();
+
+    //         return response()->json(['success' => true, 'message' => 'Batches and cartons stored successfully in both databases.']);
+    //     } catch (\Exception $e) {
+    //         // Rollback transactions on error
+    //         DB::rollBack();
+    //         \Log::error('Error creating stock: ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An unexpected error occurred while creating the stock.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         try {
-                      
             if (auth()->user()->cannot('add-purchase')) {
-                abort(403); 
+                abort(403);
             }
+
+            // Get the database name for the primary connection
             $databaseName = Session::get('db_name');
-            // dd($databaseName);
-            config(['database.connections.pgsql.database' => $databaseName]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
-           
-            
 
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
             }
-            // if($request->db_name){
-               // $dbName = $databseName;
-                // config(['database.connections.pgsql.database' => $dbName]);
-                // DB::purge('pgsql');
-                // DB::connection('pgsql')->getPdo();
-            // }
 
-            // $batches = json_decode($request->input('batches'), true);
+            // Set the primary database connection
+            config(['database.connections.pgsql.database' => $databaseName]);
+            DB::purge('pgsql');
+            DB::connection('pgsql')->getPdo();
 
-            // $rules = [
-            //     'SKU' => 'required|string|max:255',
-            //     'batches' => 'required|array',
-            //     'batches.*.batchNo' => 'required|string|max:255',
-            //     'batches.*.manufacturingDate' => 'nullable|date',
-            //     'batches.*.expiryDate' => 'nullable|date',
-            //     'batches.*.basePrice' => 'required|numeric|min:0',
-            //     'batches.*.exchangeRate' => 'required|numeric|min:0',
-            //     'batches.*.buyPrice' => 'required|numeric|min:0',
-            //     'batches.*.notes' => 'nullable|string',
-            //     'batches.*.cartons' => 'required|array',
-            //     'batches.*.cartons.*.itemsInside' => 'required|integer|min:0',
-            //     'batches.*.cartons.*.missingItems' => 'nullable|integer|min:0',
-            // ];
-
-            // $validator = Validator::make($request->all(), $rules);
-
-            // if ($validator->fails()) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Validation errors.',
-            //         'errors' => $validator->errors(),
-            //     ], 422);
-            // }
             $productSku = $request->input('SKU');
-            $product = Product::where('sku', $productSku)->first();
+            $product = Product::where('name', $productSku)->first();
             if (!$product) {
                 return response()->json(['success' => false, 'message' => 'Product with the given SKU not found.'], 404);
             }
 
             $batches = $request->input('batches');
             $decodedBatches = [];
-
             foreach ($batches as $batch) {
                 $decodedBatches[] = json_decode($batch, true);
             }
 
             DB::beginTransaction();
+
+            $historyDetails = []; // To store all action details
 
             foreach ($decodedBatches as $batch) {
                 $existingBatch = Batch::where('batch_number', $batch['batchNo'])->first();
@@ -123,7 +309,6 @@ class StockController extends Controller
                     ], 409);
                 }
 
-                // Create batch
                 $batchModel = new Batch();
                 $batchModel->batch_number = $batch['batchNo'];
                 $batchModel->product_id = $product->id;
@@ -135,7 +320,18 @@ class StockController extends Controller
                 $batchModel->notes = $batch['notes'];
                 $batchModel->save();
 
-                // Create cartons
+                $batchDetails = [
+                    'batch_number' => $batchModel->batch_number,
+                    'product_id' => $batchModel->product_id,
+                    'manufacturing_date' => $batchModel->manufacturing_date,
+                    'expiry_date' => $batchModel->expiry_date,
+                    'base_price' => $batchModel->base_price,
+                    'exchange_rate' => $batchModel->exchange_rate,
+                    'buy_price' => $batchModel->buy_price,
+                    'notes' => $batchModel->notes,
+                    'cartons' => [],
+                ];
+
                 foreach ($batch['cartons'] as $index => $carton) {
                     if ($carton['missingItems'] > $carton['itemsInside']) {
                         DB::rollBack();
@@ -144,20 +340,37 @@ class StockController extends Controller
                             'message' => "Missing items cannot be more than items inside for carton '{$batch['batchNo']}-" . ($index + 1) . "'."
                         ], 422);
                     }
+
                     $cartonModel = new Carton();
                     $cartonModel->batch_id = $batchModel->id;
                     $cartonModel->carton_number = $batch['batchNo'] . '-' . ($index + 1);
                     $cartonModel->no_of_items_inside = $carton['itemsInside'];
                     $cartonModel->missing_items = $carton['missingItems'] ?: 0;
                     $cartonModel->save();
+
+                    // Add carton details to batch history
+                    $batchDetails['cartons'][] = [
+                        'carton_number' => $cartonModel->carton_number,
+                        'no_of_items_inside' => $cartonModel->no_of_items_inside,
+                        'missing_items' => $cartonModel->missing_items,
+                    ];
                 }
+
+                $historyDetails[] = $batchDetails; // Add batch and carton details to history
             }
 
             DB::commit();
 
+            // Save the complete history
+            Purchase_History::create([
+                'action' => 'Batch and Carton Creation',
+                'details' => json_encode($historyDetails),
+                'user_id' => auth()->id(),
+                'batch_id' => $batchModel->id, // Adding batch ID for association
+            ]);
+
             return response()->json(['success' => true, 'message' => 'Batches and cartons stored successfully.']);
         } catch (\Exception $e) {
-            // Rollback transaction on error
             DB::rollBack();
             \Log::error('Error creating stock: ' . $e->getMessage());
             return response()->json([
@@ -168,20 +381,18 @@ class StockController extends Controller
         }
     }
 
-    public function list()
+
+
+    public function list(Request $request)
     {
 
-        $databaseName = Session::get('db_name');
-        // dd($databaseName);
-        config(['database.connections.pgsql.database' => $databaseName]);
-        DB::purge('pgsql');
-        DB::connection('pgsql')->getPdo();
-
+        $companies = Company::all();
+        setDatabaseConnection();
         $stocks = DB::table('batches')
             ->join('products', 'batches.product_id', '=', 'products.id')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
             ->select(
-                'products.sku',
+                // 'products.sku',
                 'batches.batch_number as batch_no',
                 'batches.buy_price',
                 DB::raw('COUNT(cartons.id) as cartons'),
@@ -189,16 +400,68 @@ class StockController extends Controller
                 DB::raw('SUM(cartons.missing_items) as missing_items'),
                 'batches.id as batch_id'
             )
-            ->groupBy('batches.id', 'products.sku', 'batches.batch_number', 'batches.buy_price')
+            ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price')
             ->orderBy('batches.id', 'DESC')
             ->get();
 
-            if(auth()->user()->role == 1){
-                return view('admin.stockList', compact('stocks'));
-            }
-            else{
-                return view('admin.list', compact('stocks'));
-            }     
+        if (auth()->user()->role == 1) {
+            return view('admin.stockList', compact('stocks', 'companies'));
+        } else {
+            return view('admin.list', compact('stocks'));
+        }
+    }
+
+    public function listByCompany(Request $request)
+    {
+        // Dynamically set the database connection
+        config(['database.connections.pgsql.database' => $request->input('company')]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
+
+        // Build the query
+        $query = DB::table('batches')
+            ->join('products', 'batches.product_id', '=', 'products.id')
+            ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
+            ->select(
+                'products.sku',
+                'products.name',
+                'batches.batch_number as batch_no',
+                'batches.buy_price',
+                DB::raw('COUNT(cartons.id) as cartons'),
+                DB::raw('SUM(cartons.no_of_items_inside) as total_items'),
+                DB::raw('SUM(cartons.missing_items) as missing_items'),
+                'batches.id as batch_id'
+            )
+            ->groupBy('batches.id', 'products.sku', 'batches.batch_number', 'batches.buy_price', 'products.name')
+            ->orderBy('batches.id', 'DESC');
+
+        // Apply product filter if provided
+        if ($request->input('productId')) {
+            $query->where('products.id', '=', $request->input('productId'));
+        }
+
+        // Execute the query and get the results
+        $stocks = $query->get();
+
+        return response()->json($stocks);
+    }
+
+
+    public function listByProduct(Request $request)
+    {
+
+        // dd($request->input('company'));
+        config(['database.connections.pgsql.database' => $request->input('company')]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
+
+
+        $companyId = Company::select('id')->where('name', '=', $request->input('company'))->first();
+        $products = DB::table('products')
+            ->where('products.company_id', '=', $companyId)
+            ->get();
+
+        return response()->json($products);
     }
 
 
@@ -207,11 +470,8 @@ class StockController extends Controller
      */
     public function show(string $id)
     {
-        $databaseName = \Session::get('db_name');
-        // dd($databaseName);
-        config(['database.connections.pgsql.database' => $databaseName]);
-        \DB::purge('pgsql');
-        \DB::connection('pgsql')->getPdo();
+        
+        setDatabaseConnection();
 
         $batchData = DB::table('batches')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
@@ -343,19 +603,128 @@ class StockController extends Controller
     //     ]);
     // }
 
+    // public function update(Request $request)
+    // {
+    //     setDatabaseConnection();
+
+    //     DB::beginTransaction();
+
+    //     try {
+    //         $batches = $request->input('batches');
+
+    //         if (!$batches || !is_array($batches)) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid batches data.',
+    //             ], 400);
+    //         }
+
+    //         foreach ($batches as $batch) {
+    //             $batchModel = Batch::firstOrNew(['batch_number' => $batch['batch_no']]);
+
+    //             $batchModel->manufacturing_date = $batch['manufacturing_date'] ?: null;
+    //             $batchModel->expiry_date = $batch['expiry_date'] ?: null;
+    //             $batchModel->base_price = $batch['base_price'];
+    //             $batchModel->exchange_rate = $batch['exchange_rate'];
+    //             $batchModel->buy_price = $batch['buy_price'];
+    //             $batchModel->save();
+
+    //             $cartonIds = [];
+    //             foreach ($batch['cartons'] as $index => $carton) {
+
+    //                 if ($carton['missing_items'] > $carton['no_of_items_inside']) {
+    //                     DB::rollBack();
+    //                     return response()->json([
+    //                         'success' => false,
+    //                         'message' => "Missing items cannot be more than items inside for carton '{$batch['batch_no']}-" . ($index + 1) . "'."
+    //                     ], 422);
+    //                 }
+
+    //                 $cartonModel = Carton::firstOrNew([
+    //                     'batch_id' => $batchModel->id,
+    //                     'carton_number' => $batch['batch_no'] . '-' . ($index + 1),
+    //                 ]);
+
+    //                 $cartonModel->no_of_items_inside = $carton['no_of_items_inside'];
+    //                 $cartonModel->missing_items = $carton['missing_items'] ?: 0;
+    //                 $cartonModel->save();
+
+    //                 $cartonIds[] = $cartonModel->id;
+    //             }
+
+    //             Carton::where('batch_id', $batchModel->id)
+    //                 ->whereNotIn('id', $cartonIds)
+    //                 ->delete();
+    //         }
+
+    //         DB::commit();
+
+    //         config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
+    //         DB::purge('pgsql');
+    //         DB::connection('pgsql')->getPdo();
+
+    //         DB::beginTransaction();
+
+    //         foreach ($batches as $batch) {
+    //             $batchModel = Batch::firstOrNew(['batch_number' => $batch['batch_no']]);
+    //             $batchModel->manufacturing_date = $batch['manufacturing_date'] ?: null;
+    //             $batchModel->expiry_date = $batch['expiry_date'] ?: null;
+    //             $batchModel->base_price = $batch['base_price'];
+    //             $batchModel->exchange_rate = $batch['exchange_rate'];
+    //             $batchModel->buy_price = $batch['buy_price'];
+    //             $batchModel->save();
+
+    //             $cartonIds = [];
+    //             foreach ($batch['cartons'] as $index => $carton) {
+
+    //                 if ($carton['missing_items'] > $carton['no_of_items_inside']) {
+    //                     DB::rollBack();
+    //                     return response()->json([
+    //                         'success' => false,
+    //                         'message' => "Missing items cannot be more than items inside for carton '{$batch['batch_no']}-" . ($index + 1) . "' in secondary database."
+    //                     ], 422);
+    //                 }
+
+    //                 $cartonModel = Carton::firstOrNew([
+    //                     'batch_id' => $batchModel->id,
+    //                     'carton_number' => $batch['batch_no'] . '-' . ($index + 1),
+    //                 ]);
+
+    //                 $cartonModel->no_of_items_inside = $carton['no_of_items_inside'];
+    //                 $cartonModel->missing_items = $carton['missing_items'] ?: 0;
+    //                 $cartonModel->save();
+
+    //                 $cartonIds[] = $cartonModel->id;
+    //             }
+
+    //             Carton::where('batch_id', $batchModel->id)
+    //                 ->whereNotIn('id', $cartonIds)
+    //                 ->delete();
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Batches and cartons updated successfully.',
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An error occurred while updating batches and cartons.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function update(Request $request)
     {
-        $databaseName = \Session::get('db_name');
-        // dd($databaseName);
-        config(['database.connections.pgsql.database' => $databaseName]);
-        \DB::purge('pgsql');
-        \DB::connection('pgsql')->getPdo();
-
-        DB::beginTransaction(); 
-
         try {
-            $batches = $request->input('batches');
+            setDatabaseConnection();
 
+            $batches = $request->input('batches');
             if (!$batches || !is_array($batches)) {
                 return response()->json([
                     'success' => false,
@@ -363,8 +732,13 @@ class StockController extends Controller
                 ], 400);
             }
 
+            DB::beginTransaction();
+
+            $historyDetails = []; // To store update history details
+
             foreach ($batches as $batch) {
                 $batchModel = Batch::firstOrNew(['batch_number' => $batch['batch_no']]);
+                $isNewBatch = !$batchModel->exists;
 
                 $batchModel->manufacturing_date = $batch['manufacturing_date'] ?: null;
                 $batchModel->expiry_date = $batch['expiry_date'] ?: null;
@@ -374,8 +748,19 @@ class StockController extends Controller
                 $batchModel->save();
 
                 $cartonIds = [];
+                $batchDetails = [
+                    'batch_number' => $batchModel->batch_number,
+                    'product_id' => $batchModel->product_id,
+                    'manufacturing_date' => $batchModel->manufacturing_date,
+                    'expiry_date' => $batchModel->expiry_date,
+                    'base_price' => $batchModel->base_price,
+                    'exchange_rate' => $batchModel->exchange_rate,
+                    'buy_price' => $batchModel->buy_price,
+                    'is_new' => $isNewBatch,
+                    'cartons' => [],
+                ];
+
                 foreach ($batch['cartons'] as $index => $carton) {
-                  
                     if ($carton['missing_items'] > $carton['no_of_items_inside']) {
                         DB::rollBack();
                         return response()->json([
@@ -394,22 +779,40 @@ class StockController extends Controller
                     $cartonModel->save();
 
                     $cartonIds[] = $cartonModel->id;
+
+                    // Add carton details to history
+                    $batchDetails['cartons'][] = [
+                        'carton_number' => $cartonModel->carton_number,
+                        'no_of_items_inside' => $cartonModel->no_of_items_inside,
+                        'missing_items' => $cartonModel->missing_items,
+                    ];
                 }
 
+                // Remove cartons not present in the request
                 Carton::where('batch_id', $batchModel->id)
                     ->whereNotIn('id', $cartonIds)
                     ->delete();
+
+                $historyDetails[] = $batchDetails; // Add batch and cartons to history
             }
 
-            DB::commit(); 
+            DB::commit();
+
+            // Record update history
+            Purchase_History::create([
+                'action' => 'Batch and Carton Update',
+                'details' => json_encode($historyDetails),
+                'user_id' => auth()->id(),
+                'batch_id' => $batchModel->id, 
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Batches and cartons updated successfully.',
+                'message' => 'Batches and cartons updated successfully, and history recorded.',
             ]);
         } catch (\Exception $e) {
-            DB::rollBack(); 
-
+            DB::rollBack();
+            \Log::error('Error updating batches: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while updating batches and cartons.',
@@ -417,6 +820,7 @@ class StockController extends Controller
             ], 500);
         }
     }
+
 
 
 

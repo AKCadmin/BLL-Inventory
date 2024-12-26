@@ -14,6 +14,9 @@ class RoleController extends Controller
     // Function to display Role table
     public function roleManager()
     {
+        if (auth()->user()->cannot('view-role')) {
+            abort(403); 
+        }
         $roles = Role::all();
         $users = User::orderBy('id', 'asc')->get();;
         return view('roleManager', compact('roles', 'users'));
@@ -50,6 +53,9 @@ class RoleController extends Controller
     public function addNewRole(Request $request)
     {
         try {
+            if (auth()->user()->cannot('add-role')) {
+                abort(403); 
+            }
 
             $request->validate([
                 'role_name' => 'required|unique:roles,role_name',

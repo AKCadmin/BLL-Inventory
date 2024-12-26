@@ -25,30 +25,47 @@ if (!empty($_SESSION['lang'])) {
                 </li>
 
                 @if (auth()->user()->role != 2 && auth()->user()->role != 3)
-                @can('view-user-management')
-                    <li>
-                        <a href="{{ route('user.management') }}" class="">
-                            <i class="bx bx-user"></i> <!-- User Icon -->
-                            <span key="t-dashboards">User Management</span>
-                        </a>
-                    </li>
-                    @endcan
                     @can('view-company')
-                    <li><a href="{{ route('company.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
-                            Company</a></li> <!-- Building Icon -->
-@endcan
-@can('view-product')
-                    <li><a href="{{ route('product.index') }}" key="t-role-manager"><i class="bx bx-box"></i>
-                            Product</a></li> <!-- Box Icon -->
-                            @endcan
-                            @can('view-stock')
+                        <li><a href="{{ route('brand.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
+                                Brand</a></li> <!-- Building Icon -->
+                    @endcan
+                    <li><a href="{{ route('organization.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
+                            Organization</a></li> <!-- Building Icon -->
+
+                    @can('view-user-management')
+                        <li>
+                            <a href="{{ route('user.management') }}" class="">
+                                <i class="bx bx-user"></i> <!-- User Icon -->
+                                <span key="t-dashboards">User Management</span>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('view-product')
+                        <li><a href="{{ route('product.index') }}" key="t-role-manager"><i class="bx bx-box"></i>
+                                Product</a></li> <!-- Box Icon -->
+                    @endcan
+                    @can('view-stock')
+                        <li>
+                            <a href="{{ route('stock.list') }}" class="">
+                                <i class="bx bx-list-ul"></i> <!-- List Icon -->
+                                <span key="t-dashboards">Stock List</span>
+                            </a>
+                        </li>
+                    @endcan
+
                     <li>
-                        <a href="{{ route('stock.list') }}" class="">
-                            <i class="bx bx-list-ul"></i> <!-- List Icon -->
-                            <span key="t-dashboards">Stock List</span>
+                        <a href="{{route('purchase.history')}}" class="">
+                            <i class="bx bx-history"></i> <!-- List Icon -->
+                            <span key="t-history">Purchase history</span>
                         </a>
                     </li>
-                    @endcan
+
+                    <li>
+                        <a href="{{route('sell.history')}}" class="">
+                            <i class="bx bx-history"></i> <!-- List Icon -->
+                            <span key="t-sale-history">Sale History</span>
+                        </a>
+                    </li>
 
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -63,25 +80,25 @@ if (!empty($_SESSION['lang'])) {
                         </ul>
                     </li>
                 @elseif(auth()->user()->role == 2)
-                @can('view-purchase')
-                    <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="bx bx-cart"></i> <!-- Cart Icon -->
-                            <span key="t-maps">Purchase Stock</span>
-                        </a>
+                    @can('view-purchase')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="bx bx-cart"></i> <!-- Cart Icon -->
+                                <span key="t-maps">Purchase Stock</span>
+                            </a>
 
 
-                        <ul class="sub-menu" aria-expanded="false">
-                            @can('add-purchase')
-                                <li><a href="{{ route('stock.index') }}" key="t-role-manager"><i class="bx bx-plus"></i> Add
-                                        Purchase</a></li>
-                            @endcan
-                           
+                            <ul class="sub-menu" aria-expanded="false">
+                                @can('add-purchase')
+                                    <li><a href="{{ route('stock.index') }}" key="t-role-manager"><i class="bx bx-plus"></i> Add
+                                            Purchase</a></li>
+                                @endcan
+
                                 <li><a href="{{ route('stock.list') }}" key="t-role-manager"><i
                                             class="bx bx-list-check"></i> Purchase List</a></li>
-                            
-                        </ul>
-                    </li>
+
+                            </ul>
+                        </li>
                     @endcan
                     @can('view-sell')
                         <li>

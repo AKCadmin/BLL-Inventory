@@ -122,6 +122,7 @@
     @include('partials.script')
     <script>
         $(document).ready(function() {
+            $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
             function validateManufacturingDate(manufacturingDate) {
                 const today = new Date();
                 const selectedDate = new Date(manufacturingDate);

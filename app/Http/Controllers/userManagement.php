@@ -7,6 +7,7 @@ use App\Models\Deploy;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -21,15 +22,17 @@ class userManagement extends Controller
 
     public function show()
     {
+        
+        
         // if (auth()->user()->cannot('view-user-management')) {
         //     abort(403); 
         // }
         $roles = role::orderBy('id', 'asc')->get();
-        $companies = Company::all();
+        $organizations = Organization::all();
         $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
         // dd($moduleusers[0]->roles->role_name);
 
-        return view('usersManagement.index', compact('roles', 'moduleusers', 'companies'));
+        return view('usersManagement.index', compact('roles', 'moduleusers', 'organizations'));
     }
 
     public function create(Request $request)
@@ -38,7 +41,7 @@ class userManagement extends Controller
         //     abort(403); 
         // }
         $validatedData = $request->validate([
-            'company_id' => 'required|integer|exists:companies,id',
+            'organization_id' => 'required|integer|exists:organizations,id',
             'role_id' => 'required|integer|exists:roles,id',
             'admin_username' => 'required|string|max:255|unique:users,username',
             'admin_firstname' => 'required|string|max:255',
@@ -57,7 +60,7 @@ class userManagement extends Controller
             $user = User::create([
                 'name' => $validatedData['admin_firstname'] . ' ' . $validatedData['admin_lastname'],
                 'username' => $validatedData['admin_username'],
-                'company_id' => $validatedData['company_id'],
+                'organization_id' => $validatedData['organization_id'],
                 'role' => $validatedData['role_id'],
                 'phone' => $validatedData['phone_number'],
                 'email' => $validatedData['email'],
@@ -119,7 +122,7 @@ class userManagement extends Controller
             $batchMigrationPath = '/database/migrations/2024_12_03_101421_create_batches_table.php';
             $cartonsMigrationPath = '/database/migrations/2024_12_03_101422_create_cartons_table.php';
             $sellMigrationPath = '/database/migrations/2024_12_07_113412_create_sell_table.php';
-            
+            $purchaseHistoryMigrationPath = '/database/migrations/2024_12_24_124745_create_purchase_history_table.php';
 
 
             $migrations = [
@@ -133,6 +136,7 @@ class userManagement extends Controller
                 $batchMigrationPath,
                 $cartonsMigrationPath,
                 $sellMigrationPath,
+                $purchaseHistoryMigrationPath
             ];
 
             foreach ($migrations as $migrationPath) {
@@ -234,7 +238,7 @@ class userManagement extends Controller
             $user = User::findOrFail($request->user_id);
 
             $validatedData = $request->validate([
-                'company_id' => 'required|integer|exists:companies,id',
+                'organization_id' => 'required|integer|exists:organizations,id',
                 'role_id' => 'required|string|exists:roles,id',
                 'admin_username' => 'required|string|max:255|unique:users,username,' . $user->id,
                 'admin_firstname' => 'required|string|max:255',
@@ -310,5 +314,18 @@ class userManagement extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function list(Request $request)
+    {
+        
+        $roles = role::orderBy('id', 'asc')->get();
+        $organizations = Organization::all();
+        $moduleusers = User::with('roles')
+        ->where('organization_id','=',$request->company)
+        ->whereNot('id', Auth::user()->id)
+        ->orderBy('id', 'asc')->get();
+
+        return response()->json(['data'=>$moduleusers]);
     }
 }

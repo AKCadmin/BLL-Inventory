@@ -2,7 +2,7 @@
 @include('partials.main')
 
 <head>
-    <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'Company Management']); ?>
+    <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'brand Management']); ?>
     @include('partials.link')
     @include('partials.head-css')
 </head>
@@ -17,7 +17,7 @@
     <div class="main-content">
         <div class="page-content">
             <div class="container-fluid">
-                <?php includeFileWithVariables('partials/page-title.php', ['pagetitle' => 'Company List', 'title' => 'Manage Companies']); ?>
+                <?php includeFileWithVariables('partials/page-title.php', ['pagetitle' => 'brand List', 'title' => 'Manage Companies']); ?>
 
                 <div class="row">
                     <div class="col-12">
@@ -27,53 +27,58 @@
                                     <h4 class="card-title"></h4>
 
                                     <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
-                                        id="openModalBtn">Create a company
+                                        id="openModalBtn">Create a brand
                                         <i class="mdi mdi-arrow-right ms-1"></i>
                                     </a>
 
 
                                 </div><br>
-                               
+
                                 <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
                                             <th>Name</th>
+                                            
                                             <th>Address</th>
-                                            <th>Email</th>
+                                            <th>Category</th>
+                                            <th>Contact Person</th>
                                             <th>Phone no</th>
+                                            <th>Description</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($companies as $company)
+                                        @foreach ($brands as $brand)
                                             @php
                                                 $addressLimit = 15; // Set the character limit for truncating the address
                                                 $truncatedAddress =
-                                                    strlen($company->address) > $addressLimit
-                                                        ? substr($company->address, 0, $addressLimit) . '...'
-                                                        : $company->address;
+                                                    strlen($brand->address) > $addressLimit
+                                                        ? substr($brand->address, 0, $addressLimit) . '...'
+                                                        : $brand->address;
                                             @endphp
                                             <tr>
-                                                <td>{{ $company->id }}</td>
-                                                <td>{{ $company->name }}</td>
+                                                <td>{{ $brand->id }}</td>
+                                                <td>{{ $brand->name }}</td>
                                                 <td>
-                                                    <span title="{{ $company->address }}" data-toggle="tooltip"
+                                                    <span title="{{ $brand->address }}" data-toggle="tooltip"
                                                         data-placement="top">
                                                         {{ $truncatedAddress }}
                                                     </span>
                                                 </td>
-                                                <td>{{ $company->contact_email }}</td>
-                                                <td>{{ $company->phone_no }}</td>
-                                                <td>{{ $company->status ? 'Active' : 'Inactive' }}</td>
+                                                <td>{{ $brand->category }}</td>
+                                                <td>{{ $brand->contact_person }}</td>
+                                                <td>{{ $brand->phone_no }}</td>
+                                                <td>{{ $brand->description }}</td>
+                                                <td>{{ $brand->status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
-                                                    @if(Gate::allows('edit-company'))
-                                                    <a href="#" class="btn btn-sm btn-warning edit-company-btn"
-                                                        data-id="{{ $company->id }}">Edit</a>
-                                                    @endif
-                                                    <button class="btn btn-sm btn-danger delete-company-btn"
-                                                        data-id="{{ $company->id }}">Delete</button>
+
+                                                    <a href="#" class="btn btn-sm btn-warning edit-brand-btn"
+                                                        data-id="{{ $brand->id }}">Edit</a>
+
+                                                    <button class="btn btn-sm btn-danger delete-brand-btn"
+                                                        data-id="{{ $brand->id }}">Delete</button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -85,8 +90,8 @@
                     </div>
                 </div>
 
-                <!-- Add Company Modal -->
-                <div id="companyModal" class="modal">
+                <!-- Add brand Modal -->
+                <div id="brandModal" class="modal">
                     <div class="container" style="margin-top:50px;">
                         <div class="row justify-content-center">
                             <div class="col-md-8 col-lg-6 col-xl-5">
@@ -95,7 +100,7 @@
                                         <div class="row" id="popup_row">
                                             <div class="col-7">
                                                 <div class="text-primary p-4">
-                                                    <h5 class="text-primary" id="modal_header">Add New Company</h5>
+                                                    <h5 class="text-primary" id="modal_header">Add New brand</h5>
                                                 </div>
                                             </div>
                                             <div class="col-3">
@@ -123,42 +128,57 @@
                                                 @endif
                                             </div>
 
-                                            <form id="companyForm" method="post"
-                                                action="{{ route('company.store') }}">
+                                            <form id="brandForm" method="post" action="{{ route('brand.store') }}">
                                                 @csrf
-                                                <input type="hidden" class="form-control" id="company_id"
-                                                    name="company_id" value="">
+                                                <input type="hidden" class="form-control" id="brand_id"
+                                                    name="brand_id" value="">
 
                                                 <div class="mb-3">
-                                                    <label for="company_name" class="form-label">Company Name</label>
-                                                    <input type="text" class="form-control" id="company_name"
-                                                        name="company_name" required placeholder="Enter Company Name">
+                                                    <label for="brand_name" class="form-label">brand Name</label>
+                                                    <input type="text" class="form-control" id="brand_name"
+                                                        name="brand_name" required placeholder="Enter brand Name">
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label for="company_address" class="form-label">Company
+                                                    <label for="brand_address" class="form-label">brand
                                                         Address</label>
-                                                    <input type="tel" class="form-control" id="company_address"
-                                                        name="company_address" required
-                                                        placeholder="Enter Company Address">
+                                                    <input type="tel" class="form-control" id="brand_address"
+                                                        name="brand_address" required placeholder="Enter brand Address">
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label for="company_email" class="form-label">Company Email</label>
-                                                    <input type="email" class="form-control" id="company_email"
-                                                        name="company_email" required placeholder="Enter Company Email">
+                                                    <label for="brand_email" class="form-label">Contact Person</label>
+                                                    <input type="text" class="form-control" id="brand_contact"
+                                                        name="brand_contact" required placeholder="Enter brand Email">
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label for="phone_no" class="form-label">Phone No</label>
                                                     <input type="number" class="form-control" id="phone_no"
-                                                        name="phone_no" required placeholder="Enter Company Phone No">
+                                                        name="phone_no" required placeholder="Enter brand Phone No">
                                                 </div>
 
+                                                <!-- Add the Category Field -->
                                                 <div class="mb-3">
-                                                    <label for="company_status" class="form-label">Status</label>
-                                                    <select class="form-select" id="company_status"
-                                                        name="company_status" required>
+                                                    <label for="brand_category" class="form-label">Category</label>
+                                                    <input type="text" class="form-control" id="brand_category"
+                                                        name="brand_category" required
+                                                        placeholder="Enter brand Category">
+                                                </div>
+
+                                                <!-- Add the Description Field -->
+                                                <div class="mb-3">
+                                                    <label for="brand_description"
+                                                        class="form-label">Description</label>
+                                                    <textarea class="form-control" id="brand_description" name="brand_description" required
+                                                        placeholder="Enter brand Description"></textarea>
+                                                </div>
+
+
+                                                <div class="mb-3">
+                                                    <label for="brand_status" class="form-label">Status</label>
+                                                    <select class="form-select" id="brand_status" name="brand_status"
+                                                        required>
                                                         <option value="1">Active</option>
                                                         <option value="0">Inactive</option>
                                                     </select>
@@ -190,31 +210,32 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
 
         $('#openModalBtn').on('click', function() {
-            $('#companyModal').show();
-            $('#company_id').val('');
-            $('#companyForm')[0].reset();
-            $('#modal_header').text('Add New Company');
+            $('#brandModal').show();
+            $('#brand_id').val('');
+            $('#brandForm')[0].reset();
+            $('#modal_header').text('Add New brand');
         });
 
 
         $('.close').on('click', function() {
-            $('#companyModal').hide();
+            $('#brandModal').hide();
         });
 
 
-        $('#companyForm').on('submit', function(e) {
+        $('#brandForm').on('submit', function(e) {
             e.preventDefault();
 
-            let companyId = $('#company_id').val();
-            let companyName = $('#company_name').val();
+            let brandId = $('#brand_id').val();
+            let brandName = $('#brand_name').val();
             let formData = $(this).serialize();
             let user = @json(auth()->user());
-            let url = companyId ?
-                '{{ route('company.update', ':id') }}'.replace(':id', companyId) :
-                '{{ route('company.store') }}';
-            let requestType = companyId ? 'PUT' : 'POST';
+            let url = brandId ?
+                '{{ route('brand.update', ':id') }}'.replace(':id', brandId) :
+                '{{ route('brand.store') }}';
+            let requestType = brandId ? 'PUT' : 'POST';
 
             $.ajax({
                     url: url,
@@ -224,52 +245,61 @@
                 .done(function(response) {
                     if (response.success) {
 
-                        $.ajax({
-                                url: "/api/company/migration",
-                                type: "POST",
-                                dataType: 'json',
-                                data: {
-                                    db_name: companyName,
-                                    user: user,
-                                },
-                            })
-                            .done(function(response) {
-                                if (response.success) {
+                        toastr.success('brand saved successfully!');
+                        $('#brandModal').hide();
+                        $("#global-loader").fadeOut();
 
-                                    toastr.success('Company saved successfully!');
-                                    $('#companyModal').hide();
-                                    $("#global-loader").fadeOut();
+                        location.reload();
 
-                                    location.reload();
-                                } else {
-                                    toastr.error("Database migration failed.");
-                                }
-                            })
-                            .fail(handleError);
-                        // loadCompanies();
-                    } else {
-                        toastr.error(response.message);
+                        //     $.ajax({
+                        //             url: "/api/brand/migration",
+                        //             type: "POST",
+                        //             dataType: 'json',
+                        //             data: {
+                        //                 db_name: brandName,
+                        //                 user: user,
+                        //             },
+                        //         })
+                        //         .done(function(response) {
+                        //             if (response.success) {
+
+                        //                 toastr.success('brand saved successfully!');
+                        //                 $('#brandModal').hide();
+                        //                 $("#global-loader").fadeOut();
+
+                        //                 location.reload();
+                        //             } else {
+                        //                 toastr.error("Database migration failed.");
+                        //             }
+                        //         })
+                        //         .fail(handleError);
+                        //     // loadCompanies();
+                        // } else {
+                        //     toastr.error(response.message);
+                        // }
                     }
                 })
                 .fail(handleError);
         });
 
 
-        $('#datatable').on('click', '.edit-company-btn', function() {
-            let companyId = $(this).data('id');
-            let url = `{{ route('company.editCompany', '') }}/${companyId}`;
+        $('#datatable').on('click', '.edit-brand-btn', function() {
+            let brandId = $(this).data('id');
+            let url = `{{ route('brand.editbrand', '') }}/${brandId}`;
 
             ajaxRequest(url, 'GET', {},
                 function(response) {
                     if (response.success) {
-                        $('#companyModal').show();
-                        $('#company_id').val(response.company.id);
-                        $('#company_name').val(response.company.name);
-                        $('#company_address').val(response.company.address);
-                        $('#company_email').val(response.company.contact_email);
-                        $('#phone_no').val(response.company.phone_no);
-                        $('#company_status').val(response.company.status);
-                        $('#modal_header').text('Edit Company');
+                        $('#brandModal').show();
+                        $('#brand_id').val(response.brand.id);
+                        $('#brand_name').val(response.brand.name);
+                        $('#brand_category').val(response.brand.category);
+                        $('#brand_address').val(response.brand.address);
+                        $('#brand_contact').val(response.brand.contact_person);
+                        $('#phone_no').val(response.brand.phone_no);
+                        $('#brand_description').val(response.brand.description);
+                        $('#brand_status').val(response.brand.status);
+                        $('#modal_header').text('Edit brand');
                     } else {
                         toastr.error('Error: ' + response.message);
                     }
@@ -278,10 +308,10 @@
         });
 
 
-        $('#datatable').on('click', '.delete-company-btn', function() {
-            let companyId = $(this).data('id');
+        $('#datatable').on('click', '.delete-brand-btn', function() {
+            let brandId = $(this).data('id');
             let appUrl = $("#appUrl").val();
-            let url = appUrl + '/company/' + companyId;
+            let url = appUrl + '/brand/' + brandId;
 
             if (confirm('Are you sure you want to delete this product?')) {
                 $.ajax({
@@ -308,26 +338,26 @@
         });
 
         //         function loadCompanies() {
-        //     ajaxRequest('{{ route('company.getData') }}', 'GET', {}, function (response) {
+        //     ajaxRequest('{{ route('brand.getData') }}', 'GET', {}, function (response) {
         //         let rows = '';
-        //         response.companies.forEach(function (company) {
+        //         response.companies.forEach(function (brand) {
         //             const charLimit = 10; 
         //             const truncatedAddress =
-        //                 company.address.length > charLimit
-        //                     ? company.address.substring(0, charLimit) + '...'
-        //                     : company.address;
+        //                 brand.address.length > charLimit
+        //                     ? brand.address.substring(0, charLimit) + '...'
+        //                     : brand.address;
 
         //             rows += `
         //                 <tr>
-        //                     <td>${company.id}</td>
-        //                     <td>${company.name}</td>
-        //                     <td title="${company.address}">${truncatedAddress}</td>
-        //                     <td>${company.contact_email}</td>
-        //                     <td>${company.phone_no}</td>
-        //                     <td>${company.status ? 'Active' : 'Inactive'}</td>
+        //                     <td>${brand.id}</td>
+        //                     <td>${brand.name}</td>
+        //                     <td title="${brand.address}">${truncatedAddress}</td>
+        //                     <td>${brand.contact_email}</td>
+        //                     <td>${brand.phone_no}</td>
+        //                     <td>${brand.status ? 'Active' : 'Inactive'}</td>
         //                     <td>
-        //                         <button class="btn btn-warning btn-sm edit-company" data-id="${company.id}">Edit</button>
-        //                         <button class="btn btn-danger btn-sm delete-company" data-id="${company.id}">Delete</button>
+        //                         <button class="btn btn-warning btn-sm edit-brand" data-id="${brand.id}">Edit</button>
+        //                         <button class="btn btn-danger btn-sm delete-brand" data-id="${brand.id}">Delete</button>
         //                     </td>
         //                 </tr>
         //             `;

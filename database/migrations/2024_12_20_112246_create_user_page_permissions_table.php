@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();   
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
             $table->foreignId('page_id')->constrained()->onDelete('cascade'); 
-            $table->json('ppage_ermission'); 
+            $table->json('page_permission'); 
             $table->timestamps();
             $table->unique(['user_id', 'page_id']);
         });

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sell_counter', function (Blueprint $table) {
-            $table->renameColumn('oeder_id', 'order_id');
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('organization_id')->nullable()->after('company_id')->constrained('organizations')->onDelete('restrict');
         });
     }
 
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sell_counter', function (Blueprint $table) {
-            $table->renameColumn('order_id', 'oeder_id');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['organization_id']);
+            $table->dropColumn('organization_id');
         });
     }
 };

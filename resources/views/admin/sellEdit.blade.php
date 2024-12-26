@@ -42,9 +42,9 @@
                             <select id="skuSelect" name="sku" class="form-select select2" required>
                                 <option value="" disabled selected>SKU</option>
                                 @foreach ($products as $product)
-                                    <option value="{{ $product->sku }}"
-                                        {{ $product->sku == old('sku', $sell->sku) ? 'selected' : '' }}>
-                                        {{ $product->sku }} - {{ $product->name }}
+                                    <option value="{{ $product->id }}"
+                                        {{ $product->id == old('sku', $sell->id) ? 'selected' : '' }}>
+                                        {{ $product->id }} - {{ $product->name }}
                                     </option>
                                 @endforeach
                             </select>

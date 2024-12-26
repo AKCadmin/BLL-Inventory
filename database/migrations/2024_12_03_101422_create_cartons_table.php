@@ -11,7 +11,7 @@ class CreateCartonsTable extends Migration
             $table->id();
             $table->foreignId('batch_id')->constrained('batches')->cascadeOnDelete();
             $table->string('carton_number')->unique()->notNullable();
-            $table->integer('total_items')->Nullable();
+            $table->integer('total_items')->nullable();
             $table->integer('no_of_items_inside')->notNullable();
             $table->integer('missing_items')->default(0);
             $table->timestamps();

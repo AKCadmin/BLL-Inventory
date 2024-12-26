@@ -2,65 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
+use Illuminate\Http\Request;
+use App\Models\Brand;
 use App\Models\Deploy;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
-class CompanyController extends Controller
+class BrandController extends Controller
 {
-
-    // Store new company
+    // Store new brand
     public function store(Request $request)
     {
-       
-       // return response()->json(['success' => true, 'db_name' => "Vardhaman Texttiles", 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
+
+        // return response()->json(['success' => true, 'db_name' => "Vardhaman Texttiles", 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
         DB::beginTransaction();
         try {
             $validated = $request->validate([
-                'company_name' => 'required',
-                'company_address' => 'required',
-                'company_email' => 'required|email',
+                'brand_name' => 'required',
+                'brand_address' => 'required',
+                'brand_contact' => 'required',
                 'phone_no' => 'required',
-                'company_status' => 'required',
+                'brand_status' => 'required',
+                'brand_category' => 'required|string|max:255', 
+                'brand_description' => 'nullable|string|max:1000',
             ]);
-          
-            $company = new Company();
-            $company->name = $request->company_name;
-            $company->address = $request->company_address;
-            $company->contact_email = $request->company_email;
-            $company->phone_no = $request->phone_no;
-            $company->status = $request->company_status;
-            $company->save();
+
+            $brand = new Brand();
+            $brand->name = $request->brand_name;
+            $brand->address = $request->brand_address;
+            $brand->contact_person = $request->brand_contact;
+            $brand->phone_no = $request->phone_no;
+            $brand->category = $request->brand_category; 
+            $brand->description = $request->brand_description;
+            $brand->status = $request->brand_status;
+            $brand->save();
             DB::commit();
-            $databaseName = str_replace(' ', '_', strtolower($company->name));
-            $existingDeploy = Deploy::where('db_name', $databaseName)->first();
+            // $databaseName = str_replace(' ', '_', strtolower($brand->name));
+            // $existingDeploy = Deploy::where('db_name', $databaseName)->first();
 
-            if ($existingDeploy) {
-                return response()->json(['success' => false, 'message' => 'A database with the same name already exists.']);
-            }
+            // if ($existingDeploy) {
+            //     return response()->json(['success' => false, 'message' => 'A database with the same name already exists.']);
+            // }
 
-            if (!$existingDeploy) {
+            // if (!$existingDeploy) {
 
-                $deployTable = deploy::create([
-                    'user_id' => auth()->user()->id,
-                    'db_name' => $databaseName,
-                    'status' => 1,
-                ]);
+            //     $deployTable = deploy::create([
+            //         'user_id' => auth()->user()->id,
+            //         'db_name' => $databaseName,
+            //         'status' => 1,
+            //     ]);
 
-                try {
+            //     try {
 
-                    DB::statement("CREATE DATABASE \"$databaseName\"");
-                    return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
-                } catch (\Exception $e) {
-                    return response()->json(['success' => false, 'message' => $e->getMessage()]);
-                }
-            } else {
-                return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!', 'note' => 'already exist']);
-            }
+            //         DB::statement("CREATE DATABASE \"$databaseName\"");
+            //         return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!']);
+            //     } catch (\Exception $e) {
+            //         return response()->json(['success' => false, 'message' => $e->getMessage()]);
+            //     }
+            // } else {
+            //     return response()->json(['success' => true, 'db_name' => $databaseName, 'user' => $request->input(), 'message' => 'User created successfully and database created!', 'note' => 'already exist']);
+            // }
 
 
             return response()->json(['success' => true]);
@@ -68,30 +70,30 @@ class CompanyController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while creating the company.',
+                'message' => 'An error occurred while creating the brand.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
 
-    public function companyMigration(Request $request)
+    public function brandMigration(Request $request)
     {
 
         $dbName = $request->db_name;
         $databaseName = str_replace(' ', '_', strtolower($dbName));
-       
+
         $userData = $request->user;
 
 
         try {
 
             config(['database.connections.pgsql.database' => $databaseName]);
-            DB::purge('pgsql');  
+            DB::purge('pgsql');
             DB::reconnect('pgsql');
             $currentDatabase = DB::connection('pgsql')->getDatabaseName();
 
-            
+
             if ($currentDatabase !== $databaseName) {
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
@@ -101,7 +103,7 @@ class CompanyController extends Controller
             // $permissionsMigrationPath = '\\database\\migrations\\2024_08_09_014220_create_permissions_table.php';
             // $rolesMigrationPath = '\\database\\migrations\\2024_10_15_131421_roles.php';
             // $menuMigrationPath = '\\database\\migrations\\2024_08_24_222034_create_menu_table.php';
-            // $companyMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
+            // $brandMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
             $productMigrationPath = '\\database\\migrations\\2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = '\\database\\migrations\\2024_12_03_101421_create_batches_table.php';
             $cartonsigrationPath = '\\database\\migrations\\2024_12_03_101422_create_cartons_table.php';
@@ -109,7 +111,7 @@ class CompanyController extends Controller
             $sellCounterMigrationPath = '\\database\\migrations\\2024_12_11_082844_create_sell_counter_table.php';
             $sellCartonMigrationPath = '\\database\\migrations\\2024_12_11_083350_create_sell_carton_table.php';
             $invoiceMigrationPath = '\\database\\migrations\\2024_12_11_083432_create_invoice_table.php';
-            
+
 
             $migrations = [
                 $usersMigrationPath,
@@ -117,7 +119,7 @@ class CompanyController extends Controller
                 // $userRole,
                 // $menuMigrationPath,
                 // $permissionsMigrationPath,
-                // $companyMigrationPath,
+                // $brandMigrationPath,
                 $productMigrationPath,
                 $batchMigrationPath,
                 $cartonsigrationPath,
@@ -164,21 +166,21 @@ class CompanyController extends Controller
     // Get companies
     public function index()
     {
-        $companies = Company::orderBy('id', 'desc')->get();
+        $brands = brand::orderBy('id', 'desc')->get();
 
-        return view('company.index', compact('companies'));
+        return view('company.index', compact('brands'));
     }
 
     public function show(string $id)
     {
-        
+
         try {
-            $companies = Company::orderBy('id', 'desc')->get();
+            $companies = Brand::orderBy('id', 'desc')->get();
             return response()->json(['companies' => $companies]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while deleting the company.',
+                'message' => 'An error occurred while deleting the brand.',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -189,11 +191,11 @@ class CompanyController extends Controller
         try {
 
             if (auth()->user()->role == 1) {
-            $products = Product::with('company')->orderBy('id', 'desc')->get();
+                $products = Product::with('brand')->orderBy('id', 'desc')->get();
             } else {
-                $products = Product::where('company_id', auth()->user()->company_id)
-                                   ->orderBy('id', 'desc')
-                                   ->get();
+                $products = Product::where('organization_id', auth()->user()->brand_id)
+                    ->orderBy('id', 'desc')
+                    ->get();
             }
             // dd($products);
             return response()->json(['products' => $products]);
@@ -209,7 +211,7 @@ class CompanyController extends Controller
     public function productDataForSaleGet(Request $request)
     {
         try {
-            $products = Product::with('company')->orderBy('id', 'desc')->get();
+            $products = Product::with('brand')->orderBy('id', 'desc')->get();
 
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
@@ -221,22 +223,22 @@ class CompanyController extends Controller
         }
     }
 
-    // Edit company
+    // Edit brand
     public function edit($id)
     {
         try {
-            $company = Company::find($id);
+            $brand = Brand::find($id);
 
-            if ($company) {
-                return response()->json(['success' => true, 'company' => $company]);
+            if ($brand) {
+                return response()->json(['success' => true, 'brand' => $brand]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Company not found']);
+            return response()->json(['success' => false, 'message' => 'brand not found']);
         } catch (\Exception $e) {
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while deleting the company.',
+                'message' => 'An error occurred while deleting the brand.',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -247,53 +249,58 @@ class CompanyController extends Controller
         try {
 
             $validated = $request->validate([
-                'company_name' => 'required|string|max:255',
-                'company_address' => 'required|string|max:500',
-                'company_email' => 'required|email|max:255',
+                'brand_name' => 'required|string|max:255',
+                'brand_address' => 'required|string|max:500',
+                'brand_contact' => 'required',
                 'phone_no' => 'required',
-                'company_status' => 'required',
+                'brand_status' => 'required',
+                'brand_category' => 'required|string|max:255', 
+                'brand_description' => 'nullable|string|max:1000',
             ]);
 
-            $company = Company::findOrFail($id);
+            $brand = Brand::findOrFail($id);
 
-            $company->name = $request->company_name;
-            $company->address = $request->company_address;
-            $company->contact_email = $request->company_email;
-            $company->phone_no = $request->phone_no;
-            $company->status = $request->company_status;
-            $company->save();
+            $brand->name = $request->brand_name;
+            $brand->address = $request->brand_address;
+            $brand->contact_person = $request->brand_contact;
+            $brand->phone_no = $request->phone_no;
+            $brand->status = $request->brand_status;
+            $brand->category = $request->brand_category;
+            $brand->description = $request->description;
+
+            $brand->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Company updated successfully.',
+                'message' => 'brand updated successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while updating the company.',
+                'message' => 'An error occurred while updating the brand.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
 
-    // Delete company
+    // Delete brand
     public function destroy($id)
     {
         try {
-            $company = Company::find($id);
+            $brand = Brand::find($id);
 
-            if ($company) {
-                $company->delete();
+            if ($brand) {
+                $brand->delete();
                 return response()->json(['success' => true]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Company not found']);
+            return response()->json(['success' => false, 'message' => 'brand not found']);
         } catch (\Exception $e) {
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while deleting the company.',
+                'message' => 'An error occurred while deleting the brand.',
                 'error' => $e->getMessage(),
             ], 500);
         }

@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // dd("hello");
         // $currentDatabase = DB::connection()->getDatabaseName();
         // config(['database.connections.pgsql.database' => "snowflack"]);
         // DB::purge('pgsql');
@@ -93,6 +94,7 @@ class AppServiceProvider extends ServiceProvider
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
                 $currentDatabase = DB::connection()->getDatabaseName();
+                // dd($currentDatabase);
 
                 $permissions = DB::table('user_page_permissions')
                     ->where('user_id', $user->id)

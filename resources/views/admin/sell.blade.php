@@ -114,6 +114,7 @@
 
 <script>
     $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
         $('.select2').select2({
             placeholder: "Select an option",
             allowClear: true
@@ -142,7 +143,7 @@
                 skuSelect.append('<option value="" disabled selected>SKU</option>');
 
                 products.forEach(function(product) {
-                    skuSelect.append('<option value="' + product.sku + '">' + product.sku +
+                    skuSelect.append('<option value="' + product.id + '">' + product.id +
                         ' - ' + product.name + '</option>');
                 });
             });
