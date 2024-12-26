@@ -10,7 +10,7 @@ if (!function_exists('setDatabaseConnection')) {
     {
         // if (Auth::user()->role != '1') {
             $databaseName = Session::get('db_name');
-            //   dd($databaseName);
+            //    dd($databaseName);
             if ($databaseName) {
                 config(['database.connections.pgsql.database' => $databaseName]);
                 DB::purge('pgsql');

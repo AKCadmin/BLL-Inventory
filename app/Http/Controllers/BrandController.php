@@ -24,7 +24,7 @@ class BrandController extends Controller
                 'brand_contact' => 'required',
                 'phone_no' => 'required',
                 'brand_status' => 'required',
-                'brand_category' => 'required|string|max:255', 
+                // 'brand_category' => 'required|string|max:255', 
                 'brand_description' => 'nullable|string|max:1000',
             ]);
 
@@ -254,7 +254,7 @@ class BrandController extends Controller
                 'brand_contact' => 'required',
                 'phone_no' => 'required',
                 'brand_status' => 'required',
-                'brand_category' => 'required|string|max:255', 
+                // 'brand_category' => 'required|string|max:255', 
                 'brand_description' => 'nullable|string|max:1000',
             ]);
 

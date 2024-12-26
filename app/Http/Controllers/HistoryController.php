@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Organization;
 use App\Models\SellHistory;
 use App\Models\Purchase_History;
 use App\Models\Sell;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -15,7 +17,10 @@ class HistoryController extends Controller
     public function history(Request $request)
     {
         // dd('helo');
-         $companies = Organization::all();
+        $brands = Brand::all();
+        $companies = Organization::all();
+        $products = Product::all();
+
 
 
         // $stocks = DB::table('batches')
@@ -35,25 +40,26 @@ class HistoryController extends Controller
         //     ->get();
 
 
-        return view('admin.purchaseHistory',compact('companies'));
+        return view('admin.purchaseHistory', compact('companies', 'products','brands'));
     }
 
     public function getHistory(Request $request)
     {
 
-        $organization = Organization::where('id','=',$request->company)->first();
+        if($request->company){
+        $organization = Organization::where('id', '=', $request->company)->first();
+        $brand = Brand::where('id', '=', $request->brandName)->first();
 
         $databaseName = Session::get('db_name');
-
+        $selectedDate = $request->selectedDate;
 
         config(['database.connections.pgsql.database' => $organization->name]);
         DB::purge('pgsql');
         DB::connection('pgsql')->getPdo();
-        $stocks = DB::table('batches')
+        $query = DB::table('batches')
             ->join('products', 'batches.product_id', '=', 'products.id')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
             ->select(
-                
                 'batches.batch_number as batch_no',
                 'batches.buy_price',
                 DB::raw('COUNT(cartons.id) as cartons'),
@@ -62,10 +68,26 @@ class HistoryController extends Controller
                 'batches.id as batch_id'
             )
             ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price')
-            ->orderBy('batches.id', 'DESC')
-            ->get();
+            ->orderBy('batches.id', 'DESC');
 
-            // dd($stocks);
+        // Apply filter if productId is provided
+        if ($request->has('productId') && !empty($request->productId)) {
+            $query->where('batches.product_id', $request->productId);
+        }
+
+        if (!empty($selectedDate)) {
+            $query->where(function ($q) use ($selectedDate) {
+                $q->whereDate('batches.manufacturing_date', '<=', $selectedDate)
+                  ->whereDate('batches.expiry_date', '>=', $selectedDate);
+            });
+        }
+
+        $stocks = $query->get();
+        }else{
+            $stocks = [];
+        }
+
+        // dd($stocks);
 
         // $history = Purchase_History::all();
 
@@ -115,7 +137,7 @@ class HistoryController extends Controller
     // {
     //     try {
     //         // $organization = Organization::where('id','=',$request->company)->first();
-            
+
     //         // config(['database.connections.pgsql.database' => $organization->name]);
     //         // DB::purge('pgsql');
     //         // DB::connection('pgsql')->getPdo();
@@ -169,12 +191,12 @@ class HistoryController extends Controller
 
     public function detailHistory(Request $request, $id, $companyName)
     {
-       
+
         setDatabaseConnection();
         // config(['database.connections.pgsql.database' => $companyName]);
         // DB::purge('pgsql');
         // DB::connection('pgsql')->getPdo();
-       
+
         $stocks = DB::table('batches')
             ->join('products', 'batches.product_id', '=', 'products.id')
             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
@@ -204,67 +226,82 @@ class HistoryController extends Controller
 
         return view('admin.purchaseHistoryDetails', ['batch' => $groupedStocks]);
 
-    //     $purchaseHistory = DB::table('purchase_history')
-    //     ->where('id', '=', $id)
-    //     ->first(); 
+        //     $purchaseHistory = DB::table('purchase_history')
+        //     ->where('id', '=', $id)
+        //     ->first(); 
 
-    // if (!$purchaseHistory) {
-       
-    //     return redirect()->back()->with('error', 'Purchase history not found.');
-    // }
+        // if (!$purchaseHistory) {
 
-    // $details = json_decode($purchaseHistory->details);
+        //     return redirect()->back()->with('error', 'Purchase history not found.');
+        // }
 
-    // $batch = collect($details)->map(function ($item) {
-    //     if (isset($item->batch_number)) {
-    //         $batch = [
-    //             'batch_number' => $item->batch_number,
-    //             'product_id' => $item->product_id,
-    //             'manufacturing_date' => $item->manufacturing_date,
-    //             'expiry_date' => $item->expiry_date,
-    //             'base_price' => $item->base_price,
-    //             'exchange_rate' => $item->exchange_rate,
-    //             'buy_price' => $item->buy_price,
-    //             'notes' => $item->notes ?? null,
-    //         ];
+        // $details = json_decode($purchaseHistory->details);
 
-    //         $cartons = collect($item->cartons)->map(function ($carton) {
-    //             return [
-    //                 'carton_number' => $carton->carton_number,
-    //                 'no_of_items_inside' => $carton->no_of_items_inside,
-    //                 'missing_items' => $carton->missing_items,
-    //             ];
-    //         });
+        // $batch = collect($details)->map(function ($item) {
+        //     if (isset($item->batch_number)) {
+        //         $batch = [
+        //             'batch_number' => $item->batch_number,
+        //             'product_id' => $item->product_id,
+        //             'manufacturing_date' => $item->manufacturing_date,
+        //             'expiry_date' => $item->expiry_date,
+        //             'base_price' => $item->base_price,
+        //             'exchange_rate' => $item->exchange_rate,
+        //             'buy_price' => $item->buy_price,
+        //             'notes' => $item->notes ?? null,
+        //         ];
 
-    //         $batch['cartons'] = $cartons;
+        //         $cartons = collect($item->cartons)->map(function ($carton) {
+        //             return [
+        //                 'carton_number' => $carton->carton_number,
+        //                 'no_of_items_inside' => $carton->no_of_items_inside,
+        //                 'missing_items' => $carton->missing_items,
+        //             ];
+        //         });
 
-    //         return $batch;
-    //     }
+        //         $batch['cartons'] = $cartons;
 
-    //     return null;
-    // })->filter();
-    // $batch = $batch->first();
+        //         return $batch;
+        //     }
 
-    //     //  dd($batch);
-    //     return view('admin.purchaseHistoryDetails', ['batch' => $batch]);
+        //     return null;
+        // })->filter();
+        // $batch = $batch->first();
+
+        //     //  dd($batch);
+        //     return view('admin.purchaseHistoryDetails', ['batch' => $batch]);
     }
 
     public function sellHistory(Request $request)
     {
         $companies = Organization::all();
-        return view('admin.sellHistory',compact('companies'));
+        return view('admin.sellHistory', compact('companies'));
     }
 
     public function getSellHistory(Request $request)
     {
         // dd($request->input());
-        $organization = Organization::where('id','=',$request->company)->first();
+        $organization = Organization::where('id', '=', $request->company)->first();
         config(['database.connections.pgsql.database' => $organization->name]);
         DB::purge('pgsql');
         DB::connection('pgsql')->getPdo();
 
-        $sells = Sell::orderBy('id','desc')->get();
-        
-        return response()->json(['data'=>$sells]);
+        $query = Sell::orderBy('id', 'desc');
+        if ($request->has('productId') && !empty($request->productId)) {
+            $query->where('sell.sku', $request->productId);
+        }
+        $sells = $query->get();
+
+        return response()->json(['data' => $sells]);
+    }
+
+    public function historyProducts(Request $request){
+        $organization = Organization::where('id', '=', $request->company)->first();
+        config(['database.connections.pgsql.database' => $organization->name]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
+
+        $products = Product::select('id', 'name')->get();
+
+        return response()->json(['products' => $products]);    
     }
 }

@@ -163,8 +163,9 @@
                     if (response.products && response.products.length > 0) {
                         $('.SKU').html('<option selected disabled>Select Product / SKU</option>');
                         $.each(response.products, function(index, product) {
+                            console.log(product,"product")
                             $('.SKU').append(
-                                `<option value="${product.sku}">${product.sku}</option>`
+                                `<option value="${product.sku}">${product.product[0].name}</option>`
                             );
                         });
                     }

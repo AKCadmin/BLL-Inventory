@@ -16,4 +16,9 @@ class Sell extends Model
         'valid_from',
         'valid_to',
     ];
+    public function product()
+    {
+        return $this->hasMany(Product::class,'id','sku');
+    }
+
 }

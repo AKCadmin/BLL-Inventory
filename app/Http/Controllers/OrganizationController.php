@@ -208,7 +208,7 @@ class OrganizationController extends Controller
         try {
 
             $validated = $request->validate([
-                'brand_id' => 'required|integer',
+                // 'brand_id' => 'required|integer',
                 'organization_name' => 'required|string|max:255',
                 'organization_address' => 'required|string|max:500',
                 'organization_email' => 'required|email|max:255',

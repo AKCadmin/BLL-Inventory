@@ -162,7 +162,7 @@ class ProductController extends Controller
             }
             $validated = $request->validate([
                 'company_id' => 'required|integer',
-                'sku' => 'required|unique:products,sku,' . $id . '|max:50',
+                // 'sku' => 'required|unique:products,sku,' . $id . '|max:50',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status' => 'required',
@@ -170,7 +170,7 @@ class ProductController extends Controller
 
             $product = Product::findOrFail($id);
             $product->company_id = $request->company_id;
-            $product->sku = $request->sku;
+            // $product->sku = $request->sku;
             $product->name = $request->name;
             $product->description = $request->description;
             $product->status = $request->status;

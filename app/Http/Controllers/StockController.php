@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Carton;
 use App\Models\Product;
 use App\Models\Company;
+use App\Models\Organization;
 use App\Models\Purchase_History;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -413,32 +414,91 @@ class StockController extends Controller
 
     public function listByCompany(Request $request)
     {
+        $organization = Organization::where('id', '=', $request->company)->first();
+        $selectedDate = $request->selectedDate;
+        $isToday = $selectedDate === now()->toDateString();
+        // dd($isToday);
+        // dd($selectedDate);
         // Dynamically set the database connection
-        config(['database.connections.pgsql.database' => $request->input('company')]);
+        // dd($organization);
+        config(['database.connections.pgsql.database' => $organization->name]);
         DB::purge('pgsql');
         DB::connection('pgsql')->getPdo();
 
         // Build the query
-        $query = DB::table('batches')
-            ->join('products', 'batches.product_id', '=', 'products.id')
-            ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
-            ->select(
-                'products.sku',
-                'products.name',
-                'batches.batch_number as batch_no',
-                'batches.buy_price',
-                DB::raw('COUNT(cartons.id) as cartons'),
-                DB::raw('SUM(cartons.no_of_items_inside) as total_items'),
-                DB::raw('SUM(cartons.missing_items) as missing_items'),
-                'batches.id as batch_id'
-            )
-            ->groupBy('batches.id', 'products.sku', 'batches.batch_number', 'batches.buy_price', 'products.name')
-            ->orderBy('batches.id', 'DESC');
+        // $query = DB::table('batches')
+        //     ->join('products', 'batches.product_id', '=', 'products.id')
+        //     ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
+        //     ->select(
 
-        // Apply product filter if provided
-        if ($request->input('productId')) {
-            $query->where('products.id', '=', $request->input('productId'));
-        }
+        //         'products.name',
+        //         'batches.batch_number as batch_no',
+        //         'batches.buy_price',
+        //         DB::raw('COUNT(cartons.id) as cartons'),
+        //         DB::raw('COUNT(batches.id) as totalBatches'),
+        //         DB::raw('SUM(cartons.no_of_items_inside) as total_items'),
+        //         DB::raw('SUM(cartons.missing_items) as missing_items'),
+        //         'batches.id as batch_id',
+        //         'products.status',
+        //     )
+        //     ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'products.name','products.status')
+        //     ->orderBy('batches.id', 'DESC');
+
+        // // Apply product filter if provided
+        // if ($request->input('productId')) {
+        //     $query->where('products.id', '=', $request->input('productId'));
+        // }
+
+        // // Execute the query and get the results
+        // $stocks = $query->get();
+
+
+        $query = DB::table('batches')
+        ->join('products', 'batches.product_id', '=', 'products.id')
+        ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
+        ->leftJoinSub(
+            DB::table('sell_carton')
+                ->select(
+                    'sell_carton.carton_id',
+                    DB::raw('SUM(sell_carton.no_of_items_sell) as total_sold_items')
+                )
+                ->whereDate('sell_carton.created_at', '>', $selectedDate)
+                ->groupBy('sell_carton.carton_id'),
+            'sell_carton',
+            'cartons.id',
+            '=',
+            'sell_carton.carton_id'
+        )
+        ->select(
+            'products.name',
+            'batches.batch_number as batch_no',
+            'batches.buy_price',
+            DB::raw('COUNT(cartons.id) as cartons'),
+            DB::raw('COUNT(batches.id) as totalBatches'),
+            DB::raw('COALESCE(SUM(cartons.no_of_items_inside), 0) as total_items'),
+            DB::raw('SUM(cartons.missing_items) as missing_items'),
+            DB::raw('COALESCE(SUM(sell_carton.total_sold_items), 0) as sold_items'),
+            DB::raw('SUM(cartons.no_of_items_inside) + COALESCE(SUM(sell_carton.total_sold_items), 0) as available_items'),
+            'batches.id as batch_id',
+            'products.status'
+        )
+        ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'products.name', 'products.status')
+        ->orderBy('batches.id', 'DESC');
+    
+    // Apply product filter if provided
+    if ($request->input('productId')) {
+        $query->where('products.id', '=', $request->input('productId'));
+    }
+    
+
+        // Apply date filter if selectedDate is provided
+        // if ($selectedDate) {
+        //     $query->whereDate('cartons.created_at', '<=', $selectedDate)
+        //           ->where(function($subQuery) use ($selectedDate) {
+        //               $subQuery->whereNull('sell_carton.created_at')
+        //                        ->orWhereDate('sell_carton.created_at', '>', $selectedDate);
+        //           });
+        // }
 
         // Execute the query and get the results
         $stocks = $query->get();
@@ -470,7 +530,7 @@ class StockController extends Controller
      */
     public function show(string $id)
     {
-        
+
         setDatabaseConnection();
 
         $batchData = DB::table('batches')
@@ -803,7 +863,7 @@ class StockController extends Controller
                 'action' => 'Batch and Carton Update',
                 'details' => json_encode($historyDetails),
                 'user_id' => auth()->id(),
-                'batch_id' => $batchModel->id, 
+                'batch_id' => $batchModel->id,
             ]);
 
             return response()->json([

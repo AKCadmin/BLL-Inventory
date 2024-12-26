@@ -143,6 +143,7 @@
                 skuSelect.append('<option value="" disabled selected>SKU</option>');
 
                 products.forEach(function(product) {
+                    
                     skuSelect.append('<option value="' + product.id + '">' + product.id +
                         ' - ' + product.name + '</option>');
                 });
@@ -161,6 +162,7 @@
 
                     if (response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
+                            
                             batchSelect.append('<option value="' + batch.batch_number +
                                 '" data-buy-price="' + batch.buy_price + '">' +
                                 batch.batch_number + '</option>');

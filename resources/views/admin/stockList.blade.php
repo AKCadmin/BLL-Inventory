@@ -60,10 +60,11 @@
                                         <tr>
                                             <th>Id</th>
                                             <th>Brand Name</th>
+                                            <th>Batch No</th>
                                             <th>Product Name</th>
                                             <th>Available</th>
 
-                                            <th>Purchased sales</th>
+                                            {{-- <th>Purchased sales</th> --}}
                                             <th>Status</th>
 
                                             <th>Action</th>
@@ -141,22 +142,71 @@
 <script>
     $(document).ready(function() {
         let table = $('#stocktable').DataTable();
-        $('#company-filter').change(function(e) {
+        var selectedDate = new Date().toISOString().split('T')[0];
+        $('#datePicker').attr('max', selectedDate);
+        var productId = "";
+
+        $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            fetchStocks(formattedName)
-            fetchProducts(formattedName)
+            fetchStocks(formattedName,null,productId,selectedDate)
+            productsList(formattedName)
+            //  fetchProducts(formattedName)
+
+        });
+        $('#product-filter').change(function(e) {
+            e.preventDefault();
+             productId = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchStocks(formattedName, null, productId,selectedDate)
 
         });
 
-        function fetchStocks(companyName, productId) {
+        $('#datePicker').on('change', function () {
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+             selectedDate = $(this).val(); // Get the selected date
+             fetchStocks(formattedName, null,productId,selectedDate)
+        });
+
+        
+        function productsList(companyId) {
+            $.ajax({
+                url: '/history/products/options', 
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    company: companyId,
+                },
+                success: function(response) {
+                    if (response.products) {
+                        const $select = $('#product-filter');
+                        $select.empty();
+                        $select.append('<option value="">Select Product</option>');
+                        response.products.forEach(function(product) {
+                            $select.append(
+                                `<option value="${product.id}">${product.name}</option>`
+                            );
+                        });
+                    }
+                },
+                error: function(error) {
+                    console.error('Error fetching products:', error);
+                }
+            });
+        }
+
+        function fetchStocks(companyName, brandId, productId,selectedDate) {
             $.ajax({
                 url: "{{ route('stocks.bycompany') }}",
                 method: "GET",
                 data: {
                     company: companyName,
-                    productId: productId
+                    brandId: brandId,
+                    productId: productId,
+                    selectedDate: selectedDate
                 },
                 success: function(data) {
                     
@@ -165,6 +215,7 @@
 
                     // Append new rows
                     $.each(data, function(index, stock) {
+                        console.log(stock,"stocks");
                         var batchExists = stock.batch_no ? true : false;
                         var editButton = batchExists ?
                             `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
@@ -175,11 +226,13 @@
                             `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.batch_id}">Delete</button>`;
 
                         table.row.add([
+                           
                             stock.batch_id,
-                            stock.name,
+                            null,
                             stock.batch_no,
-                            stock.cartons,
-                            stock.total_items,
+                            stock.name,
+                            stock.available_items,
+                            stock.status,
                             `${editButton} ${deleteButton}`
                         ]);
                     });

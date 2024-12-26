@@ -149,20 +149,79 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        var brandName = ""
+        var selectedDate = new Date().toISOString().split('T')[0];
+        $('#datePicker').attr('max', selectedDate);
         $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
             fetchHistory(formattedName)
+            productsList(formattedName)
+        });
+
+        $('#brand-filter').change(function(e) {
+            e.preventDefault();
+               brandName = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchHistory(formattedName, brandName)
 
         });
 
-        function fetchHistory(companyName) {
+        $('#datePicker').on('change', function () {
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+             selectedDate = $(this).val(); // Get the selected date
+            fetchHistory(formattedName, null,null,selectedDate)
+        });
+
+        
+        $('#product-filter').change(function(e) {
+            e.preventDefault();
+            let productId = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchHistory(formattedName, null, productId,selectedDate)
+
+        });
+
+        
+        function productsList(companyId) {
+            $.ajax({
+                url: '/history/products/options', 
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    company: companyId,
+                },
+                success: function(response) {
+                    if (response.products) {
+                        const $select = $('#product-filter');
+                        $select.empty();
+                        $select.append('<option value="">Select Product</option>');
+                        response.products.forEach(function(product) {
+                            $select.append(
+                                `<option value="${product.id}">${product.name}</option>`
+                            );
+                        });
+                    }
+                },
+                error: function(error) {
+                    console.error('Error fetching products:', error);
+                }
+            });
+        }
+
+        function fetchHistory(companyName, brandId, productId,selectedDate) {
             $.ajax({
                 url: "{{ route('sell.getHistory') }}",
                 method: "GET",
                 data: {
-                    company: companyName
+                    company: companyName,
+                    brandId: brandId,
+                    productId: productId,
+                    selectedDate: selectedDate
                 },
                 success: function(response) {
                     const data = response.data;

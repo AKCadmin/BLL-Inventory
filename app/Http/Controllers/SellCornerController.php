@@ -222,6 +222,7 @@ class SellCornerController extends Controller
 
     public function store(Request $request)
     {
+       
         if (auth()->user()->cannot('add-sell-counter')) {
             abort(403); 
         }
@@ -230,6 +231,7 @@ class SellCornerController extends Controller
         DB::beginTransaction();
 
         try {
+            setDatabaseConnection();
             $totalQuantity = 0;
 
             foreach ($data['batchData'] as $batchKey => $batchItem) {
@@ -238,7 +240,7 @@ class SellCornerController extends Controller
                 }
             }
 
-            $product = Product::where('sku', $data['skuData'][0]['SKU'])->firstOrFail();
+            $product = Product::where('id', $data['skuData'][0]['SKU'])->firstOrFail();
             $productId = $product->id;
 
             $orderId = rand(100000, 999999);
@@ -556,8 +558,8 @@ class SellCornerController extends Controller
     {
         try {
 
-
-            $batches = Sell::where('sku', $sku)
+            setdatabaseConnection();
+            $batches = Sell::where('sku','=' ,$sku)
                 ->get();
 
             return response()->json([
@@ -584,7 +586,8 @@ class SellCornerController extends Controller
     public function sellProductDataGet(Request $request)
     {
         try {
-            $products = Sell::distinct('sku')->get();
+            setDatabaseConnection();
+            $products = Sell::with('product')->distinct('batch_no')->get();
 
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
@@ -599,7 +602,7 @@ class SellCornerController extends Controller
     public function getSellcounterCartonsByBatch($batch)
     {
         try {
-
+            setDatabaseConnection();
             $batchId = Batch::where('batch_number', $batch)->first();
             // $cartons = Carton::where('batch_id', $batchId->id)->where('no_of_items_inside', '!=', 0)
             //     ->get();

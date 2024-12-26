@@ -34,18 +34,22 @@
                                             <div class="input-group">
                                                 <select id="brand-filter" class="form-control custom-select">
                                                     <option value="">Select Brand</option>
-                                                    @foreach ($companies as $company)
-                                                        <option value="{{ $company->name }}">{{ $company->name }}</option>
+                                                    @foreach ($brands as $brand)
+                                                        <option value="{{ $brand->id }}">{{ $brand->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
-                                       
+
                                         <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
                                                 <select id="product-filter" class="form-control custom-select">
                                                     <option value="">Select Product</option>
-    
+                                                    {{-- @foreach ($products as $product)
+                                                        <option value="{{ $product->id }}">{{ $product->name }}
+                                                        </option>
+                                                    @endforeach --}}
                                                 </select>
                                             </div>
                                         </div>
@@ -81,7 +85,7 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                           
+
                                             <th>Batch No</th>
                                             <th>Buy Price</th>
                                             <th>No. of Carton</th>
@@ -149,20 +153,79 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        var brandName = "";
+        var selectedDate = new Date().toISOString().split('T')[0];
+        $('#datePicker').attr('max', selectedDate);
         $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
             fetchHistory(formattedName)
+            productsList(formattedName)
+        });
+
+        $('#brand-filter').change(function(e) {
+            e.preventDefault();
+               brandName = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchHistory(formattedName, brandName)
 
         });
 
-        function fetchHistory(companyName) {
+        $('#datePicker').on('change', function () {
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+             selectedDate = $(this).val(); // Get the selected date
+            fetchHistory(formattedName, null,null,selectedDate)
+        });
+
+        
+        $('#product-filter').change(function(e) {
+            e.preventDefault();
+            let productId = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchHistory(formattedName, null, productId,selectedDate)
+
+        });
+
+        function productsList(companyId) {
+            $.ajax({
+                url: '/history/products/options', 
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    company: companyId,
+                },
+                success: function(response) {
+                    if (response.products) {
+                        const $select = $('#product-filter');
+                        $select.empty();
+                        $select.append('<option value="">Select Product</option>');
+                        response.products.forEach(function(product) {
+                            $select.append(
+                                `<option value="${product.id}">${product.name}</option>`
+                            );
+                        });
+                    }
+                },
+                error: function(error) {
+                    console.error('Error fetching products:', error);
+                }
+            });
+        }
+
+
+        function fetchHistory(companyName, brandId, productId,selectedDate) {
             $.ajax({
                 url: "{{ route('purchase.getHistory') }}",
                 method: "GET",
                 data: {
-                    company: companyName
+                    company: companyName,
+                    brandId: brandId,
+                    productId: productId,
+                    selectedDate: selectedDate
                 },
                 success: function(response) {
                     const data = response.data;
@@ -183,7 +246,11 @@
                             <a href="/purchase/details/${stock.batch_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">
                                 Details
                             </a>
-                            <button class="btn btn-sm btn-primary" onclick="editItem(${stock.batch_id})">Edit</button>
+                            <a href="/stock/${stock.batch_id}" 
+                               class="btn btn-sm btn-warning edit-stock-btn" 
+                               data-id="${stock.batch_id}">
+                                Edit
+                            </a>
                             <button class="btn btn-sm btn-danger" onclick="deleteItem(${stock.batch_id})">Delete</button>
                         </td>
                     </tr>
