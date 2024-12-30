@@ -37,9 +37,11 @@ class OrganizationController extends Controller
                 'organization_status' => 'required',
             ]);
 
+            $organization_name = str_replace(' ', '_', strtolower($request->organization_name));
+
             $organization = new Organization();
             // $organization->brand_id = $request->brand_id;
-            $organization->name = $request->organization_name;
+            $organization->name = $organization_name;
             $organization->address = $request->organization_address;
             $organization->contact_email = $request->organization_email;
             $organization->phone_no = $request->phone_no;
@@ -115,6 +117,9 @@ class OrganizationController extends Controller
             $invoiceMigrationPath = '\\database\\migrations\\2024_12_11_083432_create_invoice_table.php';
             $purchaseHistoryMigrationPath = '\\database\\migrations\\2024_12_24_124745_create_purchase_history_table.php';
             $sellHistoryMigrationPath = '\\database\\migrations\\2024_12_24_143637_create_sell_histories_table.php';
+            $addBrandIdInProductsMigrationPath = '\\database\\migrations\\2024_12_26_141516_add_brand_id_to_products_table.php';
+            $modifyBatchesMigrationPath = '\\database\\migrations\\2024_12_27_051546_modify_product_id_in_batches_table.php';
+            $modifySellCartonMigrationPath = '\\database\\migrations\\2024_12_27_051742_drop_foreign_key_from_product_id_in_batches_table.php';
 
 
             $migrations = [
@@ -132,7 +137,10 @@ class OrganizationController extends Controller
                 $sellCartonMigrationPath,
                 $invoiceMigrationPath,
                 $purchaseHistoryMigrationPath,
-                $sellHistoryMigrationPath
+                $sellHistoryMigrationPath,
+                $addBrandIdInProductsMigrationPath,
+                $modifyBatchesMigrationPath,
+                $modifySellCartonMigrationPath
             ];
 
             foreach ($migrations as $migrationPath) {
@@ -264,16 +272,17 @@ class OrganizationController extends Controller
     public function productDataGet(Request $request)
     {
         try {
-            
+           
             if (auth()->user()->role == 1) {
-                $products = Product::with('organization')
-                ->whereHas('organization', function($query) use ($request) {
-                    $query->where('id', '=', $request->company);
-                })
+                $products = Product::with('brand')
+                // ->whereHas('brand', function($query) use ($request) {
+                //     $query->where('id', '=', $request->company);
+                // })
                 ->orderBy('id', 'desc')
                 ->get();
+                // dd($request->company);
             } else {
-                setDatabaseConnection();
+                // setDatabaseConnection();
                 // $products = Product::where('company_id', auth()->user()->organization_id)
                 //     ->orderBy('id', 'desc')
                 //     ->get();

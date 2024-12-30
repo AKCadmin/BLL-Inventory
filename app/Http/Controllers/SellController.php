@@ -251,6 +251,7 @@ class SellController extends Controller
      */
     public function destroy($id)
     {
+      
         try {
            
             if (auth()->user()->cannot('delete-sell')) {
@@ -262,7 +263,7 @@ class SellController extends Controller
             DB::beginTransaction(); 
 
             $sell = Sell::findOrFail($id); 
-           
+            
             $sell->delete();
     
             return response()->json([
@@ -324,10 +325,10 @@ class SellController extends Controller
     {
         
         try {
-            setDatabaseConnection();
+            // setDatabaseConnection();
             
             $product = Product::where('id', $sku)->first();
-
+            setDatabaseConnection();
             if ($product) {
                 $batches = Batch::where('product_id', $product->id)
                 ->whereNotIn('batch_number', function ($query) use ($product) {

@@ -266,7 +266,7 @@ class BrandController extends Controller
             $brand->phone_no = $request->phone_no;
             $brand->status = $request->brand_status;
             $brand->category = $request->brand_category;
-            $brand->description = $request->description;
+            $brand->description = $request->brand_description;
 
             $brand->save();
 

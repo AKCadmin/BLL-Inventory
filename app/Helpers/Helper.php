@@ -19,3 +19,19 @@ if (!function_exists('setDatabaseConnection')) {
         // }
     }
 }
+
+
+if (!function_exists('setDatabaseConnectionForOrganization')) {
+    function setDatabaseConnectionForOrganization($databaseName)
+    {
+        // if (Auth::user()->role != '1') {
+            // $databaseName = Session::get('db_name');
+            //    dd($databaseName);
+            if ($databaseName) {
+                config(['database.connections.pgsql.database' => $databaseName]);
+                DB::purge('pgsql');
+                DB::connection('pgsql')->getPdo();
+            }
+        // }
+    }
+}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Organization;
 use App\Models\Product;
+use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,9 +21,10 @@ class ProductController extends Controller
             abort(403); 
         }
         $companies = Organization::all();
-        $products = Product::orderBy('id', 'desc')->get();
+        $products = Product::with('brand')->orderBy('id', 'desc')->get();
+        $brands = Brand::orderBy('id', 'desc')->get();
        
-        return view('admin.product',compact('companies','products'));
+        return view('admin.product',compact('companies','products','brands'));
     }
 
     /**
@@ -45,7 +47,8 @@ class ProductController extends Controller
             }
 
             $validated = $request->validate([
-                'company_id' => 'required|integer|exists:organizations,id',
+                'brand_id' => 'required|integer|exists:brands,id',
+                // 'company_id' => 'required|integer|exists:organizations,id',
                 // 'sku' => 'required|unique:products,sku|max:50',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -54,7 +57,8 @@ class ProductController extends Controller
     
           
             $product = new Product();
-            $product->company_id = $request->company_id;
+            $product->brand_id = $request->brand_id;
+            // $product->company_id = $request->company_id;
             // $product->sku = $request->sku;
             $product->name = $request->name;
             $product->description = $request->description;
@@ -62,22 +66,22 @@ class ProductController extends Controller
             $product->save();
     
            
-            $company = Organization::findOrFail($request->company_id);
-            $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
+            // $company = Organization::findOrFail($request->company_id);
+            // $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
            
-            config(['database.connections.pgsql.database' => $normalizedCompanyName]);
+            // config(['database.connections.pgsql.database' => $normalizedCompanyName]);
     
             
-            DB::purge('pgsql');
-            DB::reconnect('pgsql');
+            // DB::purge('pgsql');
+            // DB::reconnect('pgsql');
     
-            $secondaryProduct = new Product();
-            $secondaryProduct->setConnection('pgsql'); 
-            // $secondaryProduct->sku = $request->sku;
-            $secondaryProduct->name = $request->name;
-            $secondaryProduct->description = $request->description;
-            $secondaryProduct->status = $request->status;
-            $secondaryProduct->save();
+            // $secondaryProduct = new Product();
+            // $secondaryProduct->setConnection('pgsql'); 
+            // // $secondaryProduct->sku = $request->sku;
+            // $secondaryProduct->name = $request->name;
+            // $secondaryProduct->description = $request->description;
+            // $secondaryProduct->status = $request->status;
+            // $secondaryProduct->save();
     
             return response()->json([
                 'success' => true,
@@ -161,7 +165,8 @@ class ProductController extends Controller
                 abort(403); 
             }
             $validated = $request->validate([
-                'company_id' => 'required|integer',
+                'brand_id' => 'required|integer',
+                // 'company_id' => 'required|integer',
                 // 'sku' => 'required|unique:products,sku,' . $id . '|max:50',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -169,7 +174,8 @@ class ProductController extends Controller
             ]);
 
             $product = Product::findOrFail($id);
-            $product->company_id = $request->company_id;
+            $product->brand_id = $request->brand_id;
+            // $product->company_id = $request->company_id;
             // $product->sku = $request->sku;
             $product->name = $request->name;
             $product->description = $request->description;

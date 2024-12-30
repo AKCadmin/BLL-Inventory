@@ -12,4 +12,6 @@ class Carton extends Model
         "no_of_items_inside",
         "missing_items",
     ];
+
+    
 }

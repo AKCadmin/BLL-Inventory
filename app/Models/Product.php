@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    protected $connection = 'pgsqlmain';
    protected $table = "products";
     // public function company()
     // {
@@ -14,5 +15,10 @@ class Product extends Model
     public function organization()
     {
         return $this->hasOne(Organization::class,'id','company_id');
+    }
+
+    public function brand()
+    {
+        return $this->hasOne(Brand::class,'id','brand_id');
     }
 }

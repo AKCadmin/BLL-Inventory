@@ -96,7 +96,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/user-list', [userManagement::class, 'list'])->name('users.list');
     Route::get('/purchase/history', [HistoryController::class, 'history'])->name('purchase.history');
     Route::get('/purchase/get/history', [HistoryController::class, 'getHistory'])->name('purchase.getHistory');
-    Route::get('/puchase/details/{id}/{companyName}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory');
+    Route::get('/purchase/details/{id}/{companyName}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory');
     Route::get('history/products/options', [HistoryController::class, 'historyProducts'])->name('purchase.historyProducts');
     //organizations routes
 

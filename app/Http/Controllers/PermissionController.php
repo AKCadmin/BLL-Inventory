@@ -189,7 +189,7 @@ class PermissionController extends Controller
 
     public function assignPermissions()
     {
-        $users = User::all();
+        $users = User::where('id','!=',auth()->user()->id)->get();
 
         $pages = Page::all();
 

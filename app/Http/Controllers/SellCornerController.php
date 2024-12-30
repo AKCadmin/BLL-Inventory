@@ -20,7 +20,7 @@ class SellCornerController extends Controller
     public function index()
     {
         if (auth()->user()->cannot('view-sell-counter')) {
-            abort(403); 
+            abort(403);
         }
         return view('admin.sellCounter');
     }
@@ -222,15 +222,16 @@ class SellCornerController extends Controller
 
     public function store(Request $request)
     {
-       
+
         if (auth()->user()->cannot('add-sell-counter')) {
-            abort(403); 
+            abort(403);
         }
         $data = $request->all();
 
         DB::beginTransaction();
 
         try {
+            $product = Product::where('id', $data['skuData'][0]['SKU'])->firstOrFail();
             setDatabaseConnection();
             $totalQuantity = 0;
 
@@ -240,7 +241,7 @@ class SellCornerController extends Controller
                 }
             }
 
-            $product = Product::where('id', $data['skuData'][0]['SKU'])->firstOrFail();
+
             $productId = $product->id;
 
             $orderId = rand(100000, 999999);
@@ -403,114 +404,114 @@ class SellCornerController extends Controller
      */
     public function update(Request $request, $id)
     {
-     
+
         if (auth()->user()->cannot('edit-sell-counter')) {
-            abort(403); 
+            abort(403);
         }
         // Fetch all rows with the same order_id
 
-      DB::beginTransaction();
-      
-      try {
-          // Fetch all incoming request data
-          $data = $request->all();
-          $totalQuantity = 0;
-         
-          // Calculate the total quantity
-          foreach ($data['batchData'] as $batchKey => $batchItem) {
-              foreach ($batchItem['cartonItemsData'] as $cartonItem) {
-                  $totalQuantity += (int) $cartonItem['quantityItem'];
-              }
-          }
-      
-          $product = Product::where('sku', $data['skuData'][0]['SKU'])->firstOrFail();
-          $productId = $product->id;
-      
-          $sellCounterIds = [];
-          $totalPrices = [];
-          $price = 0;
-          $ab = [];
-          $xy = [];
-          $xz = [];
-          foreach ($data['batchData'] as $batchNumber => $batchItem) {
-              $batch = Batch::where('batch_number', $batchNumber)->firstOrFail();
-              $sellCounter = SellCounter::where(['order_id'=>$id,'batch_id'=>$batch->id])->first();
-              $skuData = $batchItem['sku'];
-              $sku = is_array($skuData) ? $this->extractSKU($skuData) : $skuData;
-      
-              $sellPrice = Sell::where('sku', $sku)
-                  ->where('batch_no', $batchNumber)
-                  ->first();
-      
-              if (!$sellPrice) {
-                  throw new \Exception("Sell price not found for SKU: {$sku} and Batch: {$batchNumber}");
-              }
-      
-              
-              
-              
-      
-              if (!empty($batchItem['cartonData'])) {
-                $price = $data['skuData'][0]['customerType'] === 'wholesale'
-                    ? 100 * $sellPrice->wholesale_price
-                    : ($data['skuData'][0]['customerType'] === 'retailer'
-                        ? 100 * $sellPrice->retail_price
-                        : 100 * $sellPrice->hospital_price);
-            } elseif (!empty($batchItem['cartonItemsData'])) {
-                $price = $data['skuData'][0]['customerType'] === 'wholesale'
-                    ? $totalQuantity * $sellPrice->wholesale_price
-                    : ($data['skuData'][0]['customerType'] === 'retailer'
-                        ? $totalQuantity * $sellPrice->retail_price
-                        : $totalQuantity * $sellPrice->hospital_price);
-            }
-      
-              // Iterate through each sellCounter row and update it
-            //   foreach ($sellCounters as $sellCounter) {
+        DB::beginTransaction();
 
-                  $sellCounter->batch_id = $batch->id;
-                  $sellCounter->product_id = $productId;
-                  $sellCounter->price = $price;
-                  $sellCounter->customer_type = $data['skuData'][0]['customerType'];
-                  $sellCounter->provided_no_of_cartons = count($batchItem['cartonData']) ?: count($batchItem['cartonItemsData']);
-                  $ab[] = $sellCounter;
+        try {
+            // Fetch all incoming request data
+            $data = $request->all();
+            $totalQuantity = 0;
+
+            // Calculate the total quantity
+            foreach ($data['batchData'] as $batchKey => $batchItem) {
+                foreach ($batchItem['cartonItemsData'] as $cartonItem) {
+                    $totalQuantity += (int) $cartonItem['quantityItem'];
+                }
+            }
+
+            $product = Product::where('sku', $data['skuData'][0]['SKU'])->firstOrFail();
+            $productId = $product->id;
+
+            $sellCounterIds = [];
+            $totalPrices = [];
+            $price = 0;
+            $ab = [];
+            $xy = [];
+            $xz = [];
+            foreach ($data['batchData'] as $batchNumber => $batchItem) {
+                $batch = Batch::where('batch_number', $batchNumber)->firstOrFail();
+                $sellCounter = SellCounter::where(['order_id' => $id, 'batch_id' => $batch->id])->first();
+                $skuData = $batchItem['sku'];
+                $sku = is_array($skuData) ? $this->extractSKU($skuData) : $skuData;
+
+                $sellPrice = Sell::where('sku', $sku)
+                    ->where('batch_no', $batchNumber)
+                    ->first();
+
+                if (!$sellPrice) {
+                    throw new \Exception("Sell price not found for SKU: {$sku} and Batch: {$batchNumber}");
+                }
+
+
+
+
+
+                if (!empty($batchItem['cartonData'])) {
+                    $price = $data['skuData'][0]['customerType'] === 'wholesale'
+                        ? 100 * $sellPrice->wholesale_price
+                        : ($data['skuData'][0]['customerType'] === 'retailer'
+                            ? 100 * $sellPrice->retail_price
+                            : 100 * $sellPrice->hospital_price);
+                } elseif (!empty($batchItem['cartonItemsData'])) {
+                    $price = $data['skuData'][0]['customerType'] === 'wholesale'
+                        ? $totalQuantity * $sellPrice->wholesale_price
+                        : ($data['skuData'][0]['customerType'] === 'retailer'
+                            ? $totalQuantity * $sellPrice->retail_price
+                            : $totalQuantity * $sellPrice->hospital_price);
+                }
+
+                // Iterate through each sellCounter row and update it
+                //   foreach ($sellCounters as $sellCounter) {
+
+                $sellCounter->batch_id = $batch->id;
+                $sellCounter->product_id = $productId;
+                $sellCounter->price = $price;
+                $sellCounter->customer_type = $data['skuData'][0]['customerType'];
+                $sellCounter->provided_no_of_cartons = count($batchItem['cartonData']) ?: count($batchItem['cartonItemsData']);
+                $ab[] = $sellCounter;
                 //   $sellCounter->save();
 
-                
-                  $sellCounterIds[] = $sellCounter->id;
-                  $totalPrices[] = $price;
-      
-                  // Update carton and carton items logic
-                  if (!empty($batchItem['cartonData'] ?? [])) {
-                      foreach ($batchItem['cartonData'] as $cartonData) {
-                          $carton = Carton::where('carton_number', $cartonData)->firstOrFail();
-                          $carton->no_of_items_inside = max(0, $carton->no_of_items_inside - 100);
 
-                          
-                        $sellCarton = SellCarton::where('order_id',$id)->first();
+                $sellCounterIds[] = $sellCounter->id;
+                $totalPrices[] = $price;
+
+                // Update carton and carton items logic
+                if (!empty($batchItem['cartonData'] ?? [])) {
+                    foreach ($batchItem['cartonData'] as $cartonData) {
+                        $carton = Carton::where('carton_number', $cartonData)->firstOrFail();
+                        $carton->no_of_items_inside = max(0, $carton->no_of_items_inside - 100);
+
+
+                        $sellCarton = SellCarton::where('order_id', $id)->first();
                         $sellCarton->sell_id = $sellCounter->id;
                         $sellCarton->carton_id = $carton->id;
                         $sellCarton->no_of_cartons = 1;
                         $sellCarton->no_of_items_sell = 100;
                         $sellCarton->order_id = $id;
                         // $sellCarton->save();
-                          $xy[] = $sellCarton;
+                        $xy[] = $sellCarton;
                         //   $carton->save();
-                      }
-                  }
-      
-                  if (!empty($batchItem['cartonItemsData'] ?? [])) {
-                      foreach ($batchItem['cartonItemsData'] as $cartonItem) {
-                          $carton = Carton::where('carton_number', $cartonItem['cartonItem'])->firstOrFail();
-      
-                          if ($cartonItem['quantityItem'] > $carton->no_of_items_inside) {
-                              throw new \Exception("Carton {$cartonItem['cartonItem']} does not have enough items. Available: {$carton->no_of_items_inside}, Requested: {$cartonItem['quantityItem']}");
-                          }
-      
-                          $carton->no_of_items_inside -= $cartonItem['quantityItem'];
-                          
+                    }
+                }
+
+                if (!empty($batchItem['cartonItemsData'] ?? [])) {
+                    foreach ($batchItem['cartonItemsData'] as $cartonItem) {
+                        $carton = Carton::where('carton_number', $cartonItem['cartonItem'])->firstOrFail();
+
+                        if ($cartonItem['quantityItem'] > $carton->no_of_items_inside) {
+                            throw new \Exception("Carton {$cartonItem['cartonItem']} does not have enough items. Available: {$carton->no_of_items_inside}, Requested: {$cartonItem['quantityItem']}");
+                        }
+
+                        $carton->no_of_items_inside -= $cartonItem['quantityItem'];
+
                         //   $carton->save();
 
-                        $sellCarton = SellCarton::where('order_id',$id)->first();
+                        $sellCarton = SellCarton::where('order_id', $id)->first();
                         $sellCarton->sell_id = $sellCounter->id;
                         $sellCarton->carton_id = $carton->id;
                         $sellCarton->no_of_cartons = 1;
@@ -518,33 +519,32 @@ class SellCornerController extends Controller
                         $sellCarton->order_id = $id;
                         $xz[] = $sellCarton;
                         // $sellCarton->save();
-                      }
-                  }
-            //   }
+                    }
+                }
+                //   }
 
-            
-          }
-          dd($xz);
-          // Update the invoice
-          $invoice = Invoice::where('order_id',$request->orderId)->first();
-          $invoice->customer_name = $request->customer;
-          $invoice->customer_type = $data['skuData'][0]['customerType'];
-        //   $invoice->save();
-      
-          DB::commit();
-      
-          return response()->json(['message' => 'Sell data updated successfully!']);
-      } catch (\Exception $e) {
-          DB::rollBack();
-          return response()->json([
-              'error' => $e->getMessage(),
-              'file' => $e->getFile(),
-              'line' => $e->getLine()
-          ], 500);
-      }
-      
+
+            }
+            dd($xz);
+            // Update the invoice
+            $invoice = Invoice::where('order_id', $request->orderId)->first();
+            $invoice->customer_name = $request->customer;
+            $invoice->customer_type = $data['skuData'][0]['customerType'];
+            //   $invoice->save();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Sell data updated successfully!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
@@ -559,7 +559,7 @@ class SellCornerController extends Controller
         try {
 
             setdatabaseConnection();
-            $batches = Sell::where('sku','=' ,$sku)
+            $batches = Sell::where('sku', '=', $sku)
                 ->get();
 
             return response()->json([
@@ -586,10 +586,20 @@ class SellCornerController extends Controller
     public function sellProductDataGet(Request $request)
     {
         try {
+            $productsList = Product::all();
             setDatabaseConnection();
-            $products = Sell::with('product')->distinct('batch_no')->get();
-
-            return response()->json(['products' => $products]);
+            $sells = Sell::with('product')->get()->unique('sku');
+            // $products = Sell::distinct('batch_no')->get();
+            // $sells = Sell::all()->unique('sku');
+                // $mappedData = $sells->map(function ($sell) use ($productsList) {
+                //     $product = $productsList->firstWhere('id', $sell->sku);
+                //     return [
+                //         'sku' => $sell->sku,
+                //         'product_name' => $product ? $product->name : 'Unknown Product',
+                //     ];
+                // });
+            // dd($mappedData);
+            return response()->json(['products' => $sells]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -633,7 +643,7 @@ class SellCornerController extends Controller
     public function orderList()
     {
         if (auth()->user()->cannot('view-order')) {
-            abort(403); 
+            abort(403);
         }
         $orders = SellCounter::select(
             'sell_counter.order_id',
@@ -665,7 +675,7 @@ class SellCornerController extends Controller
     public function editSellCounter($orderId)
     {
         if (auth()->user()->cannot('edit-sell-counter')) {
-            abort(403); 
+            abort(403);
         }
         // Step 1: Retrieve the order details based on the orderId
         $sellCounters = SellCounter::where('order_id', $orderId)->get();
@@ -729,7 +739,7 @@ class SellCornerController extends Controller
             'byCarton' => 'By Carton',
             'byItemBox' => 'By Item Box'
         ];
-    
+
         return $replacements[$packagingType] ?? $packagingType;
     }
 }

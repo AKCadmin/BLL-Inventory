@@ -44,19 +44,42 @@
 
         <div class="page-content">
             <div class="container-fluid">
-                <div class="mb-3">
-                    <label for="selectSku" class="form-label">Select Product</label>
-                    <select id="SKU" name="SKU" class="form-select select2">
-                        <option selected disabled>Select Product </option>
-                    </select>
-                </div>
+                {{-- <div class="container my-5">
+                    <form action="{{ route('stock.store') }}" method="post">
+                        @csrf
 
-                <!-- Add Purchase -->
-                <h4>Add Purchase</h4>
+                        <div class="mb-3">
+                            <label for="selectSku" class="form-label">Select SKU</label>
+                            <select id="SKU" name="SKU" class="form-select select2">
+                                <option selected disabled>Select Product / SKU</option>
+                                <!-- Populate with products -->
+                            </select>
+                        </div>
+
+                        <!-- Add Purchase -->
+                        <h4>Add Purchase</h4>
+
+                        <!-- Dynamic Rows for Batch Info -->
+                        <div id="batchRows" class="container mb-3">
+                            <!-- Placeholder for dynamic rows -->
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" id="addRow" class="btn btn-primary">Add Row</button>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-success mt-2">Submit</button>
+                    </form>
+
+                    
+
+
+
+
+                </div> --}}
                 <div id="purchaseContainer">
-
-
-                    <div class="row rowTemplate border p-3 rounded mb-2">
+                    <div class="row border p-3 rounded mb-3">
                         <div class="col-md-3 mb-2">
                             <label for="batchNo" class="form-label">Batch No.</label>
                             <input type="text" class="form-control batchNo" id="batchNo"
@@ -86,7 +109,7 @@
                         </div>
                     </div>
                 </div>
-                <button id="addRow" type="button" class="btn btn-primary mt-3 addRow">Add Row</button>
+                <button id="addRow" type="button" class="btn btn-primary mt-3">Add Row</button>
                 <button type="submit" id="updateButton" class="btn btn-success mt-3">Update</button>
 
             </div>
@@ -97,27 +120,18 @@
     @include('partials.right-sidebar')
     @include('partials.vendor-scripts')
     @include('partials.script')
-
     <script>
         $(document).ready(function() {
-            let user = "{{auth()->user()->role}}";
-            if(user == 1){
-                $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
-            }else{
-                $('#organization-filter').hide();
-            }
-            
-             
-
+            $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
             function validateManufacturingDate(manufacturingDate) {
                 const today = new Date();
                 const selectedDate = new Date(manufacturingDate);
 
                 // Check if the date is in the future
                 if (selectedDate > today) {
-                    return true; 
+                    return true; // Future date not allowed
                 }
-                return false;
+                return false; // Valid date
             }
 
             // Validate Expiry Date
@@ -127,36 +141,10 @@
 
                 // Expiry date should not be before the manufacturing date
                 if (selectedExpiryDate < selectedManufacturingDate) {
-                    return true;
+                    return true; // Invalid expiry date
                 }
-                return false; 
+                return false; // Valid expiry date
             }
-
-            function getProducts(id) {
-             
-                let url = `{{ route('product.getData') }}`;
-                ajaxRequest(url, 'GET', {},
-                    function(response) {
-                        if (response.products && response.products.length > 0) {
-                            $('#SKU').html('<option selected disabled>Select Product</option>');
-                            $.each(response.products, function(index, product) {
-                                $('#SKU').append(
-                                    `<option value="${product.id}">${product.name}</option>`
-                                );
-                            });
-                            $('#SKU').val(id).change();
-                        }
-                    }
-                );
-            }
-
-            const batchData = @json($groupedData);
-            const organization  = @json($organization);
-            console.log(organization,"organization")
-            $("#organization-filter").val(organization.id).change();
-
-
-            renderBatchData(batchData);
 
             function renderCartons(batchId, existingCartons, numNewCartons) {
                 let cartonRowsContainer = $(`#cartonRows_${batchId}`);
@@ -207,50 +195,43 @@
                 if (!Array.isArray(batchData)) {
                     batchData = Object.values(batchData);
                 }
-               
-                getProducts(batchData[0].product_id)
-                batchData[0].batches.forEach((batch) => {
-                  
+
+                batchData.forEach((batch) => {
                     let batchRow = $(`
-                <div class="row rowTemplate border p-3 rounded mb-2">
-                    <div class="col-md-4 mb-2">
+                <div class="row border p-3 rounded mb-3">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Batch No.</label>
                         <input type="text" class="form-control batchNo" value="${batch.batch_number}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Manufacturing Date</label>
                         <input type="date" class="form-control manufacturingDate" value="${batch.manufacturing_date}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Expiry Date</label>
                         <input type="date" class="form-control expiryDate" value="${batch.expiry_date}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Base Price</label>
                         <input type="number" class="form-control basePrice" value="${batch.base_price}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Exchange Rate</label>
                         <input type="number" class="form-control exchangeRate" value="${batch.exchange_rate}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-3 mb-2">
                         <label class="form-label">Buy Price</label>
                         <input type="number" class="form-control buyPrice" value="${batch.buy_price}" >
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-6 mb-2">
                         <label class="form-label">Add New Cartons</label>
                         <input type="number" class="form-control" id="newCartons_${batch.batch_id}" placeholder="Enter no. of new cartons">
                     </div>
-                    <div class="col-md-4 mb-2 d-flex align-items-end">
-                        <button type="button" class="btn btn-info mt-3" id="processCartonsBtn_${batch.batch_id}">Process Cartons</button>
+                    <div class="col-md-6 mb-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary w-100" id="processCartonsBtn_${batch.batch_id}">Process Cartons</button>
                     </div>
                     <div class="col-md-12 mb-3 cartonRows" id="cartonRows_${batch.batch_id}">
                         <h5>Cartons for Batch ${batch.batch_number}</h5>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label for="notes" class="form-label">Notes</label>
-                        <input type="text" name="notes" id="notes" value="${batch.notes}" class="form-control notes"
-                        placeholder="Enter Notes">
                     </div>
                 </div>
             `);
@@ -274,11 +255,11 @@
 
                         // If Manufacturing Date is invalid (future date), disable the field
                         if (validateManufacturingDate(manufacturingDate)) {
-                            $(this).val(''); 
-                            expiryDateInput.prop('disabled', true);
+                            $(this).val(''); // Clear invalid value
+                            expiryDateInput.prop('disabled', true); // Disable Expiry Date
                         } else {
-                            expiryDateInput.prop('disabled', false);
-                           
+                            expiryDateInput.prop('disabled', false); // Enable Expiry Date
+                            // Set the minimum value for Expiry Date to Manufacturing Date
                             if (manufacturingDate) {
                                 expiryDateInput.attr('min', manufacturingDate);
                             }
@@ -302,7 +283,7 @@
                         const buyPrice = basePrice * exchangeRate;
 
                         batchRow.find('.buyPrice').val(buyPrice.toFixed(
-                            2)); 
+                        2)); // Set the calculated buy price
                     });
                 });
             }
@@ -339,14 +320,12 @@
 
                 $('#purchaseContainer .row.border').each(function() {
                     const batch = {
-                        product_id: $('#SKU').val(),
                         batch_no: $(this).find('.batchNo').val(),
                         manufacturing_date: $(this).find('.manufacturingDate').val(),
                         expiry_date: $(this).find('.expiryDate').val(),
                         base_price: $(this).find('.basePrice').val(),
                         exchange_rate: $(this).find('.exchangeRate').val(),
                         buy_price: $(this).find('.buyPrice').val(),
-                        notes: $(this).find('.notes').val(),
                         cartons: [],
                     };
 
@@ -378,7 +357,7 @@
                         if (responseData.success) {
                             toastr.success('Batches updated successfully!');
                             window.location.href =
-                                '{{ route('stock.list') }}';
+                            '{{ route('stock.list') }}';
                         } else {
                             toastr.error('Error: ' + responseData.message);
                         }
@@ -410,138 +389,11 @@
                 $(`#newCartons_${batchId}`).val('');
             }
 
+            const batchData = @json($groupedData);
 
+            // Render batch data on page load
+            renderBatchData(batchData);
         });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            var currentDate = new Date().toISOString().split('T')[0];
-            $('#addRow').on('click', function() {
-
-                // $('.addRow').click(function() {
-                var newBatchRow = $(`
-            <div class="row rowTemplate border p-3 rounded mb-2">
-                <div class="col-md-4 mb-2">
-                    <label for="batchNo" class="form-label">Batch No.</label>
-                    <input type="text" class="form-control batchNo" placeholder="Enter Batch No.">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <label for="manufacturingDate" class="form-label">Manufacturing Date</label>
-                    <input type="date" class="form-control manufacturingDate">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <label for="expiryDate" class="form-label">Expiry Date</label>
-                    <input type="date" class="form-control expiryDate">
-                </div>
-
-                <div class="col-md-4 mb-2">
-                    <label for="basePrice" class="form-label">Base Price</label>
-                    <input type="text" class="form-control basePrice" placeholder="Enter Base Price">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <label for="exchangeRate" class="form-label">Exchange Rate</label>
-                    <input type="text" class="form-control exchangeRate" placeholder="Enter Exchange Rate">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <label for="buyPrice" class="form-label">Buy Price</label>
-                    <input type="text" class="form-control buyPrice" placeholder="Enter Buy Price">
-                </div>
-
-                <div class="col-md-4 mb-2">
-                    <label for="noOfCartons" class="form-label">No Of Cartons</label>
-                    <input type="number" class="form-control noOfCartons" placeholder="Enter No Of Cartons">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <button type="button" class="btn btn-info mt-3 processCartons">Process Cartons</button>
-                </div>
-
-                <div class="col-md-12 mb-3 cartonRows" id="cartonRows"></div>
-                <div class="col-md-4 mb-2">
-                    <label for="notes" class="form-label">Notes</label>
-                    <input type="text" class="form-control notes" placeholder="Enter Notes">
-                </div>
-                <div class="col-md-12 text-end">
-                    <button type="button" class="btn btn-danger removeRow">Remove</button>
-                </div>
-            </div>
-        `);
-
-                $('#purchaseContainer').append(newBatchRow);
-
-
-                newBatchRow.find('.manufacturingDate').attr('max', currentDate);
-
-
-                newBatchRow.find('.manufacturingDate').on('change', function() {
-                    var manufacturingDate = $(this).val();
-                    $(this).closest('.rowTemplate').find('.expiryDate').attr('min',
-                        manufacturingDate);
-                });
-
-
-                newBatchRow.find('.expiryDate').on('change', function() {
-                    var manufacturingDate = $(this).closest('.rowTemplate').find(
-                        '.manufacturingDate').val();
-                    var expiryDate = $(this).val();
-
-                    if (expiryDate && expiryDate < manufacturingDate) {
-                        alert("Expiry Date cannot be before Manufacturing Date.");
-                        $(this).val("");
-                    }
-                });
-
-                newBatchRow.find('.processCartons').click(function() {
-                    var noOfCartons = newBatchRow.find('.noOfCartons').val();
-                    var cartonRowsContainer = newBatchRow.find('#cartonRows');
-                    cartonRowsContainer.empty();
-
-                    if (noOfCartons && noOfCartons > 0) {
-
-                        for (var i = 0; i < noOfCartons; i++) {
-                            var cartonRow = $(`
-                        <div class="row cartonRow mb-2">
-                            <div class="col-md-4 mb-2">
-                                <label for="itemsInside_${i+1}" class="form-label">No. of Items Inside (Carton ${i+1})</label>
-                                <input type="number" id="itemsInside_${i+1}" class="form-control noOfItemsInside itemsInside" placeholder="Enter Items Inside for Carton ${i+1}">
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <label for="missingItems_${i+1}" class="form-label">Missing Items (Carton ${i+1})</label>
-                                <input type="number" id="missingItems_${i+1}" class="form-control missingItems" placeholder="Enter Missing Items for Carton ${i+1}">
-                            </div>
-
-                        </div>
-                    `);
-                            cartonRowsContainer.append(
-                                cartonRow);
-                        }
-                    } else {
-                        alert('Please enter a valid number of cartons.');
-                    }
-                });
-
-                newBatchRow.find('.removeRow').click(function() {
-                    newBatchRow.remove();
-                });
-
-                newBatchRow.on('click', '.removeCartonRow', function() {
-                    $(this).closest('.cartonRow').remove();
-                });
-
-                newBatchRow.on('input',
-                    '.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside',
-                    function() {
-                        $(this).val($(this).val().replace(/[^0-9.]/g, ''));
-                    });
-
-                newBatchRow.on('input', '.basePrice, .exchangeRate', function() {
-                    var basePrice = parseFloat(newBatchRow.find('.basePrice').val()) || 0;
-                    var exchangeRate = parseFloat(newBatchRow.find('.exchangeRate').val()) || 0;
-                    var buyPrice = basePrice * exchangeRate;
-                    newBatchRow.find('.buyPrice').val(buyPrice.toFixed(2));
-                });
-            });
-        })
     </script>
 
     </body>

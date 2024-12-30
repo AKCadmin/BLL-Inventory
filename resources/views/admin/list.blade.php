@@ -27,8 +27,46 @@
                         <div class="card">
                             <div class="card-body">
                                 <h4 class="card-title mb-4">Stock List</h4>
-                                {{-- <div class="row mb-3">
-                                    <div class="col-md-4 col-sm-6 col-12">
+
+                                <div class="row mb-3">
+                                    <div class="row mb-3">
+                                        {{-- <div class="col-md-4 col-sm-6 col-12">
+                                            <div class="input-group">
+                                                <select id="brand-filter" class="form-control custom-select">
+                                                    <option value="">Select Brand</option>
+                                                    @foreach ($brands as $brand)
+                                                        <option value="{{ $brand->id }}">{{ $brand->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div> --}}
+
+                                        {{-- <div class="col-md-4 col-sm-6 col-12">
+                                            <div class="input-group">
+                                                <select id="product-filter" class="form-control custom-select">
+                                                    <option value="">Select Product</option>
+                                                    
+                                                </select>
+                                            </div>
+                                        </div> --}}
+                                        {{-- <div class="col-md-4 col-sm-6 col-12">
+                                            <div class="input-group">
+                                                <input type="date" id="datePicker" class="form-control">
+                                            </div>
+                                        </div> --}}
+                                    </div>
+                                    {{-- <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="input-group">
+                                            <select id="company-filter" class="form-control custom-select">
+                                                <option value="">Select Organization</option>
+                                                @foreach ($companies as $company)
+                                                    <option value="{{ $company->name }}">{{ $company->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div> --}}
+                                    {{-- <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
                                             <select id="sku-filter" class="form-control custom-select">
                                                 <option value="">Select SKU</option>
@@ -37,64 +75,99 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
-                                </div> --}}
+                                    </div> --}}
+                                </div>
 
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            {{-- <th>SKU</th> --}}
-                                            <th>Batch No</th>
-                                            <th>Buy Price</th>
-                                            <th>No. of Carton</th>
-                                            <th>Total Item</th>
-                                            <th>Missing Item</th>
+                                            <th>Product Id</th>
+                                            <th>Total Buy Price</th>
+                                            <th>Total No. of Batches</th>
+                                            <th>Total No. of Cartons</th>
+                                            <th>Total Items</th>
+                                            <th>Missing Items</th>
+                                            <th>Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($stocks as $stock)
-                                            @php
-                                                // Check if the batch_no is present in the 'Sell' table
-                                                $batchExists = \App\Models\Sell::where(
-                                                    'batch_no',
-                                                    $stock->batch_no,
-                                                )->exists();
-                                            @endphp
+                                        @foreach ($groupedData as $data)
                                             <tr>
-                                                <td>{{ $stock->batch_id }}</td>
-                                                {{-- <td>{{ $stock->sku }}</td> --}}
-                                                <td>{{ $stock->batch_no }}</td>
-                                                <td>{{ $stock->buy_price }}</td>
-                                                <td>{{ $stock->cartons }}</td>
-                                                <td>{{ $stock->total_items }}</td>
-                                                <td>{{ $stock->missing_items }}</td>
+                                                <td>{{ $data['product_id'] }}</td>
+                                                <td>{{ $data['product_name'] }}</td>
                                                 <td>
-                                                    @can('edit-purchase')
-                                                        
-                                                   
-                                                    <a href="{{ $batchExists ? '#' : route('stock.show', ['stock' => $stock->batch_id]) }}"
-                                                        class="btn btn-sm btn-warning edit-stock-btn"
-                                                        data-id="{{ $stock->batch_id }}"
-                                                        @if ($batchExists) style="pointer-events: none; opacity: 0.6;" @endif>
-                                                        Edit
-                                                    </a>
-                                                    @endcan
-                                                    @can('delete-purchase')
-                                                                                      
-                                                    <button class="btn btn-sm btn-danger delete-stock-btn"
-                                                        data-id="{{ $stock->batch_id }}"
-                                                        @if ($batchExists) disabled @endif>
-                                                        Delete
-                                                    </button>
-                                                    @endcan
+                                                    @php
+                                                        $totalBuyPrice = 0;
+                                                        foreach ($data['batches'] as $batch) {
+                                                            $totalBuyPrice += $batch['buy_price'];
+                                                        }
+                                                    @endphp
+                                                    {{ number_format($totalBuyPrice, 2) }}
+                                                </td>
+                                                <td>{{ count($data['batches']) }}</td>
+                                                <td>
+                                                    @php
+                                                        $totalCartons = 0;
+                                                        foreach ($data['batches'] as $batch) {
+                                                            $totalCartons += $batch['cartons'];
+                                                        }
+                                                    @endphp
+                                                    {{ $totalCartons }}
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $totalItems = 0;
+                                                        foreach ($data['batches'] as $batch) {
+                                                            $totalItems += $batch['total_items'];
+                                                        }
+                                                    @endphp
+                                                    {{ $totalItems }}
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $missingItems = 0;
+                                                        foreach ($data['batches'] as $batch) {
+                                                            $missingItems += $batch['missing_items'];
+                                                        }
+                                                    @endphp
+                                                    {{ $missingItems }}
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $created_at = '';
+                                                        foreach ($data['batches'] as $batch) {
+                                                            $created_at = $batch['created_at'];
+                                                        }
+                                                        $formatted_date = date('Y-m-d', strtotime($created_at));
+                                                    @endphp
+                                                    {{ $formatted_date }}
+                                                </td>
+                                                <td>
+                                                    <!-- Action Buttons -->
+                                                    <div>
+                                                        @can('edit-purchase')
+                                                            <a href="{{ route('stock.show', ['stock' => $data['product_id']]) }}"
+                                                                class="btn btn-sm btn-warning edit-stock-btn"
+                                                                data-id="{{ $data['product_id'] }}">
+                                                                Edit
+                                                            </a>
+                                                        @endcan
+
+                                                        @can('delete-purchase')
+                                                            <button class="btn btn-sm btn-danger delete-stock-btn"
+                                                                data-id="{{ $data['product_id'] }}">
+                                                                Delete
+                                                            </button>
+                                                        @endcan
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
-
                                 </table>
+
                             </div>
                         </div>
                     </div> <!-- end col -->
@@ -114,25 +187,30 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script>
-    $(document).ready(function() {
-        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
-        // Check if the table is already initialized before initializing it again
-        if (!$.fn.dataTable.isDataTable('#stocktable')) {
-            var table = $('#stocktable').DataTable({
-                // Optional: Enable the global search box for the entire table if needed
-                // searching: true,
-            });
+    $('.delete-stock-btn').click(function(e) {
+        e.preventDefault();
+        var stockId = $(this).data('id');
+        var row = $(this).closest('tr');
 
-            // SKU Filter dropdown change event
-            $('#sku-filter').on('change', function() {
-                var selectedSku = $(this).val();
-
-                if (selectedSku) {
-                    // Filter the table by SKU (column 1 is the SKU column)
-                    table.column(1).search('^' + selectedSku + '$', true, false).draw();
-                } else {
-                    // Clear the filter if no SKU is selected
-                    table.column(1).search('').draw();
+        if (confirm('Are you sure you want to delete this sell record?')) {
+            $.ajax({
+                url: '/stock/' + stockId,
+                type: 'DELETE',
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        row.remove();
+                        toastr.success(response.message);
+                        window.location.href =
+                            '{{ route('stock.list') }}';
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error occurred while deleting the record.');
                 }
             });
         }

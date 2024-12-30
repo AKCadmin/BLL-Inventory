@@ -120,6 +120,7 @@
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
             @endphp
+            @if(auth()->user()->role == 1)
             <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
                 @csrf
                 <div class="input-group">
@@ -131,6 +132,7 @@
                     </select>
                 </div>
             </form>
+            @endif
 
 
         </div>

@@ -28,16 +28,16 @@
                             <div class="card-body">
                                 <h4 class="card-title mb-4">Stock List</h4>
                                 <div class="row mb-3">
-                                    <div class="col-md-4 col-sm-6 col-12">
+                                    {{-- <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
                                             <select id="brand-filter" class="form-control custom-select">
                                                 <option value="">Select Brand</option>
-                                                @foreach ($companies as $company)
-                                                    <option value="{{ $company->name }}">{{ $company->name }}</option>
+                                                @foreach ($brands as $brand)
+                                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                    
                                     <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
@@ -67,7 +67,7 @@
                                             {{-- <th>Purchased sales</th> --}}
                                             <th>Status</th>
 
-                                            <th>Action</th>
+                                            {{-- <th>Action</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -145,6 +145,7 @@
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
         var productId = "";
+        var brandId = "";
 
         $('#organization-filter').change(function(e) {
             e.preventDefault();
@@ -153,6 +154,15 @@
             fetchStocks(formattedName,null,productId,selectedDate)
             productsList(formattedName)
             //  fetchProducts(formattedName)
+
+        });
+        $('#brand-filter').change(function(e) {
+            e.preventDefault();
+
+             brandId = $(this).val();
+            let companyName = $('#organization-filter').val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchStocks(formattedName, brandId, productId,selectedDate)
 
         });
         $('#product-filter').change(function(e) {
@@ -216,24 +226,25 @@
                     // Append new rows
                     $.each(data, function(index, stock) {
                         console.log(stock,"stocks");
-                        var batchExists = stock.batch_no ? true : false;
-                        var editButton = batchExists ?
-                            `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
-                            `<a href="{{ route('stock.show', ['stock' => ':batch_id']) }}".replace(':batch_id', stock.batch_id) class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
+                        // var batchExists = stock.batch_no ? true : false;
+                        
+                            // `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
+                            var editButton = 
+        `<a href="/stock/${stock.batch_id}" class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
 
-                        var deleteButton = batchExists ?
-                            `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
+                         var deleteButton =
+                            // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
                             `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.batch_id}">Delete</button>`;
 
                         table.row.add([
                            
                             stock.batch_id,
-                            null,
+                            stock.brand_name,
                             stock.batch_no,
-                            stock.name,
+                            stock.product_name,
                             stock.available_items,
                             stock.status,
-                            `${editButton} ${deleteButton}`
+                            // `${editButton} ${deleteButton}`
                         ]);
                     });
 
@@ -312,6 +323,7 @@
             //     }
             // });
         }
+
     });
 </script>
 

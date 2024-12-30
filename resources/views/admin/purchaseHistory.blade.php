@@ -30,7 +30,7 @@
 
                                 <div class="row mb-3">
                                     <div class="row mb-3">
-                                        <div class="col-md-4 col-sm-6 col-12">
+                                        {{-- <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
                                                 <select id="brand-filter" class="form-control custom-select">
                                                     <option value="">Select Brand</option>
@@ -40,7 +40,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> --}}
 
                                         <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
@@ -86,11 +86,13 @@
                                         <tr>
                                             <th>Id</th>
 
-                                            <th>Batch No</th>
-                                            <th>Buy Price</th>
-                                            <th>No. of Carton</th>
+                                            <th>Product Id</th>
+                                            <th>Total Buy Price</th>
+                                            <th>Total No. of batches</th>
+                                            <th>Total No. of Carton</th>
                                             <th>Total Item</th>
                                             <th>Missing Item</th>
+                                            <th>Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -156,43 +158,45 @@
         var brandName = "";
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
+        var productId = "";
+        var brandId = "";
         $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            fetchHistory(formattedName)
+            fetchHistory(formattedName, null, productId, selectedDate)
             productsList(formattedName)
         });
 
         $('#brand-filter').change(function(e) {
             e.preventDefault();
-               brandName = $(this).val();
+            brandName = $(this).val();
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
             fetchHistory(formattedName, brandName)
 
         });
 
-        $('#datePicker').on('change', function () {
+        $('#datePicker').on('change', function() {
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-             selectedDate = $(this).val(); // Get the selected date
-            fetchHistory(formattedName, null,null,selectedDate)
+            selectedDate = $(this).val(); // Get the selected date
+            fetchHistory(formattedName, null, productId, selectedDate)
         });
 
-        
+
         $('#product-filter').change(function(e) {
             e.preventDefault();
-            let productId = $(this).val();
+            productId = $(this).val();
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            fetchHistory(formattedName, null, productId,selectedDate)
+            fetchHistory(formattedName, null, productId, selectedDate)
 
         });
 
         function productsList(companyId) {
             $.ajax({
-                url: '/history/products/options', 
+                url: '/history/products/options',
                 type: 'GET',
                 dataType: 'json',
                 data: {
@@ -217,7 +221,49 @@
         }
 
 
-        function fetchHistory(companyName, brandId, productId,selectedDate) {
+        // function fetchHistory(companyName, brandId, productId, selectedDate) {
+        //     $.ajax({
+        //         url: "{{ route('purchase.getHistory') }}",
+        //         method: "GET",
+        //         data: {
+        //             company: companyName,
+        //             brandId: brandId,
+        //             productId: productId,
+        //             selectedDate: selectedDate
+        //         },
+        //         success: function(response) {
+        //             var table = $('#stocktable').DataTable();
+        //             table.clear(); // Clear the existing rows
+
+        //             $.each(response.data, function(index, stock) {
+        //                 const row = `
+        //             <tr>
+        //                 <td>${stock.batch_id}</td>
+        //                 <td>${stock.batch_no}</td>
+        //                 <td>${stock.buy_price}</td>
+        //                 <td>${stock.cartons}</td>
+        //                 <td>${stock.total_items}</td>
+        //                 <td>${stock.missing_items}</td>
+        //                 <td>
+        //                     <a href="/purchase/details/${stock.batch_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">Details</a>
+        //                     <a href="/stock/${stock.batch_id}" class="btn btn-sm btn-warning edit-stock-btn" data-id="${stock.batch_id}">Edit</a>
+        //                     <button class="btn btn-sm btn-danger" onclick="deleteItem(${stock.batch_id})">Delete</button>
+        //                 </td>
+        //             </tr>
+        //         `;
+        //                 table.row.add($(row)); // Add the row to the DataTable
+        //             });
+
+        //             // Redraw the table after adding rows
+        //             table.draw();
+        //         },
+        //         error: function() {
+        //             alert("Error fetching stock data.");
+        //         }
+        //     });
+        // }
+
+        function fetchHistory(companyName, brandId, productId, selectedDate) {
             $.ajax({
                 url: "{{ route('purchase.getHistory') }}",
                 method: "GET",
@@ -228,35 +274,58 @@
                     selectedDate: selectedDate
                 },
                 success: function(response) {
-                    const data = response.data;
-                    const tbody = $("#stocktable tbody");
-                    tbody.empty(); // Clear the existing rows
+                    console.log(response);
 
-                    data.forEach(stock => {
+                    const data = response.data || {};
+                    const table = $('#stocktable').DataTable();
+                    table.clear(); 
+
+                    for (const [productKey, productDetails] of Object.entries(data)) {
+                        const {
+                            product_id,
+                            product_name,
+                            brand_name,
+                            batches
+                        } = productDetails;
+
+                        let totalBuyPrice = 0;
+                        let totalCartons = 0;
+                        let totalItems = 0;
+                        let missingItems = 0;
+                        let created_at = "";
+                        const totalBatches = batches.length;
+
+                        batches.forEach(batch => {
+                            totalBuyPrice += parseFloat(batch.buy_price) * batch
+                            .cartons; 
+                            totalCartons += parseInt(batch.cartons, 10);
+                            totalItems += parseInt(batch.total_items, 10);
+                            missingItems += parseInt(batch.missing_items, 10);
+                            created_at = batch.created_at.split(" ")[0];
+                            
+                        });
+
                         const row = `
                     <tr>
-                        <td>${stock.batch_id}</td>
-                        
-                        <td>${stock.batch_no}</td>
-                        <td>${stock.buy_price}</td>
-                        <td>${stock.cartons}</td>
-                        <td>${stock.total_items}</td>
-                        <td>${stock.missing_items}</td>
-                          <td>
-                            <a href="/purchase/details/${stock.batch_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">
-                                Details
-                            </a>
-                            <a href="/stock/${stock.batch_id}" 
-                               class="btn btn-sm btn-warning edit-stock-btn" 
-                               data-id="${stock.batch_id}">
-                                Edit
-                            </a>
-                            <button class="btn btn-sm btn-danger" onclick="deleteItem(${stock.batch_id})">Delete</button>
+                        <td>${product_id}</td>
+                        <td>${product_name}</td>
+                        <td>${totalBuyPrice.toFixed(2)}</td>
+                         <td>${totalBatches}</td>
+                        <td>${totalCartons}</td>
+                        <td>${totalItems}</td>
+                        <td>${missingItems}</td>
+                         <td>${created_at}</td>
+                        <td>
+                            <a href="/purchase/details/${product_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">Details</a>
+                            <a href="{{ route('stock.show', '') }}/${product_id}" class="btn btn-sm btn-warning">Edit</a>
+                            <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${product_id}">Delete</button>
                         </td>
                     </tr>
                 `;
-                        tbody.append(row);
-                    });
+                        table.row.add($(row));
+                    }
+
+                    table.draw();
                 },
                 error: function() {
                     alert("Error fetching stock data.");
@@ -264,6 +333,37 @@
             });
         }
 
+
+
+        $('#stocktable').on('click', '.delete-stock-btn', function(e) {
+            e.preventDefault();
+            var stockId = $(this).data('id');
+            var row = $(this).closest('tr');
+           
+
+            if (confirm('Are you sure you want to delete this sell record?')) {
+                $.ajax({
+                    url: '/stock/' + stockId,
+                    type: 'DELETE',
+                    data: {
+                        "_token": "{{ csrf_token() }}", 
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            row.remove(); 
+                            toastr.success(response.message);
+                            window.location.href =
+                            '{{ route('stock.list') }}'; 
+                        } else {
+                            toastr.error('Something went wrong. Please try again.');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Error occurred while deleting the record.');
+                    }
+                });
+            }
+        });
 
 
         // Check if the table is already initialized before initializing it again

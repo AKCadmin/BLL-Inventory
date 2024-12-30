@@ -30,22 +30,23 @@
 
                                 <div class="row mb-3">
                                     <div class="row mb-3">
-                                        <div class="col-md-4 col-sm-6 col-12">
+                                        {{-- <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
                                                 <select id="brand-filter" class="form-control custom-select">
                                                     <option value="">Select Brand</option>
                                                     @foreach ($companies as $company)
-                                                        <option value="{{ $company->name }}">{{ $company->name }}</option>
+                                                        <option value="{{ $company->name }}">{{ $company->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        </div>
-                                       
+                                        </div> --}}
+
                                         <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
                                                 <select id="product-filter" class="form-control custom-select">
                                                     <option value="">Select Product</option>
-    
+
                                                 </select>
                                             </div>
                                         </div>
@@ -87,6 +88,7 @@
                                             <th>Retail Price</th>
                                             <th>Valid From</th>
                                             <th>Valid To</th>
+                                            <th>Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -162,34 +164,34 @@
 
         $('#brand-filter').change(function(e) {
             e.preventDefault();
-               brandName = $(this).val();
+            brandName = $(this).val();
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
             fetchHistory(formattedName, brandName)
 
         });
 
-        $('#datePicker').on('change', function () {
+        $('#datePicker').on('change', function() {
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-             selectedDate = $(this).val(); // Get the selected date
-            fetchHistory(formattedName, null,null,selectedDate)
+            selectedDate = $(this).val(); // Get the selected date
+            fetchHistory(formattedName, null, productId, selectedDate)
         });
 
-        
+
         $('#product-filter').change(function(e) {
             e.preventDefault();
             let productId = $(this).val();
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            fetchHistory(formattedName, null, productId,selectedDate)
+            fetchHistory(formattedName, null, productId, selectedDate)
 
         });
 
-        
+
         function productsList(companyId) {
             $.ajax({
-                url: '/history/products/options', 
+                url: '/history/products/options',
                 type: 'GET',
                 dataType: 'json',
                 data: {
@@ -213,7 +215,7 @@
             });
         }
 
-        function fetchHistory(companyName, brandId, productId,selectedDate) {
+        function fetchHistory(companyName, brandId, productId, selectedDate) {
             $.ajax({
                 url: "{{ route('sell.getHistory') }}",
                 method: "GET",
@@ -225,8 +227,8 @@
                 },
                 success: function(response) {
                     const data = response.data;
-                    const tableBody = $('#stocktable tbody');
-                    tableBody.empty();
+                    const table = $('#stocktable').DataTable();
+                    table.clear(); // Clear existing rows
 
                     data.forEach(function(item) {
                         const row = `
@@ -238,20 +240,25 @@
                         <td>${item.retail_price}</td>
                         <td>${item.valid_from}</td>
                         <td>${item.valid_to}</td>
-                       <td>
-                            <button class="btn btn-primary btn-sm" onclick="editItem(${item.id})">Edit</button>
+                        <td>${item.created_at.split("T")[0]}</td>
+                        <td>
+                           <a href="/sell/${item.id}/edit" class="btn btn-sm btn-primary edit-sell-btn" data-id="${item.id}">Edit</a>
                             <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">Delete</button>
                         </td>
                     </tr>
                 `;
-                        tableBody.append(row);
+                        table.row.add($(row)); // Add new row to the DataTable
                     });
+
+                    // Redraw the table
+                    table.draw();
                 },
                 error: function() {
                     alert("Error fetching stock data.");
                 }
             });
         }
+
 
 
 
@@ -276,7 +283,36 @@
                 }
             });
         }
+
+
+
     });
+
+    function deleteItem(itemId) {
+            if (confirm("Are you sure you want to delete this item?")) {
+               
+                    $.ajax({
+                        url: '/sell/' + itemId,
+                        type: 'DELETE',
+                        data: {
+                            "_token": "{{ csrf_token() }}",
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                               
+                                toastr.success(response.message);
+                                window.location.href =
+                                    '{{ route('sell.list') }}';
+                            } else {
+                                toastr.error('Something went wrong. Please try again.');
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Error occurred while deleting the record.');
+                        }
+                    });
+            }
+        }
 </script>
 </body>
 

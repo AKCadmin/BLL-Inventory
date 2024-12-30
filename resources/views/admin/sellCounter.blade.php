@@ -81,8 +81,8 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input packaging-type pakagingType byItemBox" type="radio"
-                                                id="byItemBox" name="packagingType" value="byItemBox">
+                                            <input class="form-check-input packaging-type pakagingType byItemBox"
+                                                type="radio" id="byItemBox" name="packagingType" value="byItemBox">
                                             <label class="form-check-label" for="byItemBox">
                                                 By Item Box
                                             </label>
@@ -163,9 +163,12 @@
                     if (response.products && response.products.length > 0) {
                         $('.SKU').html('<option selected disabled>Select Product / SKU</option>');
                         $.each(response.products, function(index, product) {
-                            console.log(product,"product")
+                            // console.log(product, "product")
+                            // $('.SKU').append(
+                            //     `<option value="${product.sku}">${product.sku}</option>`
+                            // );
                             $('.SKU').append(
-                                `<option value="${product.sku}">${product.product[0].name}</option>`
+                                `<option value="${product.sku}">${product?.product[0]?.name} / ${product.sku}</option>`
                             );
                         });
                     }
@@ -907,9 +910,9 @@
             event.preventDefault();
 
             const skuDataForRow = [];
-            const batchData = {}; 
+            const batchData = {};
 
-         
+
             const skuRows = document.querySelectorAll(".skuRow");
             skuRows.forEach(row => {
                 const skuInput = row.querySelector(".sku-input");
@@ -929,10 +932,10 @@
                         packagingType: packagingType
                     });
 
-                  
+
                     const batchInput = row.querySelector(".batch-input").value;
 
-                  
+
                     if (!batchData[batchInput]) {
                         batchData[batchInput] = {
                             sku: [],
@@ -943,7 +946,7 @@
                         };
                     }
 
-                  
+
                     batchData[batchInput].sku.push({
                         SKU: skuValue,
                         customerType: customerType,
@@ -952,7 +955,7 @@
                 }
             });
 
-           
+
             const batchRows = document.querySelectorAll(".skuRow");
             batchRows.forEach(row => {
                 const batchInput = row.querySelector(".batch-input").value;
@@ -964,20 +967,21 @@
                         numCartons: 0,
                         cartonData: [],
                         cartonItemsData: [],
-                        packagingTypes: [] 
+                        packagingTypes: []
                     };
                 }
 
                 const packagingTypeInputs = row.querySelectorAll(".packaging-type");
-    if (!Array.isArray(batchData[batchInput].packagingTypes)) {
-        batchData[batchInput].packagingTypes = [];
-    }
+                if (!Array.isArray(batchData[batchInput].packagingTypes)) {
+                    batchData[batchInput].packagingTypes = [];
+                }
 
-    packagingTypeInputs.forEach(packagingInput => {
-        if (packagingInput.checked) {
-            batchData[batchInput].packagingTypes.push(packagingInput.value);
-        }
-    });
+                packagingTypeInputs.forEach(packagingInput => {
+                    if (packagingInput.checked) {
+                        batchData[batchInput].packagingTypes.push(packagingInput
+                            .value);
+                    }
+                });
                 // Handle SKUs
                 const skuInputs = row.querySelectorAll(".sku-input");
                 skuInputs.forEach(skuInput => {
@@ -1049,12 +1053,13 @@
                     location.reload();
                 } else {
                     const error = await response.json();
-                    toastr.error(`Error: ${error.error}<br>File: ${error.file}<br>Line: ${error.line}`);
+                    toastr.error(
+                        `Error: ${error.error}<br>File: ${error.file}<br>Line: ${error.line}`);
                     // toastr.error("Error submitting form.");
                     // toastr.error(error);
                 }
             } catch (err) {
-               
+
                 toastr.error("An error occurred. ", err.error);
             } finally {
                 // Re-enable the submit button

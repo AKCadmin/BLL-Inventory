@@ -65,6 +65,7 @@
                                             {{-- <th>Organization Name</th> --}}
                                             {{-- <th>SKU</th> --}}
                                             <th>Name</th>
+                                            <th>Brand Name</th>
                                             <th>Description</th>
                                             <th>Status</th>
                                             <th>Action</th>
@@ -84,6 +85,7 @@
                                                 {{-- <td>{{ $product->organization ? $product->organization->name : 'N/A' }}</td> --}}
                                                 {{-- <td>{{ $product->sku }}</td> --}}
                                                 <td>{{ $product->name }}</td>
+                                                <td>{{ $product->brand?$product->brand->name:null }}</td>
                                                 <td>
                                                     <span title="{{ $product->description }}" data-toggle="tooltip"
                                                         data-placement="top">
@@ -153,7 +155,21 @@
                                                 <input type="hidden" class="form-control" id="product_id"
                                                     name="product_id" value="">
 
-                                                <div class="mb-3">
+                                                    <div class="mb-3">
+                                                        <label for="autoSizingSelect">Select Organization</label>
+                                                        <select class="form-select brand" id="brandId"
+                                                            id="autoSizingSelect" name="brand_id">
+                                                            <option value="">Select Brand &ensp;</option>
+                                                            @foreach ($brands as $brand)
+                                                                <option value="{{ $brand->id }}"
+                                                                    {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
+                                                                    {{ $brand->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                {{-- <div class="mb-3">
                                                     <label for="autoSizingSelect">Select Organization</label>
                                                     <select class="form-select company" id="companyId"
                                                         id="autoSizingSelect" name="company_id">
@@ -165,7 +181,7 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                </div>
+                                                </div> --}}
 
                                                 {{-- <div class="mb-3">
                                                     <label for="sku" class="form-label">SKU</label>
@@ -386,7 +402,9 @@
                                 $(this).prop('selected', false);
                             }
                         });
+
                         $('#product_id').val(response.product.id);
+                        $('#brandId').val(response.product.brand_id);
                         // $('#sku').val(response.product.sku);
                         $('#name').val(response.product.name);
                         $('#description').val(response.product.description);
