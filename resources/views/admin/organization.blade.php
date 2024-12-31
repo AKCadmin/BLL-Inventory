@@ -209,7 +209,14 @@
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();
-
+        $('#phone_no').on('input', function () {
+            let phone = $(this).val();
+            if (phone.length > 10) {
+                $(this).val(phone.substring(0, 10)); 
+            } else if (!/^\d*$/.test(phone)) {
+                $(this).val(phone.replace(/\D/g, '')); 
+            }
+        });
         $('#openModalBtn').on('click', function() {
             $('#organizationModal').show();
             $('#organization_id').val('');

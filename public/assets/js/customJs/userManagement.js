@@ -1,7 +1,15 @@
 $(document).ready(function () {
     var appUrl = $("#appUrl").val();
 
-
+    $('#phone_number').on('input', function () {
+        let phone = $(this).val();
+        if (phone.length > 10) {
+            $(this).val(phone.substring(0, 10)); 
+        } else if (!/^\d*$/.test(phone)) {
+            $(this).val(phone.replace(/\D/g, '')); 
+        }
+    });
+    
     $("#organization-filter").change(function (e) {
         e.preventDefault();
         let companyName = $(this).val();

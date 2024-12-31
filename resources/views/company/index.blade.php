@@ -159,13 +159,14 @@
                                                 <div class="mb-3">
                                                     <label for="brand_email" class="form-label">Contact Person</label>
                                                     <input type="text" class="form-control" id="brand_contact"
-                                                        name="brand_contact" required placeholder="Enter brand Email">
+                                                        name="brand_contact" required placeholder="Enter contact person">
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label for="phone_no" class="form-label">Phone No</label>
                                                     <input type="number" class="form-control" id="phone_no"
                                                         name="phone_no" required placeholder="Enter brand Phone No">
+                                                        <div id="phone_error" style="color: red; display: none;">Please enter a valid phone number (10 digits).</div>
                                                 </div>
 
                                                 <!-- Add the Category Field -->
@@ -225,6 +226,14 @@
             const charCode = e.which;
             if ((charCode >= 48 && charCode <= 57)) {
                 e.preventDefault();
+            }
+        });
+        $('#phone_no').on('input', function () {
+            let phone = $(this).val();
+            if (phone.length > 10) {
+                $(this).val(phone.substring(0, 10)); 
+            } else if (!/^\d*$/.test(phone)) {
+                $(this).val(phone.replace(/\D/g, '')); 
             }
         });
         $('#openModalBtn').on('click', function() {
