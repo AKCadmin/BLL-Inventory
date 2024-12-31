@@ -124,6 +124,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('user_id', $user->id)
                     ->where('page_id', $pageId)
                     ->first();
+                    // dd($permissions);
 
                 if ($permissions && $permissions->page_permission) {
                     $permissionsArray = json_decode($permissions->page_permission, true);

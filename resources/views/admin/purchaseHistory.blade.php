@@ -278,7 +278,7 @@
 
                     const data = response.data || {};
                     const table = $('#stocktable').DataTable();
-                    table.clear(); 
+                    table.clear();
 
                     for (const [productKey, productDetails] of Object.entries(data)) {
                         const {
@@ -296,13 +296,14 @@
                         const totalBatches = batches.length;
 
                         batches.forEach(batch => {
-                            totalBuyPrice += parseFloat(batch.buy_price) * batch
-                            .cartons; 
+                            // totalBuyPrice += parseFloat(batch.buy_price) * batch
+                            // .cartons; 
+                            totalBuyPrice += parseFloat(batch.buy_price);
                             totalCartons += parseInt(batch.cartons, 10);
                             totalItems += parseInt(batch.total_items, 10);
                             missingItems += parseInt(batch.missing_items, 10);
                             created_at = batch.created_at.split(" ")[0];
-                            
+
                         });
 
                         const row = `
@@ -317,7 +318,8 @@
                          <td>${created_at}</td>
                         <td>
                             <a href="/purchase/details/${product_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">Details</a>
-                            <a href="{{ route('stock.show', '') }}/${product_id}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="#" class="btn btn-sm btn-warning edit-stock-btn" data-url="{{ route('stock.show', '') }}/${product_id}">Edit</a>
+
                             <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${product_id}">Delete</button>
                         </td>
                     </tr>
@@ -326,6 +328,15 @@
                     }
 
                     table.draw();
+                    $('#stocktable').on('click', '.edit-stock-btn', function(event) {
+                        event.preventDefault();
+                        const url = $(this).data('url');
+                        const confirmed = confirm(
+                            'Are you sure you want to edit this item?');
+                        if (confirmed) {
+                            window.location.href = url;
+                        }
+                    });
                 },
                 error: function() {
                     alert("Error fetching stock data.");
@@ -339,23 +350,25 @@
             e.preventDefault();
             var stockId = $(this).data('id');
             var row = $(this).closest('tr');
-           
+
 
             if (confirm('Are you sure you want to delete this sell record?')) {
                 $.ajax({
                     url: '/stock/' + stockId,
                     type: 'DELETE',
                     data: {
-                        "_token": "{{ csrf_token() }}", 
+                        "_token": "{{ csrf_token() }}",
                     },
                     success: function(response) {
-                        if (response.status === 'success') {
-                            row.remove(); 
+                        if (response.success === true) {
+                            row.remove();
                             toastr.success(response.message);
                             window.location.href =
-                            '{{ route('stock.list') }}'; 
+                                '{{ route('purchase.history') }}';
                         } else {
-                            toastr.error('Something went wrong. Please try again.');
+                            toastr.success(
+                                'Product and its related batches and cartons deleted successfully.'
+                                );
                         }
                     },
                     error: function() {

@@ -152,6 +152,7 @@
 <script>
     $(document).ready(function() {
         var brandName = ""
+        var productId = "";
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
         $('#organization-filter').change(function(e) {
@@ -181,7 +182,7 @@
 
         $('#product-filter').change(function(e) {
             e.preventDefault();
-            let productId = $(this).val();
+            productId = $(this).val();
             let companyName = $('#organization-filter').val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
             fetchHistory(formattedName, null, productId, selectedDate)
@@ -242,16 +243,26 @@
                         <td>${item.valid_to}</td>
                         <td>${item.created_at.split("T")[0]}</td>
                         <td>
-                           <a href="/sell/${item.id}/edit" class="btn btn-sm btn-primary edit-sell-btn" data-id="${item.id}">Edit</a>
+                           <a href="#" class="btn btn-sm btn-primary edit-sell-btn" data-id="${item.sku}" data-url="/sell/${item.sku}/edit">Edit</a>
                             <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">Delete</button>
                         </td>
                     </tr>
                 `;
-                        table.row.add($(row)); // Add new row to the DataTable
+                        table.row.add($(row)); 
                     });
 
-                    // Redraw the table
+                   
                     table.draw();
+
+                    $('#stocktable').on('click', '.edit-sell-btn', function(event) {
+                        event.preventDefault();
+                        const url = $(this).data('url');
+                        const confirmed = confirm(
+                            'Are you sure you want to edit this sell item?');
+                        if (confirmed) {
+                            window.location.href = url;
+                        }
+                    });
                 },
                 error: function() {
                     alert("Error fetching stock data.");
@@ -289,30 +300,30 @@
     });
 
     function deleteItem(itemId) {
-            if (confirm("Are you sure you want to delete this item?")) {
-               
-                    $.ajax({
-                        url: '/sell/' + itemId,
-                        type: 'DELETE',
-                        data: {
-                            "_token": "{{ csrf_token() }}",
-                        },
-                        success: function(response) {
-                            if (response.status === 'success') {
-                               
-                                toastr.success(response.message);
-                                window.location.href =
-                                    '{{ route('sell.list') }}';
-                            } else {
-                                toastr.error('Something went wrong. Please try again.');
-                            }
-                        },
-                        error: function() {
-                            toastr.error('Error occurred while deleting the record.');
-                        }
-                    });
-            }
+        if (confirm("Are you sure you want to delete this item?")) {
+
+            $.ajax({
+                url: '/sell/' + itemId,
+                type: 'DELETE',
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+
+                        toastr.success(response.message);
+                        window.location.href =
+                            '{{ route('sell.history') }}';
+                    } else {
+                        toastr.error('Something went wrong. Please try again.');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error occurred while deleting the record.');
+                }
+            });
         }
+    }
 </script>
 </body>
 

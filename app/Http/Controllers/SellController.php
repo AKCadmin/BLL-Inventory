@@ -16,9 +16,9 @@ class SellController extends Controller
      */
     public function index()
     {
-       
+
         if (auth()->user()->cannot('view-sell')) {
-            abort(403); 
+            abort(403);
         }
         return view('admin.sell');
     }
@@ -38,7 +38,7 @@ class SellController extends Controller
     {
         try {
             if (auth()->user()->cannot('add-sell')) {
-                abort(403); 
+                abort(403);
             }
             setDatabaseConnection();
             // Validate the incoming request data
@@ -112,7 +112,7 @@ class SellController extends Controller
      */
     public function show(string $id)
     {
-        
+
         return view('admin.sellList');
     }
 
@@ -121,29 +121,39 @@ class SellController extends Controller
      */
     public function edit(string $id)
     {
-        
-        if (auth()->user()->cannot('edit-sell')) {
-            abort(403); 
-        }
+        try {
 
-        setDatabaseConnection();
-
-        DB::beginTransaction(); 
-    
-        $sell = Sell::findOrFail($id);
-        $products = Product::all();  
-        $batches = [];
-        if ($sell->batch_no) {
-           
-            $batchExists = Sell::where('batch_no', $sell->batch_no)
-                ->where('id', '!=', $id) 
-                ->exists();
-            if (!$batchExists) {
-                $batches = Batch::where('batch_number', $sell->batch_no)->get();
+            if (auth()->user()->cannot('edit-sell')) {
+                abort(403);
             }
-        }
+            $products = Product::all();
+            $productId = Product::findOrFail($id);
 
-        return view('admin.sellEdit', compact('sell', 'products', 'batches'));
+            setDatabaseConnection();
+
+            DB::beginTransaction();
+
+            $sell = Sell::where('sku', $productId->id)->first();
+            $batches = [];
+
+            if ($sell->batch_no) {
+
+                $batchExists = Sell::where('batch_no', $sell->batch_no)
+                    ->where('sku', '!=', $productId->id)
+                    ->exists();
+                if (!$batchExists) {
+                    $batches = Batch::where('batch_number', $sell->batch_no)->get();
+                }
+            }
+
+            
+                return view('admin.sellEdit', compact('sell', 'products', 'batches'));
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'An unexpected error occurred. Please try again later.']);
+        }
     }
 
 
@@ -154,12 +164,12 @@ class SellController extends Controller
     {
         try {
             if (auth()->user()->cannot('edit-sell')) {
-                abort(403); 
+                abort(403);
             }
 
             setDatabaseConnection();
-    
-            DB::beginTransaction(); 
+
+            DB::beginTransaction();
 
             $sell = Sell::findOrFail($id);
 
@@ -168,7 +178,7 @@ class SellController extends Controller
             if (!$batch) {
                 return response()->json(['success' => false, 'message' => 'Invalid batch number.'], 422);
             }
-        
+
             $buyPrice = $batch->buy_price;
             // Validate the incoming data
             $validatedData = $request->validate([
@@ -190,9 +200,9 @@ class SellController extends Controller
             ]);
 
             // Update the record
-             $sell->update($validatedData);
+            $sell->update($validatedData);
 
-             $sellHistory = SellHistory::create([
+            $sellHistory = SellHistory::create([
                 'batch_no' => $validatedData['batch_no'],
                 'hospital_price' => $validatedData['hospital_price'],
                 'wholesale_price' => $validatedData['wholesale_price'],
@@ -215,7 +225,7 @@ class SellController extends Controller
             //  DB::purge('pgsql');
             //  DB::connection('pgsql')->getPdo();
 
-             
+
             // $sellSecondary = new Sell($validatedData); 
             // $sellSecondary->setConnection('pgsql'); 
             // $sellSecondary->update($validatedData);
@@ -251,52 +261,44 @@ class SellController extends Controller
      */
     public function destroy($id)
     {
-      
+
         try {
-           
+
             if (auth()->user()->cannot('delete-sell')) {
-                abort(403); 
+                abort(403);
             }
-
+            // $products = Product::findOrFail($id);
             setDatabaseConnection();
-    
-            DB::beginTransaction(); 
 
-            $sell = Sell::findOrFail($id); 
-            
+            $sell = Sell::findOrFail($id);
+
             $sell->delete();
-    
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Sell record deleted successfully!',
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-          
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Sell record not found!',
-            ], 404);
         } catch (\Exception $e) {
-          
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while deleting the record.',
-                'error' => $e->getMessage(), 
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-    
+
 
     public function getBatchesBySku($sku)
     {
-        
+
         try {
             setDatabaseConnection();
-          
+
             $product = Product::where('sku', $sku)->first();
 
             if ($product) {
-               
+
                 $batches = Batch::where('product_id', $product->id)->get();
 
                 return response()->json([
@@ -312,7 +314,7 @@ class SellController extends Controller
                 'batches' => [],
             ], 404);
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred. Please try again later.',
@@ -323,21 +325,21 @@ class SellController extends Controller
 
     public function getSellBatchesBySku($sku)
     {
-        
+
         try {
             // setDatabaseConnection();
-            
+
             $product = Product::where('id', $sku)->first();
             setDatabaseConnection();
             if ($product) {
                 $batches = Batch::where('product_id', $product->id)
-                ->whereNotIn('batch_number', function ($query) use ($product) {
-                    $query->select('batch_no')
-                          ->from('sell')
-                          ->where('product_id', $product->id); 
-                })
-                ->get();
-                
+                    ->whereNotIn('batch_number', function ($query) use ($product) {
+                        $query->select('batch_no')
+                            ->from('sell')
+                            ->where('product_id', $product->id);
+                    })
+                    ->get();
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Batches fetched successfully.',
@@ -351,7 +353,7 @@ class SellController extends Controller
                 'batches' => [],
             ], 404);
         } catch (\Exception $e) {
-        
+
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred. Please try again later.',
@@ -366,7 +368,7 @@ class SellController extends Controller
 
         setDatabaseConnection();
 
-        $sells = sell::orderBy('id','desc')->get();
+        $sells = sell::orderBy('id', 'desc')->get();
 
         return view('admin.sellList', compact('sells'));
     }

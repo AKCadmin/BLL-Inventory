@@ -39,7 +39,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Name</th>
-                                            
+
                                             <th>Address</th>
                                             <th>Category</th>
                                             <th>Contact Person</th>
@@ -57,6 +57,11 @@
                                                     strlen($brand->address) > $addressLimit
                                                         ? substr($brand->address, 0, $addressLimit) . '...'
                                                         : $brand->address;
+                                                $descriptionLimit = 15; // Set the character limit for truncating the address
+                                                $truncatedDescription =
+                                                    strlen($brand->description) > $descriptionLimit
+                                                        ? substr($brand->description, 0, $descriptionLimit) . '...'
+                                                        : $brand->description;
                                             @endphp
                                             <tr>
                                                 <td>{{ $brand->id }}</td>
@@ -70,7 +75,12 @@
                                                 <td>{{ $brand->category }}</td>
                                                 <td>{{ $brand->contact_person }}</td>
                                                 <td>{{ $brand->phone_no }}</td>
-                                                <td>{{ $brand->description }}</td>
+                                                <td>
+                                                    <span title="{{ $brand->description }}" data-toggle="tooltip"
+                                                        data-placement="top">
+                                                        {{ $truncatedDescription }}
+                                                    </span>
+                                                </td>
                                                 <td>{{ $brand->status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
 
@@ -210,8 +220,13 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
-        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
-
+        $('#organization-filter').hide();
+        $('#brand_contact').on('keypress', function (e) {
+            const charCode = e.which;
+            if ((charCode >= 48 && charCode <= 57)) {
+                e.preventDefault();
+            }
+        });
         $('#openModalBtn').on('click', function() {
             $('#brandModal').show();
             $('#brand_id').val('');
@@ -244,42 +259,16 @@
                 })
                 .done(function(response) {
                     if (response.success) {
-
                         toastr.success('brand saved successfully!');
-                        $('#brandModal').hide();
                         $("#global-loader").fadeOut();
-
+                        $('#brandModal').hide();
                         location.reload();
-
-                        //     $.ajax({
-                        //             url: "/api/brand/migration",
-                        //             type: "POST",
-                        //             dataType: 'json',
-                        //             data: {
-                        //                 db_name: brandName,
-                        //                 user: user,
-                        //             },
-                        //         })
-                        //         .done(function(response) {
-                        //             if (response.success) {
-
-                        //                 toastr.success('brand saved successfully!');
-                        //                 $('#brandModal').hide();
-                        //                 $("#global-loader").fadeOut();
-
-                        //                 location.reload();
-                        //             } else {
-                        //                 toastr.error("Database migration failed.");
-                        //             }
-                        //         })
-                        //         .fail(handleError);
-                        //     // loadCompanies();
-                        // } else {
-                        //     toastr.error(response.message);
-                        // }
                     }
                 })
-                .fail(handleError);
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    toastr.error('An error occurred: ' + errorThrown);
+                    $("#global-loader").fadeOut();
+                });
         });
 
 

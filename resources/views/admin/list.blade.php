@@ -200,7 +200,7 @@
                     "_token": "{{ csrf_token() }}",
                 },
                 success: function(response) {
-                    if (response.status === 'success') {
+                    if (response.success === true) {
                         row.remove();
                         toastr.success(response.message);
                         window.location.href =

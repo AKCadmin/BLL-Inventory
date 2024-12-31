@@ -22,8 +22,8 @@ class userManagement extends Controller
 
     public function show()
     {
-        
-        
+
+
         // if (auth()->user()->cannot('view-user-management')) {
         //     abort(403); 
         // }
@@ -318,14 +318,47 @@ class userManagement extends Controller
 
     public function list(Request $request)
     {
-        
-        $roles = role::orderBy('id', 'asc')->get();
-        $organizations = Organization::all();
-        $moduleusers = User::with('roles')
-        ->where('organization_id','=',$request->company)
-        ->whereNot('id', Auth::user()->id)
-        ->orderBy('id', 'asc')->get();
+        try {
+            $roles = role::orderBy('id', 'asc')->get();
+            $organizations = Organization::all();
+            $moduleusers = User::with('roles')
+                ->where('organization_id', '=', $request->company)
+                ->whereNot('id', Auth::user()->id)
+                ->orderBy('id', 'asc')->get();
 
-        return response()->json(['data'=>$moduleusers]);
+            return response()->json(['data' => $moduleusers]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while fetching users.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function listGet(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'company' => 'required|integer|exists:organizations,id',
+            ]);
+            $users = User::where('organization_id', '=', $request->company)
+                ->orderBy('id', 'asc')->get();
+                
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No users found for the specified organization.',
+                ], 404);
+            }
+            return response()->json(['data' => $users]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while fetching users.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

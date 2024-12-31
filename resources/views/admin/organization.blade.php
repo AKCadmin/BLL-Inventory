@@ -208,7 +208,7 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
-        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
+        $('#organization-filter').hide();
 
         $('#openModalBtn').on('click', function() {
             $('#organizationModal').show();
@@ -256,9 +256,8 @@
                                 if (response.success) {
 
                                     toastr.success('brand saved successfully!');
-                                    $('#brandModal').hide();
                                     $("#global-loader").fadeOut();
-
+                                    $('#brandModal').hide();
                                     location.reload();
                                 } else {
                                     toastr.error("Database migration failed.");

@@ -151,9 +151,6 @@
             }
 
             const batchData = @json($groupedData);
-            const organization  = @json($organization);
-            console.log(organization,"organization")
-            $("#organization-filter").val(organization.id).change();
 
 
             renderBatchData(batchData);
@@ -336,6 +333,7 @@
 
             $('#updateButton').click(function() {
                 const batches = [];
+                let user = "{{auth()->user()->role}}";
 
                 $('#purchaseContainer .row.border').each(function() {
                     const batch = {
@@ -377,8 +375,13 @@
                     .then(responseData => {
                         if (responseData.success) {
                             toastr.success('Batches updated successfully!');
+                            if(user == 1){
+                                window.location.href =
+                                '{{ route('purchase.history') }}';
+                            }else{
                             window.location.href =
                                 '{{ route('stock.list') }}';
+                            }
                         } else {
                             toastr.error('Error: ' + responseData.message);
                         }

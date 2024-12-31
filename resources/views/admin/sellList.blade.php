@@ -38,6 +38,7 @@
                                             <th>Retail Price</th>
                                             <th>Valid From</th>
                                             <th>Valid To</th>
+                                            <th>Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -59,9 +60,10 @@
                                                 <td>{{ $sell->retail_price }}</td>
                                                 <td>{{ $sell->valid_from }}</td>
                                                 <td>{{ $sell->valid_to }}</td>
+                                                <td>{{$sell->created_at->format('Y-m-d')}}</td>
                                                 <td>
                                                     @can('edit-sell')
-                                                    <a href="{{ route('sell.edit', ['sell' => $sell->id]) }}" class="btn btn-sm btn-primary edit-sell-btn" data-id="{{ $sell->id }}" 
+                                                    <a href="{{ route('sell.edit', ['sell' => $sell->sku]) }}" class="btn btn-sm btn-primary edit-sell-btn" data-id="{{ $sell->sku }}" 
                                                         @if ($batchExists) style="pointer-events: none; opacity: 0.6;" @endif>Edit</a>
                                                     @endcan
                                                     @can('delete-sell')

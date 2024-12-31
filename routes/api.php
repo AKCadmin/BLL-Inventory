@@ -103,6 +103,7 @@ Route::post('/generate-token', [TokenController::class, 'generateToken']);
     Route::get('/user/{id}/edit', [userManagement::class, 'edit'])->name('user.edit');
     Route::post('/user/update', [userManagement::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [userManagement::class, 'delete'])->name('users.delete');
+    Route::get('/users/list/get', [userManagement::class, 'listGet'])->name('users.listGet');
     //menu management routes
     Route::post('/add-new-menu', [MenuController::class, 'addNewMenu'])->name('menus.add');
     Route::post('/menus/toggle-status', [MenuController::class, 'toggleStatus'])->name('menus.toggleStatus'); // URL should be kebab-case for consistency

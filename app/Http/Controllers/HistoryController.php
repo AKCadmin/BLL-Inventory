@@ -605,7 +605,7 @@ class HistoryController extends Controller
     public function getSellHistory(Request $request)
     {
         try {
-            // dd($request->input());
+            
             $organization = Organization::where('id', '=', $request->company)->first();
             config(['database.connections.pgsql.database' => $organization->name]);
             DB::purge('pgsql');
@@ -614,6 +614,10 @@ class HistoryController extends Controller
             $query = Sell::orderBy('id', 'desc');
             if ($request->has('productId') && !empty($request->productId)) {
                 $query->where('sell.sku', $request->productId);
+            }
+            if ($request->has('selectedDate') && !empty($request->selectedDate)) {
+                $selectedDate = $request->selectedDate;
+                $query->whereDate('created_at', $selectedDate);
             }
             $sells = $query->get();
 

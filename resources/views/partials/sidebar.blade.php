@@ -80,7 +80,7 @@ if (!empty($_SESSION['lang'])) {
                         </ul>
                     </li>
                 @elseif(auth()->user()->role == 2)
-                    @can('view-purchase')
+                    @can('view-stock')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="bx bx-cart"></i> <!-- Cart Icon -->
@@ -126,6 +126,7 @@ if (!empty($_SESSION['lang'])) {
                             <span key="t-maps">Sell Management</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
+                            
                             @can('add-sell-counter')
                                 <li><a href="{{ route('sellCounter.index') }}" class=""><i
                                             class="bx bx-add-to-queue"></i> Add Sell</a></li> <!-- Queue Icon -->

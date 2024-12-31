@@ -471,7 +471,7 @@ class StockController extends Controller
                         'batches.id as batch_id'
                     )
                     ->whereNotIn('batches.id', $excludedBatchIds)
-                    ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'batches.product_id','batches.created_at')
+                    ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'batches.product_id', 'batches.created_at')
                     ->orderBy('batches.id', 'DESC');
 
                 $stocksList = $query->get();
@@ -846,7 +846,7 @@ class StockController extends Controller
 
     public function show(string $id)
     {
-        $organization = Organization::select('id','name')->where('id',$id)->first();
+        // $organization = Organization::select('id','name')->where('name',3)->first();
         // dd($organization);
         setDatabaseConnection();
         $excludedBatchIds = DB::table('sell_counter')
@@ -913,7 +913,7 @@ class StockController extends Controller
             ];
         });
         // dd($groupedData);
-        return view('admin.edit', compact('groupedData','organization'));
+        return view('admin.edit', compact('groupedData'));
     }
 
 
@@ -1224,7 +1224,7 @@ class StockController extends Controller
             // if (auth()->user()->cannot('delete-purchase')) {
             //     abort(403);
             // }
-    
+
             // Get the product by its ID
             $product = Product::find($id);
 
@@ -1233,41 +1233,49 @@ class StockController extends Controller
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
             }
-           
+
             config(['database.connections.pgsql.database' => $databaseName]);
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
-    
+
             if (!$product) {
                 return response()->json(['success' => false, 'message' => 'Product not found.'], 404);
             }
-    
+
             // Begin a database transaction
             DB::beginTransaction();
-    
+
             // Delete related batches and cartons
             $batches = DB::table('batches')->where('product_id', $id)->get();
             foreach ($batches as $batch) {
-                // Delete the related cartons for each batch
+                $batchInSellCounter = DB::table('sell_counter')->where('batch_id', $batch->id)->exists();
+                $batchInSellCarton = DB::table('cartons')->join('sell_carton', 'cartons.id', '=', 'sell_carton.carton_id')->where('cartons.batch_id', $batch->id)->exists();
+                if ($batchInSellCounter) {
+                    continue;
+                }
+                if ($batchInSellCarton) {
+                    continue;
+                }
+
                 DB::table('cartons')->where('batch_id', $batch->id)->delete();
-    
+
                 // Delete the batch itself
                 DB::table('batches')->where('id', $batch->id)->delete();
             }
-    
+
             // Delete the product
             //$product->delete();
-    
+
             // Commit the transaction
             DB::commit();
-    
+
             // Log the action
             // Purchase_History::create([
             //     'action' => 'Product Deletion',
             //     'details' => json_encode(['product_id' => $product->id]),
             //     'user_id' => 1,
             // ]);
-    
+
             return response()->json(['success' => true, 'message' => 'Product and its related batches and cartons deleted successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1279,5 +1287,4 @@ class StockController extends Controller
             ], 500);
         }
     }
-    
 }

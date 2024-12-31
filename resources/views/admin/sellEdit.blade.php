@@ -43,7 +43,7 @@
                                 <option value="" disabled selected>SKU</option>
                                 @foreach ($products as $product)
                                     <option value="{{ $product->id }}"
-                                        {{ $product->id == old('sku', $sell->id) ? 'selected' : '' }}>
+                                        {{ $product->id == old('sku', $sell->sku) ? 'selected' : '' }}>
                                         {{ $product->id }} - {{ $product->name }}
                                     </option>
                                 @endforeach
@@ -206,7 +206,7 @@
 
         $('form').on('submit', function(e) {
             e.preventDefault();
-
+            let user = "{{ auth()->user()->role }}";
             // Collect form data
             var formData = {
                 sku: $('#skuSelect').val(),
@@ -232,8 +232,13 @@
                     if (response.success) {
                         toastr.success('Sell updated successfully!');
 
-                        window.location.href =
-                            '{{ route('sell.list') }}';
+                        if (user == 1) {
+                            window.location.href =
+                                '{{ route('sell.history') }}';
+                        } else {
+                            window.location.href =
+                                '{{ route('sell.list') }}';
+                        }
                     } else {
                         toastr.error('Failed to update sell. Please try again.');
                     }
@@ -242,6 +247,7 @@
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
                         // Display each validation error using toastr
                         const errors = xhr.responseJSON.errors;
+                        console.log(errors,"errors")
                         for (const field in errors) {
                             if (errors[field]) {
                                 errors[field].forEach(errorMessage => {
