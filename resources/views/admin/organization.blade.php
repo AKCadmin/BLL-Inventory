@@ -209,6 +209,7 @@
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();
+        
         $('#phone_no').on('input', function () {
             let phone = $(this).val();
             if (phone.length > 10) {
