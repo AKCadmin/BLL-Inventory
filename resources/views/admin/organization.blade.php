@@ -57,7 +57,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $organization->id }}</td>
-                                                <td>{{ $organization->name }}</td>
+                                                <td>{{  str_replace('_', ' ', $organization->name) }}</td>
                                                 <td>
                                                     <span title="{{ $organization->address }}" data-toggle="tooltip"
                                                         data-placement="top">
@@ -206,6 +206,7 @@
 @include('partials.right-sidebar')
 @include('partials.vendor-scripts')
 @include('partials.script')
+<script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();

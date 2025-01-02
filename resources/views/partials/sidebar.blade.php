@@ -26,11 +26,11 @@ if (!empty($_SESSION['lang'])) {
 
                 @if (auth()->user()->role != 2 && auth()->user()->role != 3)
                     @can('view-company')
-                        <li><a href="{{ route('brand.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
-                                Brand</a></li> <!-- Building Icon -->
+                        <li><a href="{{ route('brand.index') }}" key="t-brand"><i class="bx bx-buildings"></i><span key="t-brands">
+                                Brand</span></a></li> <!-- Building Icon -->
                     @endcan
                     <li><a href="{{ route('organization.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
-                            Organization</a></li> <!-- Building Icon -->
+                        <span key="t-organization"> Organization</span></a></li> <!-- Building Icon -->
 
                     @can('view-user-management')
                         <li>
@@ -42,7 +42,7 @@ if (!empty($_SESSION['lang'])) {
                     @endcan
                     @can('view-product')
                         <li><a href="{{ route('product.index') }}" key="t-role-manager"><i class="bx bx-box"></i>
-                                Product</a></li> <!-- Box Icon -->
+                            <span key="t-products">Product</span></a></li> <!-- Box Icon -->
                     @endcan
                     @can('view-stock')
                         <li>
@@ -73,9 +73,9 @@ if (!empty($_SESSION['lang'])) {
                             <span key="t-maps">Settings</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="role-manager" key="t-role-manager"><i class="bx bx-shield-quarter"></i> Role
+                            <li><a href="{{route('role-manager')}}" key="t-role-manager"><i class="bx bx-shield-quarter"></i> Role
                                     Manager</a></li> <!-- Role Icon -->
-                            <li><a href="permission-manager" key="t-permission-manager"><i class="bx bx-lock-alt"></i>
+                            <li><a href="{{route('permission-manager')}}" key="t-permission-manager"><i class="bx bx-lock-alt"></i>
                                     Permission Manager</a></li> <!-- Lock Icon -->
                         </ul>
                     </li>

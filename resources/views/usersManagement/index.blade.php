@@ -279,6 +279,7 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script src="assets/js/customJs/userManagement.js"></script>
+<script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 <script>
     @if ((isset($showModal) && $showModal) || $errors->any() || session('success'))
         modal.style.display = "block";

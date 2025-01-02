@@ -163,8 +163,8 @@ class OrganizationController extends Controller
                     return response()->json(['success' => false, 'message' => 'Failed to apply migrations.', 'error' => Artisan::output()]);
                 }
             }
-            DB::purge('pgsql');
-            DB::reconnect('pgsql');
+            // DB::purge('pgsql');
+            // DB::reconnect('pgsql');
 
             // DB::connection('pgsql')->table('users')->insert([
             //     'name' => $userData['admin_firstname'] . ' ' . $userData['admin_lastname'],

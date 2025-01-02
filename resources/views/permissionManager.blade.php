@@ -307,7 +307,9 @@
     <!-- end main content-->
 @endsection
 @section('script')
+    <script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
     <script src="assets/js/customJs/permissionManager.js"></script>
+    
     <script>
         // Automatically open the modal if showModal is true, if there are errors, or if there is a success message
         @if ((isset($showModal) && $showModal) || $errors->any() || session('success'))

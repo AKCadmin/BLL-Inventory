@@ -78,5 +78,10 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 
+<script>
+    $(document).ready(function() {
+        $('#organization-filter').hide();
+    })
+</script>
 </body>
 </html>

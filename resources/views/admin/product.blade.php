@@ -250,7 +250,7 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script src="assets/js/customJs/productManagement.js"></script>
-
+<script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 
 <script>
     $(document).ready(function() {

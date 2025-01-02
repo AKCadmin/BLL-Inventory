@@ -212,6 +212,7 @@
 
 @include('partials.right-sidebar')
 @include('partials.vendor-scripts')
+<script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 {{-- 
 <!-- Required datatable js -->
 <script src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
