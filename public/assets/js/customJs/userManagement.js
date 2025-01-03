@@ -4,11 +4,107 @@ $(document).ready(function () {
     $('#phone_number').on('input', function () {
         let phone = $(this).val();
         if (phone.length > 10) {
+            $('#phone-error').text('Phone number must be 10 digits.');
             $(this).val(phone.substring(0, 10)); 
         } else if (!/^\d*$/.test(phone)) {
             $(this).val(phone.replace(/\D/g, '')); 
+            $('#phone-error').text('');
         }
     });
+    
+    $('#email').on('input', function () {
+        let email = $(this).val();
+        let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        
+        if (!emailPattern.test(email)) {
+            $('#email-error').text('Please enter a valid email address.');
+        } else {
+            $('#email-error').text(''); 
+        }
+    });
+    
+    $("#userForm").on("submit", function (e) {
+        e.preventDefault();
+    
+        let hasErrors = false;
+        $('#email-error').text(''); 
+        $('#phone-error').text(''); 
+    
+        // Check phone number validity
+        let phone = $("#phone_number").val();
+        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            $('#phone-error').text('Phone number must be 10 digits.');
+            hasErrors = true;
+        }
+    
+        // Check email validity
+        let email = $("#email").val();
+        let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+            $('#email-error').text('Please enter a valid email address.');
+            hasErrors = true;
+        }
+    
+        if (hasErrors) {
+            return; 
+        }
+    
+        let id = $("#user_id").val();
+        var formData = $(this).serialize();
+    
+        function handleError(xhr) {
+            var errors = xhr.responseJSON.errors;
+            if (errors) {
+                $.each(errors, function (key, value) {
+                    toastr.error(value[0]);
+                });
+            }
+        }
+    
+        if (id) {
+            $.ajax({
+                url: appUrl + "/api/user/update",
+                type: "POST",
+                data: formData,
+            })
+            .done(function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    $("#global-loader").fadeOut();
+                    $("#myModal").hide();
+                    $("#userForm")[0].reset();
+                    location.reload();
+                }
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                var errorMessage =
+                    jqXHR.responseJSON?.message ||
+                    "An unexpected error occurred. Please try again.";
+                toastr.error(errorMessage);
+                $("#global-loader").fadeOut();
+            });
+        } else {
+            $.ajax({
+                url: appUrl + "/api/user/create",
+                type: "POST",
+                data: formData,
+            })
+            .done(function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    location.reload();
+                    $("#global-loader").fadeOut();
+                    $("#myModal").hide();
+                    $("#userForm")[0].reset();
+                } else {
+                    toastr.error(response.message);
+                }
+            })
+            .fail(handleError);
+        }
+    });
+    
+    
     
     $("#organization-filter").change(function (e) {
         e.preventDefault();
@@ -106,87 +202,86 @@ $(document).ready(function () {
     //         .fail(handleError);
     // });
 
-    $("#userForm").on("submit", function (e) {
-        e.preventDefault();
-        let id = $("#user_id").val();
-        var formData = $(this).serialize();
+    // $("#userForm").on("submit", function (e) {
+    //     e.preventDefault();
+    //     let id = $("#user_id").val();
+    //     var formData = $(this).serialize();
 
-        function handleError(xhr) {
-            var errors = xhr.responseJSON.errors;
-            if (errors) {
-                $.each(errors, function (key, value) {
-                    toastr.error(value[0]);
-                    alert(value[0]);
-                });
-            }
-        }
+    //     function handleError(xhr) {
+    //         var errors = xhr.responseJSON.errors;
+    //         if (errors) {
+    //             $.each(errors, function (key, value) {
+    //                 toastr.error(value[0]);
+    //             });
+    //         }
+    //     }
 
-        if (id) {
-            $.ajax({
-                url: appUrl + "/api/user/update",
-                type: "POST",
-                data: formData,
-            })
-                .done(function (response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        $("#global-loader").fadeOut();
-                        $("#myModal").hide();
-                        $("#userForm")[0].reset();
-                        location.reload();
-                    }
-                })
-                .fail(function (jqXHR, textStatus, errorThrown) {
-                    var errorMessage =
-                        jqXHR.responseJSON?.message ||
-                        "An unexpected error occurred. Please try again.";
-                    toastr.error(errorMessage);
-                    $("#global-loader").fadeOut();
-                });
-        } else {
-            $.ajax({
-                url: appUrl + "/api/user/create",
-                type: "POST",
-                data: formData,
-            })
-                .done(function (response) {
-                    if (response.success) {
-                        // if(response.note){
-                        toastr.success(response.message);
-                        location.reload();
-                        $("#global-loader").fadeOut();
-                        $("#myModal").hide();
-                        $("#userForm")[0].reset();
-                        // }
+    //     if (id) {
+    //         $.ajax({
+    //             url: appUrl + "/api/user/update",
+    //             type: "POST",
+    //             data: formData,
+    //         })
+    //             .done(function (response) {
+    //                 if (response.success) {
+    //                     toastr.success(response.message);
+    //                     $("#global-loader").fadeOut();
+    //                     $("#myModal").hide();
+    //                     $("#userForm")[0].reset();
+    //                     location.reload();
+    //                 }
+    //             })
+    //             .fail(function (jqXHR, textStatus, errorThrown) {
+    //                 var errorMessage =
+    //                     jqXHR.responseJSON?.message ||
+    //                     "An unexpected error occurred. Please try again.";
+    //                 toastr.error(errorMessage);
+    //                 $("#global-loader").fadeOut();
+    //             });
+    //     } else {
+    //         $.ajax({
+    //             url: appUrl + "/api/user/create",
+    //             type: "POST",
+    //             data: formData,
+    //         })
+    //             .done(function (response) {
+    //                 if (response.success) {
+    //                     // if(response.note){
+    //                     toastr.success(response.message);
+    //                     location.reload();
+    //                     $("#global-loader").fadeOut();
+    //                     $("#myModal").hide();
+    //                     $("#userForm")[0].reset();
+    //                     // }
 
-                        // Make second API call only if the first one was successful
-                        // $.ajax({
-                        //     url: appUrl + "/api/user/migration",
-                        //     type: "POST",
-                        //     data: {
-                        //         db_name: response.db_name,
-                        //         user: response.user,
-                        //     },
-                        // })
-                        //     .done(function (response) {
-                        //         if (response.success) {
-                        //             toastr.success(response.message);
-                        //             $("#global-loader").fadeOut();
-                        //             $("#myModal").hide();
-                        //             $("#userForm")[0].reset();
-                        //             location.reload();
-                        //         } else {
-                        //             toastr.error("Database migration failed.");
-                        //         }
-                        //     })
-                        //     .fail(handleError);
-                    } else {
-                        toastr.error(response.message);
-                    }
-                })
-                .fail(handleError);
-        }
-    });
+    //                     // Make second API call only if the first one was successful
+    //                     // $.ajax({
+    //                     //     url: appUrl + "/api/user/migration",
+    //                     //     type: "POST",
+    //                     //     data: {
+    //                     //         db_name: response.db_name,
+    //                     //         user: response.user,
+    //                     //     },
+    //                     // })
+    //                     //     .done(function (response) {
+    //                     //         if (response.success) {
+    //                     //             toastr.success(response.message);
+    //                     //             $("#global-loader").fadeOut();
+    //                     //             $("#myModal").hide();
+    //                     //             $("#userForm")[0].reset();
+    //                     //             location.reload();
+    //                     //         } else {
+    //                     //             toastr.error("Database migration failed.");
+    //                     //         }
+    //                     //     })
+    //                     //     .fail(handleError);
+    //                 } else {
+    //                     toastr.error(response.message);
+    //                 }
+    //             })
+    //             .fail(handleError);
+    //     }
+    // });
 
     $(document).on("change", ".toggle-status", function () {
         var permissionId = $(this).data("id");

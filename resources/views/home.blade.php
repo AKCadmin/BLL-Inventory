@@ -222,14 +222,7 @@
                                     <table class="table align-middle table-nowrap mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th style="width: 20px;">
-                                                    <div class="form-check font-size-16 align-middle">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck01">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck01"></label>
-                                                    </div>
-                                                </th>
+                                                
                                                 <th class="align-middle">Order ID</th>
                                                 <th class="align-middle">Billing Name</th>
                                                 <th class="align-middle">Date</th>
@@ -241,14 +234,7 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck02">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck02"></label>
-                                                    </div>
-                                                </td>
+                                                
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2540</a> </td>
                                                 <td>Neal Matthews</td>
@@ -277,14 +263,7 @@
                                             </tr>
 
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck03">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck03"></label>
-                                                    </div>
-                                                </td>
+                                                
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2541</a> </td>
                                                 <td>Jamal Burnett</td>
@@ -313,14 +292,7 @@
                                             </tr>
 
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck04">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck04"></label>
-                                                    </div>
-                                                </td>
+                                                
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2542</a> </td>
                                                 <td>Juan Mitchell</td>
@@ -348,14 +320,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck05">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck05"></label>
-                                                    </div>
-                                                </td>
+                                               
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2543</a> </td>
                                                 <td>Barry Dick</td>
@@ -383,14 +348,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck06">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck06"></label>
-                                                    </div>
-                                                </td>
+                                               
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2544</a> </td>
                                                 <td>Ronald Taylor</td>
@@ -418,14 +376,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>
-                                                    <div class="form-check font-size-16">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="transactionCheck07">
-                                                        <label class="form-check-label"
-                                                            for="transactionCheck07"></label>
-                                                    </div>
-                                                </td>
+                                               
                                                 <td><a href="javascript: void(0);"
                                                         class="text-body fw-bold">#SK2545</a> </td>
                                                 <td>Jacob Hunter</td>

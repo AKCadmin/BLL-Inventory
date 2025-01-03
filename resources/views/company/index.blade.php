@@ -159,14 +159,15 @@
                                                 <div class="mb-3">
                                                     <label for="brand_email" class="form-label">Contact Person</label>
                                                     <input type="text" class="form-control" id="brand_contact"
-                                                        name="brand_contact" required placeholder="Enter contact person">
+                                                        name="brand_contact" required
+                                                        placeholder="Enter contact person">
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label for="phone_no" class="form-label">Phone No</label>
                                                     <input type="number" class="form-control" id="phone_no"
                                                         name="phone_no" required placeholder="Enter brand Phone No">
-                                                        <div id="phone_error" style="color: red; display: none;">Please enter a valid phone number (10 digits).</div>
+                                                        <div id="phone-error" class="text-danger"></div>
                                                 </div>
 
                                                 <!-- Add the Category Field -->
@@ -223,20 +224,25 @@
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();
-        $('#brand_contact').on('keypress', function (e) {
+        $('#brand_contact').on('keypress', function(e) {
             const charCode = e.which;
             if ((charCode >= 48 && charCode <= 57)) {
                 e.preventDefault();
             }
         });
-        $('#phone_no').on('input', function () {
+
+        $('#phone_no').on('input', function() {
             let phone = $(this).val();
             if (phone.length > 10) {
-                $(this).val(phone.substring(0, 10)); 
+                $('#phone-error').text('Phone number must be 10 digits.');
+                $(this).val(phone.substring(0, 10));
             } else if (!/^\d*$/.test(phone)) {
-                $(this).val(phone.replace(/\D/g, '')); 
+                $(this).val(phone.replace(/\D/g, ''));
+                $('#phone-error').text('');
             }
         });
+
+       
         $('#openModalBtn').on('click', function() {
             $('#brandModal').show();
             $('#brand_id').val('');
@@ -252,6 +258,20 @@
 
         $('#brandForm').on('submit', function(e) {
             e.preventDefault();
+
+            let hasErrors = false;
+            $('#phone-error').text('');
+
+            // Check phone number validity
+            let phone = $("#phone_no").val();
+            if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                $('#phone-error').text('Phone number must be 10 digits.');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                return;
+            }
 
             let brandId = $('#brand_id').val();
             let brandName = $('#brand_name').val();

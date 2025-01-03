@@ -57,7 +57,7 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $organization->id }}</td>
-                                                <td>{{  str_replace('_', ' ', $organization->name) }}</td>
+                                                <td>{{ str_replace('_', ' ', $organization->name) }}</td>
                                                 <td>
                                                     <span title="{{ $organization->address }}" data-toggle="tooltip"
                                                         data-placement="top">
@@ -164,6 +164,7 @@
                                                     <input type="email" class="form-control" id="organization_email"
                                                         name="organization_email" required
                                                         placeholder="Enter organization Email">
+                                                        <div id="email-error" class="text-danger"></div>
                                                 </div>
 
                                                 <div class="mb-3">
@@ -171,6 +172,7 @@
                                                     <input type="number" class="form-control" id="phone_no"
                                                         name="phone_no" required
                                                         placeholder="Enter organization Phone No">
+                                                        <div id="phone-error" class="text-danger"></div>
                                                 </div>
 
                                                 <div class="mb-3">
@@ -210,13 +212,27 @@
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();
-        
-        $('#phone_no').on('input', function () {
+
+
+        $('#phone_no').on('input', function() {
             let phone = $(this).val();
             if (phone.length > 10) {
-                $(this).val(phone.substring(0, 10)); 
+                $('#phone-error').text('Phone number must be 10 digits.');
+                $(this).val(phone.substring(0, 10));
             } else if (!/^\d*$/.test(phone)) {
-                $(this).val(phone.replace(/\D/g, '')); 
+                $(this).val(phone.replace(/\D/g, ''));
+                $('#phone-error').text('');
+            }
+        });
+
+        $('#organization_email').on('input', function() {
+            let email = $(this).val();
+            let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailPattern.test(email)) {
+                $('#email-error').text('Please enter a valid email address.');
+            } else {
+                $('#email-error').text('');
             }
         });
         $('#openModalBtn').on('click', function() {
@@ -234,6 +250,29 @@
 
         $('#organizationForm').on('submit', function(e) {
             e.preventDefault();
+
+            let hasErrors = false;
+            $('#email-error').text('');
+            $('#phone-error').text('');
+
+            // Check phone number validity
+            let phone = $("#phone_no").val();
+            if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                $('#phone-error').text('Phone number must be 10 digits.');
+                hasErrors = true;
+            }
+
+            // Check email validity
+            let email = $("#organization_email").val();
+            let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(email)) {
+                $('#email-error').text('Please enter a valid email address.');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                return;
+            }
 
             let organizationId = $('#organization_id').val();
             let organizationName = $('#organization_name').val();
@@ -264,7 +303,9 @@
                             .done(function(response) {
                                 if (response.success == true) {
 
-                                    toastr.success('Migrations for roles and permissions applied successfully!');
+                                    toastr.success(
+                                        'Migrations for roles and permissions applied successfully!'
+                                    );
                                     $("#global-loader").fadeOut();
                                     $('#brandModal').hide();
                                     location.reload();

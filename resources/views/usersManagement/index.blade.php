@@ -206,6 +206,7 @@
                                                     <input type="tel" class="form-control" id="phone_number"
                                                         name="phone_number" value="{{ old('phone_number') }}"
                                                         placeholder="Enter Phone Number" required>
+                                                        <div id="phone-error" class="text-danger"></div>
                                                 </div>
 
                                                 <div class="mb-3">
@@ -213,6 +214,7 @@
                                                     <input type="email" class="form-control" id="email"
                                                         name="email" value="{{ old('email') }}"
                                                         placeholder="Enter Email" required>
+                                                        <div id="email-error" class="text-danger"></div>
                                                 </div>
 
                                                 <div class="mb-3">

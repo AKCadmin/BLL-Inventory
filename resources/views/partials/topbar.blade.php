@@ -127,7 +127,7 @@
                     <select id="organization-filter" name="organization" class="form-control custom-select">
                         <option value="">Select Organization</option>
                         @foreach ($organizations as $organization)
-                            <option value="{{ $organization->id }}">{{ $organization->name }}</option>
+                            <option value="{{ $organization->id }}">{{ str_replace('_', ' ', $organization->name) }}</option>
                         @endforeach
                     </select>
                 </div>
