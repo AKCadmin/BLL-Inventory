@@ -102,19 +102,7 @@ class OrganizationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
 
-            // $usersMigrationPath = '\\database\\migrations\\0001_01_01_000000_create_users_table.php';
-            // $productMigrationPath = '\\database\\migrations\\2024_12_03_101214_create_products_table.php';
-            // $batchMigrationPath = '\\database\\migrations\\2024_12_03_101421_create_batches_table.php';
-            // $cartonsigrationPath = '\\database\\migrations\\2024_12_03_101422_create_cartons_table.php';
-            // $sellMigrationPath = '\\database\\migrations\\2024_12_07_113412_create_sell_table.php';
-            // $sellCounterMigrationPath = '\\database\\migrations\\2024_12_11_082844_create_sell_counter_table.php';
-            // $sellCartonMigrationPath = '\\database\\migrations\\2024_12_11_083350_create_sell_carton_table.php';
-            // $invoiceMigrationPath = '\\database\\migrations\\2024_12_11_083432_create_invoice_table.php';
-            // $purchaseHistoryMigrationPath = '\\database\\migrations\\2024_12_24_124745_create_purchase_history_table.php';
-            // $sellHistoryMigrationPath = '\\database\\migrations\\2024_12_24_143637_create_sell_histories_table.php';
-            // $addBrandIdInProductsMigrationPath = '\\database\\migrations\\2024_12_26_141516_add_brand_id_to_products_table.php';
-            // $modifyBatchesMigrationPath = '\\database\\migrations\\2024_12_27_051546_modify_product_id_in_batches_table.php';
-            // $modifySellCartonMigrationPath = '\\database\\migrations\\2024_12_27_051742_drop_foreign_key_from_product_id_in_batches_table.php';
+            
 
             $usersMigrationPath = 'database/migrations/0001_01_01_000000_create_users_table.php';
             $productMigrationPath = 'database/migrations/2024_12_03_101214_create_products_table.php';
@@ -154,13 +142,20 @@ class OrganizationController extends Controller
             ];
 
             foreach ($migrations as $migrationPath) {
+                set_time_limit(60);
+                
                 $exitCode = Artisan::call('migrate', [
                     '--path' => $migrationPath,
                     '--database' => 'pgsql',
+                    '--force' => true
                 ]);
-
+            
                 if ($exitCode !== 0) {
-                    return response()->json(['success' => false, 'message' => 'Failed to apply migrations.', 'error' => Artisan::output()]);
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Failed to apply migrations.', 
+                        'error' => Artisan::output()
+                    ]);
                 }
             }
             // DB::purge('pgsql');
