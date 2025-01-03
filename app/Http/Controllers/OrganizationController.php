@@ -103,7 +103,6 @@ class OrganizationController extends Controller
             }
 
             
-
             $usersMigrationPath = 'database/migrations/0001_01_01_000000_create_users_table.php';
             $productMigrationPath = 'database/migrations/2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = 'database/migrations/2024_12_03_101421_create_batches_table.php';
@@ -119,14 +118,9 @@ class OrganizationController extends Controller
             $modifySellCartonMigrationPath = 'database/migrations/2024_12_27_051742_drop_foreign_key_from_product_id_in_batches_table.php';
 
 
-
             $migrations = [
                 $usersMigrationPath,
-                // $rolesMigrationPath,
-                // $userRole,
-                // $menuMigrationPath,
-                // $permissionsMigrationPath,
-                // $companyMigrationPath,
+
                 $productMigrationPath,
                 $batchMigrationPath,
                 $cartonMigrationPath,

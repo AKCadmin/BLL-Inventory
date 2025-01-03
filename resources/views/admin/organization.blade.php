@@ -262,9 +262,9 @@
                                 },
                             })
                             .done(function(response) {
-                                if (response.success) {
+                                if (response.success == true) {
 
-                                    toastr.success('brand saved successfully!');
+                                    toastr.success('Migrations for roles and permissions applied successfully!');
                                     $("#global-loader").fadeOut();
                                     $('#brandModal').hide();
                                     location.reload();
