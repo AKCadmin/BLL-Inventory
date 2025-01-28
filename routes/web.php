@@ -148,7 +148,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
     Route::get('/batches/{sku}', [SellController::class, 'getBatchesBySku'])->name('batch.getBatchesBySku');
 
-    //sale user
+    //  sale user
     Route::resource('customer', CustomerController::class);
     Route::get('customers/list', [CustomerController::class,'customerList'])->name('customers.list');
 
