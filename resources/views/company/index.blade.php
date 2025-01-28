@@ -144,13 +144,13 @@
                                                     name="brand_id" value="">
 
                                                 <div class="mb-3">
-                                                    <label for="brand_name" class="form-label">brand Name</label>
+                                                    <label for="brand_name" class="form-label">Brand Owner Name</label>
                                                     <input type="text" class="form-control" id="brand_name"
                                                         name="brand_name" required placeholder="Enter brand Name">
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label for="brand_address" class="form-label">brand
+                                                    <label for="brand_address" class="form-label">Brand Owner
                                                         Address</label>
                                                     <input type="tel" class="form-control" id="brand_address"
                                                         name="brand_address" required placeholder="Enter brand Address">

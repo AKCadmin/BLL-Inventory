@@ -259,18 +259,30 @@
                                                     <div class="col-md-4 mb-2">
                                     <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
                                     <input type="number" name="noOfUnits" id="noOfUnits" value="${batch.no_of_units}" class="form-control noOfUnits"
-                                        placeholder="Enter No of Unit Per Cartoon">
+                                        placeholder="Enter No of Units">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="qty" class="form-label">Total No of Cartoons</label>
                                     <input type="number" name="qty" id="qty" value="${batch.quantity}" class="form-control qty"
                                         placeholder="Enter No of Cartoons">
                                 </div>
-                    <div class="col-md-4 mb-2">
-                        <label for="notes" class="form-label">Notes</label>
-                        <input type="text" name="notes" id="notes" value="${batch.notes}" class="form-control notes"
-                        placeholder="Enter Notes">
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="notes" class="form-label">Notes</label>
+                            <input type="text" name="notes" id="notes" value="${batch.notes}" class="form-control notes"
+                            placeholder="Enter Notes">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="hospitalPrice" class="form-label">Hospital Price</label>
+                            <input type="text" id="hospitalPrice" value="${batch.hospital_price ?? ""}" class="form-control price-input hospitalPrice">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="wholesalePrice" class="form-label">Wholesale Price</label>
+                            <input type="text" id="wholesalePrice" value="${batch.wholesale_price ?? ""}" class="form-control price-input wholesalePrice">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="retailPrice" class="form-label">Retail Price</label>
+                            <input type="text" id="retailPrice" value="${batch.retail_price ?? "" }" class="form-control price-input retailPrice">
+                        </div>
                 </div>
             `);
 
@@ -372,6 +384,9 @@
                         no_of_units: $(this).find('.noOfUnits').val(),
                         quantity: $(this).find('.qty').val(),
                         notes: $(this).find('.notes').val(),
+                        hospitalPrice: $(this).find('.hospitalPrice').val(),
+                        wholesalePrice: $(this).find('.wholesalePrice').val(),
+                        retailPrice: $(this).find('.retailPrice').val(),
                         cartons: [],
                     };
 
@@ -481,12 +496,12 @@
                                                 <div class="col-md-4 mb-2">
                                     <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
                                     <input type="number" name="noOfUnits" id="noOfUnits" class="form-control noOfUnits"
-                                        placeholder="Enter No of Unit Per Cartoon">
+                                        placeholder="Enter No of Units">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="qty" class="form-label">Total No of Cartoons</label>
                                     <input type="number" name="qty" id="qty" class="form-control qty"
-                                        placeholder="Enter No of Cartoons">
+                                        placeholder="Enter No of Cartoon">
                                 </div>
                 <div class="col-md-4 mb-2">
                     <label for="notes" class="form-label">Notes</label>
@@ -495,6 +510,18 @@
                 <div class="col-md-12 text-end">
                     <button type="button" class="btn btn-danger removeRow">Remove</button>
                 </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="hospitalPrice" class="form-label">Hospital Price</label>
+                            <input type="text" id="hospitalPrice" class="form-control price-input hospitalPrice">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="wholesalePrice" class="form-label">Wholesale Price</label>
+                            <input type="text" id="wholesalePrice" class="form-control price-input wholesalePrice">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="retailPrice" class="form-label">Retail Price</label>
+                            <input type="text" id="retailPrice" class="form-control price-input retailPrice">
+                        </div>
             </div>
         `);
 

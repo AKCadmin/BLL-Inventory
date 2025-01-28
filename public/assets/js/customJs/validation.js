@@ -1,5 +1,5 @@
 $('input[type="text"]').on('input', function() {
-    if ($(this).attr('id') === 'admin_username') {
+    if ($(this).attr('id') === 'admin_username' || $(this).attr('id') === 'unit') {
         return;
     }
     const textInput = $(this).val();

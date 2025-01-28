@@ -36,7 +36,10 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="customer" class="form-label">Select Customer</label>
-                                        <input class="form-control" id="customer" type="input" id="">
+                                        <select id="customer" name="customer"
+                                            class="form-select select2 customer sku-input">
+                                            <option selected disabled>Select Customer</option>
+                                        </select>
                                     </div>
 
 
@@ -54,10 +57,10 @@
                                     <div class="mb-3">
                                         <label for="customerType" class="form-label">Select Customer Type</label>
                                         <select class="form-select customer-type" id="customerType" required>
-                                            <option value="" disabled selected>Select customer type</option>
-                                            <option value="hospital">hospital</option>
+                                            {{-- <option value="" disabled selected>Select customer type</option> --}}
+                                            {{-- <option value="hospital">hospital</option>
                                             <option value="wholesale">wholesaler</option>
-                                            <option value="retailer">retailer</option>
+                                            <option value="retailer">retailer</option> --}}
                                         </select>
                                     </div>
 
@@ -68,30 +71,59 @@
                                             <option value="" disabled selected>Batch No</option>
                                         </select>
                                     </div>
+
+                                   
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="unitsPerCarton">Number of Unit Per
+                                            Carton</label>
+                                        <input type="number" class="form-control" id="unitsPerCarton"
+                                            name="unitsPerCarton" readonly placeholder="Enter units per carton" disabled>
+                                    </div>
+                                    <div class="mb-3">
+                                      
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div  class="mb-3">
+                                        <label class="form-label" for="availableQtyCarton">Available Total No of
+                                            Carton</label>
+                                        <input type="number" class="form-control" readonly id="availableQtyCarton"
+                                            name="availableQtyCarton"
+                                            placeholder="Enter available no of carton" disabled>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label class="form-label">Select Packaging Type</label>
                                         <div class="form-check">
-                                            <input class="form-check-input packaging-type byCarton" type="radio"
+                                            <input class="form-check-input packaging-type byCarton" type="checkbox"
                                                 id="byCarton" name="packagingType" value="byCarton">
                                             <label class="form-check-label" for="byCarton">
                                                 By Carton
                                             </label>
+                                            <div id="quantityBox" style="display: none; width:20%; margin-top: 10px;">
+                                                <label class="form-label" for="quantity">Enter Number of Carton</label>
+                                                <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter carton">
+                                            </div>
                                         </div>
-                                        <div class="form-check">
+                                        {{-- <div class="form-check">
                                             <input class="form-check-input packaging-type pakagingType byItemBox"
                                                 type="radio" id="byItemBox" name="packagingType" value="byItemBox">
                                             <label class="form-check-label" for="byItemBox">
                                                 By Item Box
                                             </label>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
 
                                 <!-- No of Cartons and No of Item Boxes -->
-                                <div class="col-md-6 mb-2">
+                                {{-- <div class="col-md-6 mb-2">
                                     <div class="row">
 
                                         <div class="col-md-6 cartonInput" style="display: none;">
@@ -111,7 +143,8 @@
                                         </div>
 
                                     </div>
-                                </div>
+                                </div> --}}
+
 
                             </div>
                         </div>
@@ -138,43 +171,94 @@
 <script src="assets/js/customJs/productManagement.js"></script>
 <script>
     $(document).ready(function() {
+      
         GetSKU();
 
+        function GetSKU() {
+          
+          let url = `{{ route('sell.product.getData') }}`;
+          ajaxRequest(url, 'GET', {},
+              function(response) {
+                 console.log(response.products,"gggg")
+                  if (response.products) {
+                      $('.SKU').html('<option selected disabled>Select Product / SKU</option>');
+                      $.each(response.products, function(index, product) {
+                        
+                           console.log(product?.product[0]?.id, "product")
+                          // $('.SKU').append(
+                          //     `<option value="${product.sku}">${product.sku}</option>`
+                          // );
+                          $('.SKU').append(
+                              `<option value="${product?.product[0]?.id}">${product?.product[0].name} / ${product?.product[0]?.id}</option>`
+                          );
+                      });
+                  }
+              }
+          );
+      }
+
         $('input[name="packagingType"]').change(function() {
+            if ($('#byCarton').is(':checked')) {
+                $('#quantityBox').slideDown();
+            }else{
+                $('#quantityBox').slideUp();
+            }
             console.log($(this).val(), "jj")
             if ($(this).val() == 'byCarton') {
-                $('.cartonInput').show();
-                $('.itemBoxInput').hide();
-                $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-                $('.cartonCheckboxes').find('input[type="number"]').val('');
+                
+                // $('.cartonInput').show();
+                // $('.itemBoxInput').hide();
+                // $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+                // $('.cartonCheckboxes').find('input[type="number"]').val('');
             } else if ($(this).val() == 'byItemBox') {
-                $('.itemBoxInput').show();
-                $('.cartonInput').hide();
-                $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-                $('.itemBoxCheckboxes').find('input[type="number"]').val('');
+                // $('.itemBoxInput').show();
+                // $('.cartonInput').hide();
+                // $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+                // $('.itemBoxCheckboxes').find('input[type="number"]').val('');
             }
         });
 
+        let url = `{{ route('customers.list') }}`;
+        ajaxRequest(url, 'GET', {},
+            function(response) {
+                console.log(response, "response")
+                if (response.customers && response.customers.length > 0) {
+                    $('#customer').html('<option selected disabled>Select Product Customer</option>');
+                    $.each(response.customers, function(index, customer) {
 
-        function GetSKU() {
-            let url = `{{ route('sell.product.getData') }}`;
-            ajaxRequest(url, 'GET', {},
+                        $('#customer').append(
+                            `<option value="${customer.id}">${customer?.name}</option>`
+                        );
+                    });
+                }
+            }
+        );
+
+        $('#customer').on('change', function() {
+            let customerId = $(this).val();
+            GetCustomer(customerId);
+        })
+
+        function GetCustomer(customerId) {
+            let url = `{{ route('customers.list') }}`;
+            ajaxRequest(url, 'GET', {
+                    customerId
+                },
                 function(response) {
-                    if (response.products && response.products.length > 0) {
-                        $('.SKU').html('<option selected disabled>Select Product / SKU</option>');
-                        $.each(response.products, function(index, product) {
-                            // console.log(product, "product")
-                            // $('.SKU').append(
-                            //     `<option value="${product.sku}">${product.sku}</option>`
-                            // );
-                            $('.SKU').append(
-                                `<option value="${product.sku}">${product?.product[0]?.name} / ${product.sku}</option>`
+                    console.log(response, "responsennnnn")
+                    if (response.customers) {
+                        $.each(response.customers, function(index, customer) {
+                            console.log(customer, "customertyope")
+                            $('#customerType').append(
+                                `<option selected readonly value="${customer.id}">${customer?.type_of_customer}</option>`
                             );
                         });
                     }
                 }
             );
         }
+
+
 
         $('.SKU').on('change', function() {
             var selectedSku = $(this).val();
@@ -223,11 +307,27 @@
             var selectedBatch = $(this).val();
 
             if (selectedBatch) {
-                loadCartons(selectedBatch);
+                loadBatchData(selectedBatch);
             } else {
 
             }
         });
+
+        function loadBatchData(batchId){
+            $.ajax({
+                url: '{{ url('/sellcorner/batche/data') }}/' + batchId,
+                type: 'GET',
+                success: function(response) {
+                  console.log(response,"response")
+                  $('#unitsPerCarton').val(response?.batches?.no_of_units)
+                  $('#availableQtyCarton').val(response?.batches?.quantity)
+
+                },
+                error: function() {
+                    alert("Error loading batches.");
+                }
+            });
+        }
 
         function loadCartons(batch) {
             $.ajax({
@@ -462,6 +562,27 @@
                         </select>
                     </div>
                 </div>
+                                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="unitsPerCarton_${rowIndex}">Number of Unit Per
+                                            Carton</label>
+                                        <input type="number" class="form-control" id="unitsPerCarton_${rowIndex}"
+                                            name="unitsPerCarton" readonly placeholder="Enter units per carton" disabled>
+                                    </div>
+                                    <div class="mb-3">
+                                      
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div  class="mb-3">
+                                        <label class="form-label" for="availableQtyCarton_${rowIndex}">Available Total No of
+                                            Carton</label>
+                                        <input type="number" class="form-control" readonly id="availableQtyCarton_${rowIndex}"
+                                            name="availableQtyCarton"
+                                            placeholder="Enter available no of carton" disabled>
+                                    </div>
+                                </div>
 
                 <!-- Packaging Type and Carton Selection -->
                 <div class="col-md-12">
@@ -613,7 +734,7 @@
                     );
                     $.each(response.products, function(index, product) {
                         $skuDropdown.append(
-                            `<option value="${product.sku}">${product.sku}</option>`
+                            `<option value="${product?.product[0]?.sku}">${product?.product[0]?.name}</option>`
                         );
                     });
                 }

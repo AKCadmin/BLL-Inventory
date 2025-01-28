@@ -230,6 +230,97 @@ class HistoryController extends Controller
     //     }
     // }
 
+    // public function getHistory(Request $request)
+    // {
+    //     try {
+    //         $organization = Organization::where('id', '=', $request->company)->first();
+    //         $selectedDate = $request->selectedDate;
+    //         $productId = $request->productId;
+    //         $brandId = $request->brandId;
+
+    //         // Get all products with their brands
+    //         $products = Product::with('brand')->get();
+
+    //         setDatabaseConnectionForOrganization($organization->name);
+    //         $excludedBatchIds = DB::table('sell_counter')
+    //         ->pluck('batch_id');
+    //         // Build the query for batches and cartons
+    //         $query = DB::table('batches')
+    //             ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
+    //             ->leftJoinSub(
+    //                 DB::table('sell_carton')
+    //                     ->select(
+    //                         'sell_carton.carton_id',
+    //                         DB::raw('SUM(sell_carton.no_of_items_sell) as total_sold_items')
+    //                     )
+    //                     ->whereDate('sell_carton.created_at', '>', $selectedDate)
+    //                     ->groupBy('sell_carton.carton_id'),
+    //                 'sell_carton',
+    //                 'cartons.id',
+    //                 '=',
+    //                 'sell_carton.carton_id'
+    //             )
+    //             ->select(
+    //                 'batches.batch_number as batch_no',
+    //                 'batches.buy_price',
+    //                 'batches.product_id',
+    //                 'batches.created_at',
+    //                 DB::raw('COUNT(cartons.id) as cartons'),
+    //                 DB::raw('COALESCE(SUM(cartons.no_of_items_inside), 0) as total_items'),
+    //                 DB::raw('SUM(cartons.missing_items) as missing_items'),
+    //                 DB::raw('COALESCE(SUM(sell_carton.total_sold_items), 0) as sold_items'),
+    //                 DB::raw('SUM(cartons.no_of_items_inside) + COALESCE(SUM(sell_carton.total_sold_items), 0) as available_items'),
+    //                 'batches.id as batch_id'
+    //             )
+    //             ->whereNotIn('batches.id', $excludedBatchIds)
+    //             ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'batches.product_id','batches.created_at')
+    //             ->orderBy('batches.id', 'DESC');
+
+    //         $stocksList = $query->get();
+
+    //         // Filter by productId if provided
+    //         if ($productId) {
+    //             $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
+    //         }
+
+    //         // Filter by brandId if provided
+    //         if ($brandId) {
+    //             $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
+    //                 $product = $products->firstWhere('id', $stock->product_id);
+    //                 return $product && $product->brand_id == $brandId;
+    //             });
+    //         }
+
+    //         // Group data by product_id
+    //         $groupedData = $stocksList->groupBy('product_id')->map(function ($stocks, $productId) use ($products) {
+    //             $product = $products->firstWhere('id', $productId);
+    //             return [
+    //                 'product_id' => $productId,
+    //                 'product_name' => $product->name ?? null,
+    //                 'brand_name' => $product->brand->name ?? null,
+    //                 'status' => $product->status ?? null,
+    //                 'batches' => $stocks->map(function ($stock) {
+    //                     return [
+    //                         'batch_no' => $stock->batch_no,
+    //                         'buy_price' => $stock->buy_price,
+    //                         'cartons' => $stock->cartons,
+    //                         'total_items' => $stock->total_items,
+    //                         'missing_items' => $stock->missing_items,
+    //                         'sold_items' => $stock->sold_items,
+    //                         'available_items' => $stock->available_items,
+    //                         'batch_id' => $stock->batch_id,
+    //                         'created_at' => $stock->created_at,
+    //                     ];
+    //                 })->values(),
+    //             ];
+    //         });
+
+    //         return response()->json(['data' => $groupedData]);
+    //     } catch (\Throwable $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function getHistory(Request $request)
     {
         try {
@@ -237,7 +328,7 @@ class HistoryController extends Controller
             $selectedDate = $request->selectedDate;
             $productId = $request->productId;
             $brandId = $request->brandId;
-
+            $brand = Brand::where('id',$brandId)->first();
             // Get all products with their brands
             $products = Product::with('brand')->get();
 
@@ -246,37 +337,24 @@ class HistoryController extends Controller
             ->pluck('batch_id');
             // Build the query for batches and cartons
             $query = DB::table('batches')
-                ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
-                ->leftJoinSub(
-                    DB::table('sell_carton')
-                        ->select(
-                            'sell_carton.carton_id',
-                            DB::raw('SUM(sell_carton.no_of_items_sell) as total_sold_items')
-                        )
-                        ->whereDate('sell_carton.created_at', '>', $selectedDate)
-                        ->groupBy('sell_carton.carton_id'),
-                    'sell_carton',
-                    'cartons.id',
-                    '=',
-                    'sell_carton.carton_id'
-                )
-                ->select(
-                    'batches.batch_number as batch_no',
-                    'batches.buy_price',
-                    'batches.product_id',
-                    'batches.created_at',
-                    DB::raw('COUNT(cartons.id) as cartons'),
-                    DB::raw('COALESCE(SUM(cartons.no_of_items_inside), 0) as total_items'),
-                    DB::raw('SUM(cartons.missing_items) as missing_items'),
-                    DB::raw('COALESCE(SUM(sell_carton.total_sold_items), 0) as sold_items'),
-                    DB::raw('SUM(cartons.no_of_items_inside) + COALESCE(SUM(sell_carton.total_sold_items), 0) as available_items'),
-                    'batches.id as batch_id'
-                )
-                ->whereNotIn('batches.id', $excludedBatchIds)
-                ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price', 'batches.product_id','batches.created_at')
-                ->orderBy('batches.id', 'DESC');
-
+                
+            ->select(
+                // 'batches.*',
+                // 'batches.batch_number as batch_no',                       
+                'batches.product_id',
+                'batches.unit',                     
+                // 'batches.id as batch_id',
+                DB::raw('SUM(batches.quantity) as total_quantity'),
+                DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
+                DB::raw('SUM(batches.buy_price) as total_buy_price'),
+                DB::raw('MAX(batches.created_at) as first_created_at')
+            )
+            // ->whereNotIn('batches.id', $excludedBatchIds)
+            ->groupBy('batches.product_id', 'batches.unit')
+            ->orderBy('product_id', 'ASC');
+           
             $stocksList = $query->get();
+   
 
             // Filter by productId if provided
             if ($productId) {
@@ -297,23 +375,17 @@ class HistoryController extends Controller
                 return [
                     'product_id' => $productId,
                     'product_name' => $product->name ?? null,
+                    'total_buy_price' => $stocks[0]->total_buy_price,
                     'brand_name' => $product->brand->name ?? null,
-                    'status' => $product->status ?? null,
-                    'batches' => $stocks->map(function ($stock) {
-                        return [
-                            'batch_no' => $stock->batch_no,
-                            'buy_price' => $stock->buy_price,
-                            'cartons' => $stock->cartons,
-                            'total_items' => $stock->total_items,
-                            'missing_items' => $stock->missing_items,
-                            'sold_items' => $stock->sold_items,
-                            'available_items' => $stock->available_items,
-                            'batch_id' => $stock->batch_id,
-                            'created_at' => $stock->created_at,
-                        ];
-                    })->values(),
+                    'unit' => $product->unit,
+                    'total_quantity' => $stocks[0]->total_quantity,
+                    'total_no_of_unit' => $stocks[0]->total_no_of_unit,
+                    'status' => $product->status ?? null,  
+                    'created_at' => $stocks[0]->first_created_at ?? null,                     
                 ];
             });
+
+            //  dd($groupedData);
 
             return response()->json(['data' => $groupedData]);
         } catch (\Throwable $e) {

@@ -26,11 +26,12 @@ if (!empty($_SESSION['lang'])) {
 
                 @if (auth()->user()->role != 2 && auth()->user()->role != 3)
                     @can('view-company')
-                        <li><a href="{{ route('brand.index') }}" key="t-brand"><i class="bx bx-buildings"></i><span key="t-brands">
-                                Brand</span></a></li> <!-- Building Icon -->
+                        <li><a href="{{ route('brand.index') }}" key="t-brand"><i class="bx bx-buildings"></i><span
+                                    key="t-brands">
+                                    Brand Owner</span></a></li> <!-- Building Icon -->
                     @endcan
                     <li><a href="{{ route('organization.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
-                        <span key="t-organization"> Organization</span></a></li> <!-- Building Icon -->
+                            <span key="t-organization"> Organization</span></a></li> <!-- Building Icon -->
 
                     @can('view-user-management')
                         <li>
@@ -40,9 +41,33 @@ if (!empty($_SESSION['lang'])) {
                             </a>
                         </li>
                     @endcan
+                    <li><a href="{{ route('customer.index') }}" class=""><i
+                                class="bx bx-add-to-queue"></i>Customer</a></li>
+
                     @can('view-product')
                         <li><a href="{{ route('product.index') }}" key="t-role-manager"><i class="bx bx-box"></i>
-                            <span key="t-products">Product</span></a></li> <!-- Box Icon -->
+                                <span key="t-products">Product</span></a></li> <!-- Box Icon -->
+                    @endcan
+                    @can('view-sell')
+                        {{-- <li>
+
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="bx bx-package"></i> <!-- Alternate Cart Icon -->
+                                <span key="t-maps">Stock Pricing</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                @can('add-sell')
+                                    <li><a href="{{ route('sell.index') }}" class=""><i class="bx  bx-add-to-queue"></i>
+                                            Add
+                                            Stock Price</a></li> <!-- Plus Icon -->
+                                @endcan
+
+                                <li><a href="{{ route('sell.list') }}" class=""><i class="bx bx-clipboard"></i> Stock
+                                        Price
+                                        List</a></li> <!-- List Icon -->
+
+                            </ul>
+                        </li> --}}
                     @endcan
                     @can('view-stock')
                         <li>
@@ -53,15 +78,17 @@ if (!empty($_SESSION['lang'])) {
                         </li>
                     @endcan
 
+
+
                     <li>
-                        <a href="{{route('purchase.history')}}" class="">
+                        <a href="{{ route('purchase.history') }}" class="">
                             <i class="bx bx-history"></i> <!-- List Icon -->
                             <span key="t-history">Purchase history</span>
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{route('sell.history')}}" class="">
+                        <a href="{{ route('sell.history') }}" class="">
                             <i class="bx bx-history"></i> <!-- List Icon -->
                             <span key="t-sale-history">Sale History</span>
                         </a>
@@ -73,9 +100,11 @@ if (!empty($_SESSION['lang'])) {
                             <span key="t-maps">Settings</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="{{route('role-manager')}}" key="t-role-manager"><i class="bx bx-shield-quarter"></i> Role
+                            <li><a href="{{ route('role-manager') }}" key="t-role-manager"><i
+                                        class="bx bx-shield-quarter"></i> Role
                                     Manager</a></li> <!-- Role Icon -->
-                            <li><a href="{{route('permission-manager')}}" key="t-permission-manager"><i class="bx bx-lock-alt"></i>
+                            <li><a href="{{ route('permission-manager') }}" key="t-permission-manager"><i
+                                        class="bx bx-lock-alt"></i>
                                     Permission Manager</a></li> <!-- Lock Icon -->
                         </ul>
                     </li>
@@ -90,31 +119,13 @@ if (!empty($_SESSION['lang'])) {
 
                             <ul class="sub-menu" aria-expanded="false">
                                 @can('add-purchase')
-                                    <li><a href="{{ route('stock.index') }}" key="t-role-manager"><i class="bx bx-plus"></i> Add
+                                    <li><a href="{{ route('stock.index') }}" key="t-role-manager"><i class="bx bx-plus"></i>
+                                            Add
                                             Purchase</a></li>
                                 @endcan
 
                                 <li><a href="{{ route('stock.list') }}" key="t-role-manager"><i
                                             class="bx bx-list-check"></i> Purchase List</a></li>
-
-                            </ul>
-                        </li>
-                    @endcan
-                    @can('view-sell')
-                        <li>
-
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="bx bx-cart-alt"></i> <!-- Alternate Cart Icon -->
-                                <span key="t-maps">Sell Stock</span>
-                            </a>
-                            <ul class="sub-menu" aria-expanded="false">
-                                @can('add-sell')
-                                    <li><a href="{{ route('sell.index') }}" class=""><i class="bx bx-plus"></i> Add
-                                            Sell</a></li> <!-- Plus Icon -->
-                                @endcan
-
-                                <li><a href="{{ route('sell.list') }}" class=""><i class="bx bx-list-ul"></i> Sell
-                                        List</a></li> <!-- List Icon -->
 
                             </ul>
                         </li>
@@ -126,7 +137,7 @@ if (!empty($_SESSION['lang'])) {
                             <span key="t-maps">Sell Management</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            
+
                             @can('add-sell-counter')
                                 <li><a href="{{ route('sellCounter.index') }}" class=""><i
                                             class="bx bx-add-to-queue"></i> Add Sell</a></li> <!-- Queue Icon -->

@@ -48,9 +48,10 @@ class ProductController extends Controller
 
             $validated = $request->validate([
                 'brand_id' => 'required|integer|exists:brands,id',
-                // 'company_id' => 'required|integer|exists:organizations,id',
+                 'company_id' => 'required|integer|exists:organizations,id',
                 // 'sku' => 'required|unique:products,sku|max:50',
                 'name' => 'required|string|max:255',
+                'unit' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status' => 'required|string|max:50',
             ]);
@@ -58,9 +59,10 @@ class ProductController extends Controller
           
             $product = new Product();
             $product->brand_id = $request->brand_id;
-            // $product->company_id = $request->company_id;
+             $product->company_id = $request->company_id;
             // $product->sku = $request->sku;
             $product->name = $request->name;
+            $product->unit = $request->unit;
             $product->description = $request->description;
             $product->status = $request->status;
             $product->save();
@@ -166,18 +168,20 @@ class ProductController extends Controller
             }
             $validated = $request->validate([
                 'brand_id' => 'required|integer',
-                // 'company_id' => 'required|integer',
+                 'company_id' => 'required|integer',
                 // 'sku' => 'required|unique:products,sku,' . $id . '|max:50',
                 'name' => 'required|string|max:255',
+                'unit' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status' => 'required',
             ]);
 
             $product = Product::findOrFail($id);
             $product->brand_id = $request->brand_id;
-            // $product->company_id = $request->company_id;
+             $product->company_id = $request->company_id;
             // $product->sku = $request->sku;
             $product->name = $request->name;
+            $product->unit = $request->unit;
             $product->description = $request->description;
             $product->status = $request->status;
             $product->save();
@@ -241,5 +245,24 @@ class ProductController extends Controller
                 'message' => 'An error occurred: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function productDataGetById(Request $request)
+    {
+        try{
+            if($request->productId){
+            $products = Product::where('id', $request->productId)->first();
+            }
+            if($request->brandId){
+                $products = Product::where('brand_id', $request->brandId)->get();
+            }
+            return response()->json(['data' => $products]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while fetching products.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
     }
 }

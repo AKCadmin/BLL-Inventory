@@ -22,6 +22,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\paymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SellController;
 use App\Http\Controllers\SellCornerController;
 use App\Http\Controllers\userManagement;
@@ -129,6 +130,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/product/toggle-status', [ProductController::class, 'toggleStatus'])->name('product.toggleStatus');
     // Route::get('/product/data/get', [CompanyController::class, 'productDataGet'])->name('product.getData');
     Route::get('/product/data/get', [OrganizationController::class, 'productDataGet'])->name('product.getData');
+    Route::get('/product/data/byid', [ProductController::class, 'productDataGetById'])->name('product.getDataById');
 
     //stock routes
     Route::resource('stock', StockController::class);
@@ -146,6 +148,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
     Route::get('/batches/{sku}', [SellController::class, 'getBatchesBySku'])->name('batch.getBatchesBySku');
 
+    //sale user
+    Route::resource('customer', CustomerController::class);
+    Route::get('customers/list', [CustomerController::class,'customerList'])->name('customers.list');
+
     // sell counter Management routes
     Route::resource('sellCounter', SellCornerController::class);
     Route::get('/sellcounter/orders', [SellCornerController::class, 'orderList'])->name('sell.orders.list');
@@ -153,6 +159,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sellcounter/batches/{sku}', [SellCornerController::class, 'getSellcounterBatchesBySku'])->name('batch.getSellCounterBatchesBySku');
     Route::get('/sellcounter/product/data/get', [SellCornerController::class, 'sellProductDataGet'])->name('sell.product.getData');
     Route::get('/sellcounter/cartons/{batch}', [SellCornerController::class, 'getSellcounterCartonsByBatch'])->name('batch.getSellCounterCartonsByBatch');
+    Route::get('/sellcorner/batche/data/{batch}', [SellCornerController::class, 'getBatchData'])->name('getBatchData');
 
 
     //for user assign permission

@@ -1,4 +1,5 @@
 function ajaxRequest(url, type = 'GET', data = {}, successCallback, errorCallback) {
+    
     $.ajax({
         url: url,
         type: type,

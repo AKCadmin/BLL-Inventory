@@ -281,11 +281,10 @@ class OrganizationController extends Controller
                     ->get();
                 // dd($request->company);
             } else {
+                
                 // setDatabaseConnection();
-                // $products = Product::where('company_id', auth()->user()->organization_id)
-                //     ->orderBy('id', 'desc')
-                //     ->get();
-                $products = Product::orderBy('id', 'desc')
+                $productBrand = Product::where('company_id', auth()->user()->organization_id)->first();
+                $products = Product::where('brand_id', $productBrand->brand_id)->orderBy('id', 'desc')
                     ->get();
             }
             // dd($products);

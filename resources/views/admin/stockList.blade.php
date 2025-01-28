@@ -58,12 +58,19 @@
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
-                                            <th>Id</th>
+                                            {{-- <th>Id</th>
                                             <th>Brand Name</th>
                                             <th>Batch No</th>
                                             <th>Product Name</th>
-                                            <th>Available</th>
-
+                                            <th>Available</th> --}}
+                                            
+                                            <th>Id</th>
+                                            <th>Brand Name</th>
+                                            <th>Product Name</th>                                       
+                                            <th>Unit</th>
+                                            <th>Expire Date</th>
+                                            <th>No of Unit Per Cartoon</th>
+                                            <th>Total No of Cartoons</th>
                                             {{-- <th>Purchased sales</th> --}}
                                             <th>Status</th>
 
@@ -144,6 +151,7 @@
         let table = $('#stocktable').DataTable();
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
+        $('#organization-filter').val("");
         var productId = "";
         var brandId = "";
 
@@ -230,19 +238,20 @@
                         
                             // `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
                             var editButton = 
-        `<a href="/stock/${stock.batch_id}" class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
+        `<a href="/stock/${stock.product_id}" class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
 
                          var deleteButton =
                             // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
-                            `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.batch_id}">Delete</button>`;
+                            `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.product_id}">Delete</button>`;
 
                         table.row.add([
-                           
-                            stock.batch_id,
+                            stock.product_id,
                             stock.brand_name,
-                            stock.batch_no,
-                            stock.product_name,
-                            stock.available_items,
+                            stock.product_name,   
+                            stock.unit,
+                            stock.expiry_date,
+                            stock.total_no_of_unit,
+                            stock.total_quantity,
                             stock.status,
                             // `${editButton} ${deleteButton}`
                         ]);

@@ -82,12 +82,13 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Product Id</th>
+                                            <th>Brand Name</th>
+                                            <th>Product Name</th>
                                             <th>Total Buy Price</th>
-                                            <th>Total No. of Batches</th>
-                                            <th>Total No. of Cartons</th>
-                                            <th>Total Items</th>
-                                            <th>Missing Items</th>
+                                            <th>Total No. of Unit Per Cartoon</th>
+                                            <th>Total No. of Cartoons</th>
+                                            {{-- <th>Total Items</th>
+                                            <th>Missing Items</th> --}}
                                             <th>Date</th>
                                             <th>Action</th>
                                         </tr>
@@ -96,8 +97,12 @@
                                         @foreach ($groupedData as $data)
                                             <tr>
                                                 <td>{{ $data['product_id'] }}</td>
+                                                <td>{{ $data['brand_name'] }}</td>
                                                 <td>{{ $data['product_name'] }}</td>
-                                                <td>
+                                                <td>{{ $data['total_buy_price'] }}</td>
+                                                <td>{{ $data['total_no_of_unit'] }}</td>
+                                                <td>{{ $data['total_quantity'] }}</td>
+                                                {{-- <td>
                                                     @php
                                                         $totalBuyPrice = 0;
                                                         foreach ($data['batches'] as $batch) {
@@ -105,9 +110,9 @@
                                                         }
                                                     @endphp
                                                     {{ number_format($totalBuyPrice, 2) }}
-                                                </td>
-                                                <td>{{ count($data['batches']) }}</td>
-                                                <td>
+                                                </td> --}}
+                                                {{-- <td>{{ count($data['batches']) }}</td> --}}
+                                                {{-- <td>
                                                     @php
                                                         $totalCartons = 0;
                                                         foreach ($data['batches'] as $batch) {
@@ -115,8 +120,8 @@
                                                         }
                                                     @endphp
                                                     {{ $totalCartons }}
-                                                </td>
-                                                <td>
+                                                </td> --}}
+                                                {{-- <td>
                                                     @php
                                                         $totalItems = 0;
                                                         foreach ($data['batches'] as $batch) {
@@ -124,8 +129,8 @@
                                                         }
                                                     @endphp
                                                     {{ $totalItems }}
-                                                </td>
-                                                <td>
+                                                </td> --}}
+                                                {{-- <td>
                                                     @php
                                                         $missingItems = 0;
                                                         foreach ($data['batches'] as $batch) {
@@ -133,14 +138,12 @@
                                                         }
                                                     @endphp
                                                     {{ $missingItems }}
-                                                </td>
+                                                </td> --}}
                                                 <td>
                                                     @php
                                                         $created_at = '';
-                                                        foreach ($data['batches'] as $batch) {
-                                                            $created_at = $batch['created_at'];
-                                                        }
-                                                        $formatted_date = date('Y-m-d', strtotime($created_at));
+                                                       
+                                                        $formatted_date = date('Y-m-d', strtotime($data['created_at']));
                                                     @endphp
                                                     {{ $formatted_date }}
                                                 </td>

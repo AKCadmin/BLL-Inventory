@@ -83,7 +83,7 @@
 
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
-                                        <tr>
+                                        {{-- <tr>
                                             <th>Id</th>
 
                                             <th>Product Id</th>
@@ -92,6 +92,17 @@
                                             <th>Total No. of Carton</th>
                                             <th>Total Item</th>
                                             <th>Missing Item</th>
+                                            <th>Date</th>
+                                            <th>Action</th> --}}
+
+                                            <th>Id</th>
+                                            <th>Brand Name</th>
+                                            <th>Product Name</th>
+                                            <th>Total Buy Price</th>
+                                            <th>Total No. of Unit Per Cartoon</th>
+                                            <th>Total No. of Cartoons</th>
+                                            {{-- <th>Total Items</th>
+                                            <th>Missing Items</th> --}}
                                             <th>Date</th>
                                             <th>Action</th>
                                         </tr>
@@ -263,86 +274,151 @@
         //     });
         // }
 
+        // function fetchHistory(companyName, brandId, productId, selectedDate) {
+        //     $.ajax({
+        //         url: "{{ route('purchase.getHistory') }}",
+        //         method: "GET",
+        //         data: {
+        //             company: companyName,
+        //             brandId: brandId,
+        //             productId: productId,
+        //             selectedDate: selectedDate
+        //         },
+        //         success: function(response) {
+        //             console.log(response);
+
+        //             const data = response.data || {};
+        //             const table = $('#stocktable').DataTable();
+        //             table.clear();
+
+        //             for (const [productKey, productDetails] of Object.entries(data)) {
+        //                 const {
+        //                     product_id,
+        //                     product_name,
+        //                     brand_name,
+        //                     batches
+        //                 } = productDetails;
+
+        //                 let totalBuyPrice = 0;
+        //                 let totalCartons = 0;
+        //                 let totalItems = 0;
+        //                 let missingItems = 0;
+        //                 let created_at = "";
+        //                 const totalBatches = batches.length;
+
+        //                 batches.forEach(batch => {
+        //                     // totalBuyPrice += parseFloat(batch.buy_price) * batch
+        //                     // .cartons; 
+        //                     totalBuyPrice += parseFloat(batch.buy_price);
+        //                     totalCartons += parseInt(batch.cartons, 10);
+        //                     totalItems += parseInt(batch.total_items, 10);
+        //                     missingItems += parseInt(batch.missing_items, 10);
+        //                     created_at = batch.created_at.split(" ")[0];
+
+        //                 });
+
+        //                 const row = `
+        //             <tr>
+        //                 <td>${product_id}</td>
+        //                 <td>${product_name}</td>
+        //                 <td>${totalBuyPrice.toFixed(2)}</td>
+        //                  <td>${totalBatches}</td>
+        //                 <td>${totalCartons}</td>
+        //                 <td>${totalItems}</td>
+        //                 <td>${missingItems}</td>
+        //                  <td>${created_at}</td>
+        //                 <td>
+        //                     <a href="/purchase/details/${product_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">Details</a>
+        //                     <a href="#" class="btn btn-sm btn-warning edit-stock-btn" data-url="{{ route('stock.show', '') }}/${product_id}">Edit</a>
+
+        //                     <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${product_id}">Delete</button>
+        //                 </td>
+        //             </tr>
+        //         `;
+        //                 table.row.add($(row));
+        //             }
+
+        //             table.draw();
+        //             $('#stocktable').on('click', '.edit-stock-btn', function(event) {
+        //                 event.preventDefault();
+        //                 const url = $(this).data('url');
+        //                 const confirmed = confirm(
+        //                     'Are you sure you want to edit this item?');
+        //                 if (confirmed) {
+        //                     window.location.href = url;
+        //                 }
+        //             });
+        //         },
+        //         error: function() {
+        //             alert("Error fetching stock data.");
+        //         }
+        //     });
+        // }
+
+        
         function fetchHistory(companyName, brandId, productId, selectedDate) {
-            $.ajax({
-                url: "{{ route('purchase.getHistory') }}",
-                method: "GET",
-                data: {
-                    company: companyName,
-                    brandId: brandId,
-                    productId: productId,
-                    selectedDate: selectedDate
-                },
-                success: function(response) {
-                    console.log(response);
+    $.ajax({
+        url: "{{ route('purchase.getHistory') }}",
+        method: "GET",
+        data: {
+            company: companyName,
+            brandId: brandId,
+            productId: productId,
+            selectedDate: selectedDate
+        },
+        success: function(response) {
+            console.log(response);
 
-                    const data = response.data || {};
-                    const table = $('#stocktable').DataTable();
-                    table.clear();
+            const data = response.data || {};
+            const table = $('#stocktable').DataTable();
+            table.clear(); // Clear existing rows
 
-                    for (const [productKey, productDetails] of Object.entries(data)) {
-                        const {
-                            product_id,
-                            product_name,
-                            brand_name,
-                            batches
-                        } = productDetails;
-
-                        let totalBuyPrice = 0;
-                        let totalCartons = 0;
-                        let totalItems = 0;
-                        let missingItems = 0;
-                        let created_at = "";
-                        const totalBatches = batches.length;
-
-                        batches.forEach(batch => {
-                            // totalBuyPrice += parseFloat(batch.buy_price) * batch
-                            // .cartons; 
-                            totalBuyPrice += parseFloat(batch.buy_price);
-                            totalCartons += parseInt(batch.cartons, 10);
-                            totalItems += parseInt(batch.total_items, 10);
-                            missingItems += parseInt(batch.missing_items, 10);
-                            created_at = batch.created_at.split(" ")[0];
-
-                        });
-
-                        const row = `
+            // Loop through the response data
+            for (const [key, productDetails] of Object.entries(data)) {
+                const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+                const row = `
                     <tr>
-                        <td>${product_id}</td>
-                        <td>${product_name}</td>
-                        <td>${totalBuyPrice.toFixed(2)}</td>
-                         <td>${totalBatches}</td>
-                        <td>${totalCartons}</td>
-                        <td>${totalItems}</td>
-                        <td>${missingItems}</td>
-                         <td>${created_at}</td>
+                         <td>${productDetails?.product_id || "N/A"}</td>
+                        <td>${productDetails?.brand_name || "N/A"}</td>
+                        <td>${productDetails?.product_name || "N/A"}</td>
+                        <td>${productDetails?.total_buy_price || "N/A"}</td>
+                        <td>${productDetails?.total_no_of_unit || "N/A"}</td>
+                        <td>${productDetails?.total_quantity || "N/A"}</td>
+                        <td>${created_at}</td>
                         <td>
-                            <a href="/purchase/details/${product_id}/${companyName}" class="btn btn-sm btn-info" target="_blank">Details</a>
-                            <a href="#" class="btn btn-sm btn-warning edit-stock-btn" data-url="{{ route('stock.show', '') }}/${product_id}">Edit</a>
-
-                            <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${product_id}">Delete</button>
+                            <a href="/purchase/details/${productDetails?.product_id}/${productDetails?.brand_name}" 
+                               class="btn btn-sm btn-info" 
+                               target="_blank">Details</a>
+                            <a href="#" 
+                               class="btn btn-sm btn-warning edit-stock-btn" 
+                               data-url="{{ route('stock.show', '') }}/${productDetails?.product_id}">Edit</a>
+                            <button class="btn btn-sm btn-danger delete-stock-btn" 
+                                    data-id="${productDetails?.product_id}">Delete</button>
                         </td>
                     </tr>
                 `;
-                        table.row.add($(row));
-                    }
+                table.row.add($(row)); // Add the row to DataTable
+            }
 
-                    table.draw();
-                    $('#stocktable').on('click', '.edit-stock-btn', function(event) {
-                        event.preventDefault();
-                        const url = $(this).data('url');
-                        const confirmed = confirm(
-                            'Are you sure you want to edit this item?');
-                        if (confirmed) {
-                            window.location.href = url;
-                        }
-                    });
-                },
-                error: function() {
-                    alert("Error fetching stock data.");
+            table.draw(); // Redraw the table
+
+            // Bind click event for dynamically added buttons
+            $('#stocktable').off('click', '.edit-stock-btn').on('click', '.edit-stock-btn', function(event) {
+                event.preventDefault();
+                const url = $(this).data('url');
+                const confirmed = confirm('Are you sure you want to edit this item?');
+                if (confirmed) {
+                    window.location.href = url;
                 }
             });
+        },
+        error: function() {
+            alert("Error fetching stock data.");
         }
+    });
+}
+
+
 
 
 

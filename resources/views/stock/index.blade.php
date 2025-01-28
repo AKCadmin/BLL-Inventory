@@ -49,12 +49,38 @@
                     <h1 class="text-center mb-4">Add Stock</h1>
                     <form action="{{ route('stock.store') }}" method="post">
                         @csrf
+                        <div class="row align-items-center">
 
-                        <div class="mb-3">
-                            <label for="selectSku" class="form-label">Select Product</label>
-                            <select id="SKU" name="SKU" class="form-select select2">
-                                <option selected disabled>Select Product </option>
-                            </select>
+                            <div class="col-md-6 mb-3">
+                                <label for="autoSizingSelect">Select Brand</label>
+                                <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">
+                                    <option value="">Select Brand &ensp;</option>
+                                    @foreach ($brands as $brand)
+                                        <option value="{{ $brand->id }}"
+                                            {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
+                                            {{ $brand->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- Select Product -->
+                            <div class="col-md-6 mb-3">
+                                <label for="selectSku" class="form-label">Select Product</label>
+                                <select id="SKU" name="SKU" class="form-select select2">
+                                    <option selected disabled>Select Product </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="unit" class="form-label">Unit</label>
+                                <input type="text" name="unit" id="unit" class="form-control unit" readonly
+                                    style="background-color: #e9ecef; cursor: not-allowed;">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="invoice" class="form-label">Invoice</label>
+                                <input type="text" name="invoice" id="invoice" class="form-control invoice">
+                            </div>
                         </div>
 
                         <!-- Add Purchase -->
@@ -96,8 +122,18 @@
                                     <input type="text" name="buyPrice" id="buyPrice" class="form-control buyPrice"
                                         placeholder="Enter Buy Price">
                                 </div>
-
                                 <div class="col-md-4 mb-2">
+                                    <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
+                                    <input type="number" name="noOfUnits" id="noOfUnits" class="form-control noOfUnits"
+                                        placeholder="Enter No of Units">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label for="qty" class="form-label">Total No of Cartoons</label>
+                                    <input type="number" name="qty" id="qty" class="form-control qty"
+                                        placeholder="Enter No of Cartoon">
+                                </div>
+
+                                {{-- <div class="col-md-4 mb-2">
                                     <label for="noOfCartons" class="form-label">No Of Cartons</label>
                                     <input type="number" name="noOfCartons" id="noOfCartons"
                                         class="form-control noOfCartons" placeholder="Enter No Of Cartons">
@@ -107,149 +143,187 @@
                                         class="btn btn-info mt-3 processCartons">Process
                                         Cartons</button>
                                 </div>
-                                <div id="cartonRows" class="container mb-3">
+                                <div id="cartonRows" class="container mb-3"> --}}
 
-                                </div>
-                                <div class="col-md-4 mb-2">
-                                    <label for="notes" class="form-label">Notes</label>
-                                    <input type="text" name="notes" id="notes" class="form-control notes"
-                                        placeholder="Enter Notes">
-                                </div>
-                                <div class="col-md-12 text-end">
-                                    <button type="button" class="btn btn-danger removeRow">Remove</button>
-                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="notes" class="form-label">Notes</label>
+                                <input type="text" name="notes" id="notes" class="form-control notes"
+                                    placeholder="Enter Notes">
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="button" class="btn btn-danger removeRow">Remove</button>
                             </div>
                         </div>
-
-
-                        <div class="d-flex gap-2">
-                            <button type="button" id="addRow" class="btn btn-primary">Add Row</button>
-
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-success mt-2">Submit</button>
-                    </form>
                 </div>
+
+
+                <div class="d-flex gap-2">
+                    <button type="button" id="addRow" class="btn btn-primary">Add Row</button>
+
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success mt-2">Submit</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
 
-    @include('partials.right-sidebar')
-    @include('partials.vendor-scripts')
-    @include('partials.script')
-    <script src="assets/js/customJs/userManagement.js"></script>
-    <Script>
-        $(document).ready(function() {
-            $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
-            $('.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside', ).on('input',
-                function() {
-                    $(this).val($(this).val().replace(/[^0-9.]/g, ''));
-                });
-
-            $('.basePrice, .exchangeRate').on('input', function() {
+@include('partials.right-sidebar')
+@include('partials.vendor-scripts')
+@include('partials.script')
+<script src="assets/js/customJs/userManagement.js"></script>
+<Script>
+    $(document).ready(function() {
+        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
+        $('.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside', ).on('input',
+            function() {
                 $(this).val($(this).val().replace(/[^0-9.]/g, ''));
-                var basePrice = parseFloat($('.basePrice').val()) || 0;
-                var exchangeRate = parseFloat($('.exchangeRate').val()) || 0;
-                var buyPrice = basePrice * exchangeRate;
-                $('.buyPrice').val(buyPrice.toFixed(2));
             });
 
-            var currentDate = new Date().toISOString().split('T')[0];
+        $('.basePrice, .exchangeRate').on('input', function() {
+            $(this).val($(this).val().replace(/[^0-9.]/g, ''));
+            var basePrice = parseFloat($('.basePrice').val()) || 0;
+            var exchangeRate = parseFloat($('.exchangeRate').val()) || 0;
+            var buyPrice = basePrice * exchangeRate;
+            $('.buyPrice').val(buyPrice.toFixed(2));
+        });
 
-            $('.manufacturingDate').attr('max', currentDate);
-            $('.manufacturingDate').on('change', function() {
-                var manufacturingDate = $(this).val();
-                $(this).closest('.rowTemplate').find('.expiryDate').attr('min', manufacturingDate);
-            });
+        var currentDate = new Date().toISOString().split('T')[0];
 
-            $('.expiryDate').on('change', function() {
-                var manufacturingDate = $(this).closest('.rowTemplate').find('.manufacturingDate').val();
-                var expiryDate = $(this).val();
+        $('.manufacturingDate').attr('max', currentDate);
+        $('.manufacturingDate').on('change', function() {
+            var manufacturingDate = $(this).val();
+            $(this).closest('.rowTemplate').find('.expiryDate').attr('min', manufacturingDate);
+        });
 
-                if (expiryDate && expiryDate < manufacturingDate) {
-                    alert("Expiry Date cannot be before Manufacturing Date.");
-                    $(this).val("");
-                }
-            });
-            $('form').on('submit', function(e) {
+        $('.expiryDate').on('change', function() {
+            var manufacturingDate = $(this).closest('.rowTemplate').find('.manufacturingDate').val();
+            var expiryDate = $(this).val();
 
-                e.preventDefault();
+            if (expiryDate && expiryDate < manufacturingDate) {
+                alert("Expiry Date cannot be before Manufacturing Date.");
+                $(this).val("");
+            }
+        });
 
-                var formData = new FormData(this);
-
-
-                $('#batchRows .rowTemplate').each(function(index) {
-                    var batchData = {
-                        batchNo: $(this).find('.batchNo').val(),
-                        manufacturingDate: $(this).find('.manufacturingDate').val(),
-                        expiryDate: $(this).find('.expiryDate').val(),
-                        basePrice: $(this).find('.basePrice').val(),
-                        exchangeRate: $(this).find('.exchangeRate').val(),
-                        buyPrice: $(this).find('.buyPrice').val(),
-                        notes: $(this).find('.notes').val(),
-                        noOfCartons: $(this).find('.noOfCartons').val(),
-                        cartons: []
-                    };
-
-                    $(this).find('.cartonRow').each(function(cartonIndex) {
-                        var cartonData = {
-                            itemsInside: $(this).find('.itemsInside').val(),
-                            missingItems: $(this).find('.missingItems').val()
-                        };
-                        batchData.cartons.push(cartonData);
-                    });
-                    console.log(batchData, "batchData2");
-
-                    formData.append('batches[' + index + ']', JSON.stringify(batchData));
-                });
-                console.log("Inspecting FormData:");
-                for (var pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
-                }
-                const form = event.target;
-                fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            toastr.success('Form submitted successfully!');
-                            window.location.href =
-                            '{{ route('stock.list') }}';
-                        } else {
-                            toastr.error('Submission failed: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        toastr.error('An error occurred: ' + error.message);
-                    });
-            });
-            
-            $('.select2').select2({
-                placeholder: "Select an option",
-                allowClear: true
-            });
-            let url = `{{ route('product.getData') }}`;
-            ajaxRequest(url, 'GET', {},
+        $('#brandId').on('change', function() {
+            let brandId = $(this).val();
+            $('#unit').val("");
+            let url = `{{ route('product.getDataById') }}`;
+            ajaxRequest(url, 'GET', {
+                brandId
+                },
                 function(response) {
-                    if (response.products && response.products.length > 0) {
+                    console.log(response,"response")
+                    if (response.data && response.data.length > 0) {
                         $('#SKU').html('<option selected disabled>Select Product</option>');
-                        $.each(response.products, function(index, product) {
+                        $.each(response.data, function(index, product) {
                             $('#SKU').append(
-                                `<option value="${product.name}">${product.name}</option>`
+                                `<option value="${product.id}">${product.name}</option>`
                             );
                         });
                     }
                 }
             );
-            $('#addRow').click(function() {
-                var newBatchRow = $(`
+        });
+
+        $('#SKU').on('change', function() {
+            let productId = $(this).val();
+
+            let url = `{{ route('product.getDataById') }}`;
+            ajaxRequest(url, 'GET', {
+                    productId
+                },
+                function(response) {
+                    $('#unit').val(response?.data?.unit)
+                }
+            );
+        });
+
+
+        $('form').on('submit', function(e) {
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+
+            $('#batchRows .rowTemplate').each(function(index) {
+                var batchData = {
+                    batchNo: $(this).find('.batchNo').val(),
+                    manufacturingDate: $(this).find('.manufacturingDate').val(),
+                    expiryDate: $(this).find('.expiryDate').val(),
+                    basePrice: $(this).find('.basePrice').val(),
+                    exchangeRate: $(this).find('.exchangeRate').val(),
+                    buyPrice: $(this).find('.buyPrice').val(),
+                    noOfUnits: $(this).find('.noOfUnits').val(),
+                    qty: $(this).find('.qty').val(),
+                    notes: $(this).find('.notes').val(),
+                    noOfCartons: $(this).find('.noOfCartons').val(),
+                    cartons: []
+                };
+
+                // $(this).find('.cartonRow').each(function(cartonIndex) {
+                //     var cartonData = {
+                //         itemsInside: $(this).find('.itemsInside').val(),
+                //         missingItems: $(this).find('.missingItems').val()
+                //     };
+                //     batchData.cartons.push(cartonData);
+                // });
+                console.log(batchData, "batchData2");
+
+                formData.append('batches[' + index + ']', JSON.stringify(batchData));
+            });
+            console.log("Inspecting FormData:");
+            for (var pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            const form = event.target;
+            fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success('Form submitted successfully!');
+                        window.location.href =
+                            '{{ route('stock.list') }}';
+                    } else {
+                        toastr.error('Submission failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    toastr.error('An error occurred: ' + error.message);
+                });
+        });
+
+        $('.select2').select2({
+            placeholder: "Select an option",
+            allowClear: true
+        });
+        // let url = `{{ route('product.getData') }}`;
+        // ajaxRequest(url, 'GET', {},
+        //     function(response) {
+        //         if (response.products && response.products.length > 0) {
+        //             $('#SKU').html('<option selected disabled>Select Product</option>');
+        //             $.each(response.products, function(index, product) {
+        //                 $('#SKU').append(
+        //                     `<option value="${product.id}">${product.name}</option>`
+        //                 );
+        //             });
+        //         }
+        //     }
+        // );
+        $('#addRow').click(function() {
+            var newBatchRow = $(`
             <div class="row rowTemplate border p-3 rounded mb-2">
                 <div class="col-md-4 mb-2">
                     <label for="batchNo" class="form-label">Batch No.</label>
@@ -277,58 +351,60 @@
                     <input type="text" class="form-control buyPrice" placeholder="Enter Buy Price">
                 </div>
 
-                <div class="col-md-4 mb-2">
-                    <label for="noOfCartons" class="form-label">No Of Cartons</label>
-                    <input type="number" class="form-control noOfCartons" placeholder="Enter No Of Cartons">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <button type="button" class="btn btn-info mt-3 processCartons">Process Cartons</button>
-                </div>
-
-                <div class="col-md-12 mb-3" id="cartonRows"></div>
-                <div class="col-md-4 mb-2">
-                    <label for="notes" class="form-label">Notes</label>
-                    <input type="text" class="form-control notes" placeholder="Enter Notes">
-                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
+                                    <input type="number" name="noOfUnits" id="noOfUnits" class="form-control noOfUnits"
+                                        placeholder="Enter No of Units">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <label for="qty" class="form-label">Total No of Cartoons</label>
+                                    <input type="number" name="qty" id="qty" class="form-control qty"
+                                        placeholder="Enter No of Cartoon">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                <label for="notes" class="form-label">Notes</label>
+                                <input type="text" name="notes" id="notes" class="form-control notes"
+                                    placeholder="Enter Notes">
+                            </div>
                 <div class="col-md-12 text-end">
                     <button type="button" class="btn btn-danger removeRow">Remove</button>
                 </div>
             </div>
         `);
 
-                $('#batchRows').append(newBatchRow);
-
-               
-                newBatchRow.find('.manufacturingDate').attr('max', currentDate);
-
-                
-                newBatchRow.find('.manufacturingDate').on('change', function() {
-                    var manufacturingDate = $(this).val();
-                    $(this).closest('.rowTemplate').find('.expiryDate').attr('min',
-                        manufacturingDate);
-                });
+            $('#batchRows').append(newBatchRow);
 
 
-                newBatchRow.find('.expiryDate').on('change', function() {
-                    var manufacturingDate = $(this).closest('.rowTemplate').find(
-                        '.manufacturingDate').val();
-                    var expiryDate = $(this).val();
+            newBatchRow.find('.manufacturingDate').attr('max', currentDate);
 
-                    if (expiryDate && expiryDate < manufacturingDate) {
-                        alert("Expiry Date cannot be before Manufacturing Date.");
-                        $(this).val("");
-                    }
-                });
 
-                newBatchRow.find('.processCartons').click(function() {
-                    var noOfCartons = newBatchRow.find('.noOfCartons').val();
-                    var cartonRowsContainer = newBatchRow.find('#cartonRows');
-                    cartonRowsContainer.empty();
+            newBatchRow.find('.manufacturingDate').on('change', function() {
+                var manufacturingDate = $(this).val();
+                $(this).closest('.rowTemplate').find('.expiryDate').attr('min',
+                    manufacturingDate);
+            });
 
-                    if (noOfCartons && noOfCartons > 0) {
 
-                        for (var i = 0; i < noOfCartons; i++) {
-                            var cartonRow = $(`
+            newBatchRow.find('.expiryDate').on('change', function() {
+                var manufacturingDate = $(this).closest('.rowTemplate').find(
+                    '.manufacturingDate').val();
+                var expiryDate = $(this).val();
+
+                if (expiryDate && expiryDate < manufacturingDate) {
+                    alert("Expiry Date cannot be before Manufacturing Date.");
+                    $(this).val("");
+                }
+            });
+
+            newBatchRow.find('.processCartons').click(function() {
+                var noOfCartons = newBatchRow.find('.noOfCartons').val();
+                var cartonRowsContainer = newBatchRow.find('#cartonRows');
+                cartonRowsContainer.empty();
+
+                if (noOfCartons && noOfCartons > 0) {
+
+                    for (var i = 0; i < noOfCartons; i++) {
+                        var cartonRow = $(`
                         <div class="row cartonRow mb-2">
                             <div class="col-md-4 mb-2">
                                 <label for="itemsInside_${i+1}" class="form-label">No. of Items Inside (Carton ${i+1})</label>
@@ -341,46 +417,46 @@
 
                         </div>
                     `);
-                            cartonRowsContainer.append(
-                                cartonRow);
-                        }
-                    } else {
-                        alert('Please enter a valid number of cartons.');
+                        cartonRowsContainer.append(
+                            cartonRow);
                     }
+                } else {
+                    alert('Please enter a valid number of cartons.');
+                }
+            });
+
+            newBatchRow.find('.removeRow').click(function() {
+                newBatchRow.remove();
+            });
+
+            newBatchRow.on('click', '.removeCartonRow', function() {
+                $(this).closest('.cartonRow').remove();
+            });
+
+            newBatchRow.on('input',
+                '.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside',
+                function() {
+                    $(this).val($(this).val().replace(/[^0-9.]/g, ''));
                 });
 
-                newBatchRow.find('.removeRow').click(function() {
-                    newBatchRow.remove();
-                });
-
-                newBatchRow.on('click', '.removeCartonRow', function() {
-                    $(this).closest('.cartonRow').remove();
-                });
-
-                newBatchRow.on('input',
-                    '.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside',
-                    function() {
-                        $(this).val($(this).val().replace(/[^0-9.]/g, ''));
-                    });
-
-                newBatchRow.on('input', '.basePrice, .exchangeRate', function() {
-                    var basePrice = parseFloat(newBatchRow.find('.basePrice').val()) || 0;
-                    var exchangeRate = parseFloat(newBatchRow.find('.exchangeRate').val()) || 0;
-                    var buyPrice = basePrice * exchangeRate;
-                    newBatchRow.find('.buyPrice').val(buyPrice.toFixed(2));
-                });
+            newBatchRow.on('input', '.basePrice, .exchangeRate', function() {
+                var basePrice = parseFloat(newBatchRow.find('.basePrice').val()) || 0;
+                var exchangeRate = parseFloat(newBatchRow.find('.exchangeRate').val()) || 0;
+                var buyPrice = basePrice * exchangeRate;
+                newBatchRow.find('.buyPrice').val(buyPrice.toFixed(2));
             });
         });
+    });
 
 
-        $(document).ready(function() {
-            $('.processCartons').click(function() {
-                var noOfCartons = $('#noOfCartons').val();
+    $(document).ready(function() {
+        $('.processCartons').click(function() {
+            var noOfCartons = $('#noOfCartons').val();
 
-                if (noOfCartons && noOfCartons > 0) {
-                    $('#cartonRows').empty();
-                    for (var i = 0; i < noOfCartons; i++) {
-                        var newRow = $(`
+            if (noOfCartons && noOfCartons > 0) {
+                $('#cartonRows').empty();
+                for (var i = 0; i < noOfCartons; i++) {
+                    var newRow = $(`
                         <div class="row cartonRow mb-2">
                             <div class="col-md-4 mb-2">
                                 <label for="itemsInside_${i+1}" class="form-label">No. of Items Inside (Carton ${i+1})</label>
@@ -393,20 +469,20 @@
                            
                         </div>
                 `);
-                        $('#cartonRows').append(newRow);
-                    }
-                } else {
-                    alert('Please enter a valid number of cartons.');
+                    $('#cartonRows').append(newRow);
                 }
-            });
-
-            // Remove row logic
-            $(document).on('click', '.removeRow', function() {
-                $(this).closest('.rowTemplate').remove();
-            });
+            } else {
+                alert('Please enter a valid number of cartons.');
+            }
         });
-    </Script>
 
-    </body>
+        // Remove row logic
+        $(document).on('click', '.removeRow', function() {
+            $(this).closest('.rowTemplate').remove();
+        });
+    });
+</Script>
 
-    </html>
+</body>
+
+</html>

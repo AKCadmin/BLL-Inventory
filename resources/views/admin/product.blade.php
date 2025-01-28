@@ -62,10 +62,13 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            {{-- <th>Organization Name</th> --}}
+                                            
                                             {{-- <th>SKU</th> --}}
-                                            <th>Name</th>
-                                            <th>Brand Name</th>
+                                            <th>Organization Name</th>
+                                            <th>Brand Name</th>         
+                                           
+                                            <th>Product Name</th>
+                                            <th>Unit</th>
                                             <th>Description</th>
                                             <th>Status</th>
                                             <th>Action</th>
@@ -82,10 +85,13 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $product->id }}</td>
-                                                {{-- <td>{{ $product->organization ? $product->organization->name : 'N/A' }}</td> --}}
+                                                
                                                 {{-- <td>{{ $product->sku }}</td> --}}
-                                                <td>{{ $product->name }}</td>
+                                                <td>{{ $product->organization ? str_replace('_', ' ', $product->organization->name) : 'N/A' }}</td>
                                                 <td>{{ $product->brand?$product->brand->name:null }}</td>
+                                                
+                                                <td>{{ $product->name }}</td>
+                                                <td>{{ $product->unit }}</td>
                                                 <td>
                                                     <span title="{{ $product->description }}" data-toggle="tooltip"
                                                         data-placement="top">
@@ -154,9 +160,22 @@
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="product_id"
                                                     name="product_id" value="">
-
                                                     <div class="mb-3">
                                                         <label for="autoSizingSelect">Select Organization</label>
+                                                        <select class="form-select company" id="companyId"
+                                                            id="autoSizingSelect" name="company_id">
+                                                            <option value="">Select Organization &ensp;</option>
+                                                            @foreach ($companies as $company)
+                                                                <option value="{{ $company->id }}"
+                                                                    {{ old('company_id') == $company->id ? 'selected' : '' }}>
+                                                                    {{ $company->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="autoSizingSelect">Select Brand</label>
                                                         <select class="form-select brand" id="brandId"
                                                             id="autoSizingSelect" name="brand_id">
                                                             <option value="">Select Brand &ensp;</option>
@@ -169,19 +188,7 @@
                                                         </select>
                                                     </div>
 
-                                                {{-- <div class="mb-3">
-                                                    <label for="autoSizingSelect">Select Organization</label>
-                                                    <select class="form-select company" id="companyId"
-                                                        id="autoSizingSelect" name="company_id">
-                                                        <option value="">Select Organization &ensp;</option>
-                                                        @foreach ($companies as $company)
-                                                            <option value="{{ $company->id }}"
-                                                                {{ old('company_id') == $company->id ? 'selected' : '' }}>
-                                                                {{ $company->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div> --}}
+
 
                                                 {{-- <div class="mb-3">
                                                     <label for="sku" class="form-label">SKU</label>
@@ -195,6 +202,13 @@
                                                     <input type="text" class="form-control" id="name"
                                                         name="name" value="{{ old('name') }}"
                                                         placeholder="Enter Product Name" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="unit" class="form-label">Unit</label>
+                                                    <input type="text" class="form-control" id="unit"
+                                                        name="unit" value="{{ old('unit') }}"
+                                                        placeholder="Enter Product Unit" required>
                                                 </div>
 
                                                 <div class="mb-3">
@@ -407,6 +421,7 @@
                         $('#brandId').val(response.product.brand_id);
                         // $('#sku').val(response.product.sku);
                         $('#name').val(response.product.name);
+                        $('#unit').val(response.product.unit);
                         $('#description').val(response.product.description);
                         $('.status').val(response.product.status);
                         $('#modal_header').text('Edit Product');

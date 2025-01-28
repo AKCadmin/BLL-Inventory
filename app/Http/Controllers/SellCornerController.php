@@ -223,11 +223,12 @@ class SellCornerController extends Controller
     public function store(Request $request)
     {
 
+       
         if (auth()->user()->cannot('add-sell-counter')) {
             abort(403);
         }
         $data = $request->all();
-
+dd($data);
         DB::beginTransaction();
 
         try {
@@ -251,18 +252,19 @@ class SellCornerController extends Controller
 
             foreach ($data['batchData'] as $batchNumber => $batchItem) {
                 $batch = Batch::where('batch_number', $batchNumber)->firstOrFail();
-
+                
                 $skuData = $batchItem['sku'];
+               
                 $sku = is_array($skuData) ? $this->extractSKU($skuData) : $skuData;
-
-                $sellPrice = Sell::where('sku', $sku)
-                    ->where('batch_no', $batchNumber)
+                
+                $sellPrice = Sell::where('batch_no', $batchNumber)
                     ->first();
-
+                    // dd($sellPrice);
                 if (!$sellPrice) {
                     throw new \Exception("Sell price not found for SKU: {$sku} and Batch: {$batchNumber}");
                 }
 
+                dd($sellPrice);
                 $price = 0;
                 if (!empty($batchItem['cartonData'])) {
 
@@ -741,5 +743,30 @@ class SellCornerController extends Controller
         ];
 
         return $replacements[$packagingType] ?? $packagingType;
+    }
+
+    public function getBatchData($batchId)
+    {
+      
+        try {
+
+            setdatabaseConnection();
+            $batches = Batch::where('batch_number', '=', $batchId)
+                ->first();
+                // dd($batches);
+            return response()->json([
+                'success' => true,
+                'message' => 'Batches fetched successfully.',
+                'batches' => $batches,
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again later.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

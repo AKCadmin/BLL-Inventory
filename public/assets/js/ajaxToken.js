@@ -1,5 +1,7 @@
 $.ajaxSetup({
-    
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+    },
     beforeSend: function (xhr, settings) {
         const dbName = localStorage.getItem('db_name');
         const token = localStorage.getItem('token');

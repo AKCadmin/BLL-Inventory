@@ -14,6 +14,10 @@ class Batch extends Model
         "exchange_rate",
         "buy_price",
         "notes",
-        "product_id"
+        "product_id",
+        "brand_id",
+        "no_of_units",
+        "quantity",
+        "invoice_no"
     ];
 }
