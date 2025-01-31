@@ -22,7 +22,11 @@ class PagesSeeder extends Seeder
             'Sell',
             'Sell Counter',
             'Order',
-            'Invoice'
+            'Invoice',
+            'Organization',
+            'Customer',
+            'Purchase History',
+            'Sale History'
         ];
 
         // Loop through the pages and create each one in the database

@@ -69,12 +69,123 @@
     /* .input-group {
         width: 100%;
         /* Full width */
-        max-width: 300px;
-        /* Set a max width for the dropdown */
-        margin: 0 auto;
-        /* Center align (optional) */
-    } */
+    max-width: 300px;
+    /* Set a max width for the dropdown */
+    margin: 0 auto;
+    /* Center align (optional) */
+    }
+
+    */
 </style>
+
+{{-- <style>
+    #organizationModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-title {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .organization-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .organization-item {
+        padding: 0.75rem;
+        border: 1px solid #eee;
+        margin-bottom: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .organization-item:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .organization-item label {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        cursor: pointer;
+        color: #495057;
+        font-size: 1rem;
+    }
+
+    .organization-item input[type="radio"] {
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: #0d6efd;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5c636a;
+    }
+</style> --}}
+
 <header id="page-topbar">
     <div class="navbar-header">
         <div class="d-flex">
@@ -120,18 +231,19 @@
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
             @endphp
-            @if(auth()->user()->role == 1)
-            <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
-                @csrf
-                <div class="input-group">
-                    <select id="organization-filter" name="organization" class="form-control custom-select">
-                        <option value="">Select Organization</option>
-                        @foreach ($organizations as $organization)
-                            <option value="{{ $organization->id }}">{{ str_replace('_', ' ', $organization->name) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </form>
+            @if (auth()->user()->role == 1)
+                <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
+                    @csrf
+                    <div class="input-group">
+                        <select id="organization-filter" name="organization" class="form-control custom-select">
+                            <option value="">Select Organization</option>
+                            @foreach ($organizations as $organization)
+                                <option value="{{ $organization->id }}">{{ str_replace('_', ' ', $organization->name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
             @endif
 
 
@@ -300,11 +412,49 @@
             </div>
 
         </div>
+
+
     </div>
+
 </header>
+{{-- <div id="organizationModal" class="modal" style="display: none">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Select Organization</h5>
+        </div>
+        <div class="modal-body">
+            @php
+                config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
+                DB::purge('pgsql');
+                DB::connection('pgsql')->getPdo();
+                $organizations = App\Models\Organization::all();
+            @endphp
+
+            @if (auth()->user()->role == 1)
+                <div class="organization-list">
+                    @foreach ($organizations as $organization)
+                        <div class="organization-item">
+                            <label for="organization_{{ $organization->id }}">
+                                <input type="radio" name="selectedOrganization"
+                                    id="organization_{{ $organization->id }}" value="{{ $organization->id }}">
+                                {{ str_replace('_', ' ', $organization->name) }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeModalBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveSelectionBtn">Confirm</button>
+        </div>
+    </div>
+</div> --}}
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+        $('#organization-filter').val("");
         $('#organization-filter').change(function() {
             let organizationId = $(this).val(); // Get selected value
             if (organizationId) {

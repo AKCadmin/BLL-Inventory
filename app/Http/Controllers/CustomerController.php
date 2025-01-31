@@ -13,9 +13,14 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $organizations = Organization::all();
+        if (auth()->user()->role == 1) {
+            $organizations = Organization::all();
+            $salesUsers = Customer::with('organization')->get();
+            return view('customer.index', compact('salesUsers', 'organizations'));
+        }
+        $organizations = Organization::where('name', session('db_name'))->first();
+        $salesUsers = Customer::with('organization')->where('organization_id', $organizations->id)->get();
 
-        $salesUsers = Customer::with('organization')->get();
         return view('customer.index', compact('salesUsers', 'organizations'));
     }
 
@@ -24,7 +29,7 @@ class CustomerController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
-                'organization_id' => 'required|integer',
+                // 'organization_id' => 'required|integer',
                 'name' => 'required|string|max:255',
                 'phone_number' => 'required|digits:10',
                 'address' => 'required|string|max:255',
@@ -41,8 +46,27 @@ class CustomerController extends Controller
                 ]);
             }
 
+            $dbName = session('db_name');
+
+            $organizationId = null;
+            if ($request->input('organization_id') == null) {
+
+                $organization = Organization::where('name', $dbName)->first();
+
+                if (!$organization) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Organization not found for the current database.',
+                    ], 404);
+                }
+
+                $organizationId = $organization->id;
+            } else {
+                $organizationId = $request->input('organization_id');
+            }
+
             $saleUser = Customer::create([
-                'organization_id' => $request->input('organization_id'),
+                'organization_id' => $organizationId,
                 'name' => $request->input('name'),
                 'phone_number' => $request->input('phone_number'),
                 'address' => $request->input('address'),
@@ -75,7 +99,7 @@ class CustomerController extends Controller
 
             // Validate the incoming request
             $validator = Validator::make($request->all(), [
-                'organization_id' => 'required|integer',
+               // 'organization_id' => 'required|integer',
                 'name' => 'required|string|max:255',
                 'phone_number' => 'required|digits:10',
                 'address' => 'required|string|max:255',
@@ -102,9 +126,28 @@ class CustomerController extends Controller
                 ], 404);
             }
 
+            $dbName = session('db_name');
+
+            $organizationId = null;
+            if ($request->input('organization_id') == null) {
+
+                $organization = Organization::where('name', $dbName)->first();
+
+                if (!$organization) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Organization not found for the current database.',
+                    ], 404);
+                }
+
+                $organizationId = $organization->id;
+            } else {
+                $organizationId = $request->input('organization_id');
+            }
+
             // Update the SaleUser record
             $saleUser->update([
-                'organization_id' => $request->input('organization_id'),
+                'organization_id' => $organizationId,
                 'name' => $request->input('name'),
                 'phone_number' => $request->input('phone_number'),
                 'address' => $request->input('address'),
@@ -151,7 +194,7 @@ class CustomerController extends Controller
         $customer = Customer::find($id);
 
         if ($customer) {
-            $customer->delete(); 
+            $customer->delete();
 
             return response()->json([
                 'success' => true,
@@ -178,12 +221,20 @@ class CustomerController extends Controller
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
 
-            $organization = Organization::where('name',$databaseName)->first();
+            if ($request->company) {
+
+                $organization = Organization::where('id', $request->company)->first();
+            } else {
+                $organization = Organization::where('name', $databaseName)->first();
+            }
 
             if ($request->has('customerId')) {
-                $customers = Customer::where(['organization_id'=>$organization->id,'id'=>$request->customerId])->get();
+                $customers = Customer::where(['organization_id' => $organization->id, 'id' => $request->customerId])->get();
             } else {
-                $customers = Customer::where('organization_id',$organization->id)->get();
+                $customers = Customer::select('customers.*', 'organizations.name as organizationName')
+                    ->join('organizations', 'customers.organization_id', '=', 'organizations.id')
+                    ->where('customers.organization_id', $organization->id)->get();
+                // dd($customers);
             }
             return response()->json(['customers' => $customers]);
         } catch (\Exception $e) {
@@ -191,6 +242,7 @@ class CustomerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred. Please try again later.',
+                'error' => $e->getMessage(),
             ], 500); // 500 Internal Server Error
         }
     }

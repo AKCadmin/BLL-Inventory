@@ -270,15 +270,23 @@ class OrganizationController extends Controller
 
     public function productDataGet(Request $request)
     {
+       
         try {
 
             if (auth()->user()->role == 1) {
-                $products = Product::with('brand')
+               
+                $products = Product::
+                select('products.*','products.id as productId','brands.id','brands.name as brand_name','organizations.id','organizations.name as organization_name')
+                ->join('brands','products.brand_id','=','brands.id')
                     // ->whereHas('brand', function($query) use ($request) {
                     //     $query->where('id', '=', $request->company);
                     // })
-                    ->orderBy('id', 'desc')
-                    ->get();
+                    ->join('organizations', 'products.company_id', '=', 'organizations.id');
+                    if (!empty($request->company)) {
+                        $products->where('organizations.id', $request->company);
+                    }
+                    $products = $products->orderBy('productId', 'desc')->get();
+                    // dd($products);
                 // dd($request->company);
             } else {
                 
@@ -287,7 +295,7 @@ class OrganizationController extends Controller
                 $products = Product::where('brand_id', $productBrand->brand_id)->orderBy('id', 'desc')
                     ->get();
             }
-            // dd($products);
+           
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
             return response()->json([

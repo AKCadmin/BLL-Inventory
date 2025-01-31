@@ -5,6 +5,7 @@
     <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'Stock List']); ?>
     @include('partials.link')
     @include('partials.head-css')
+
 </head>
 
 @include('partials.body')
@@ -95,16 +96,16 @@
                                             <th>Date</th>
                                             <th>Action</th> --}}
 
-                                            <th>Id</th>
-                                            <th>Brand Name</th>
-                                            <th>Product Name</th>
-                                            <th>Total Buy Price</th>
-                                            <th>Total No. of Unit Per Cartoon</th>
-                                            <th>Total No. of Cartoons</th>
-                                            {{-- <th>Total Items</th>
+                                        <th>Id</th>
+                                        <th>Brand Name</th>
+                                        <th>Product Name</th>
+                                        <th>Total Buy Price</th>
+                                        <th>Total No. of Unit Per Cartoon</th>
+                                        <th>Total No. of Cartoons</th>
+                                        {{-- <th>Total Items</th>
                                             <th>Missing Items</th> --}}
-                                            <th>Date</th>
-                                            <th>Action</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -151,7 +152,9 @@
                     </div> <!-- end col -->
                 </div> <!-- end row -->
             </div> <!-- container-fluid -->
+
         </div>
+
         <!-- End Page-content -->
 
         @include('partials.footer')
@@ -166,6 +169,28 @@
 @include('partials.script')
 <script>
     $(document).ready(function() {
+        $('#organizationModal').show();
+
+        $('#closeModalBtn').click(function(){
+            $('#organizationModal').hide();
+        });
+
+        $('#saveSelectionBtn').click(saveSelection);
+
+        function saveSelection() {
+            const selected = $('input[name="selectedOrganization"]:checked');
+            if (selected.length > 0) {
+                let companyName = selected.val();
+                let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+                fetchHistory(formattedName, null, productId, selectedDate);
+                productsList(formattedName);
+                $('#organizationModal').hide();
+                $('#organization-filter').val(companyName)
+            } else {
+                alert('Please select an organization');
+            }
+        }
+
         var brandName = "";
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
@@ -355,28 +380,28 @@
         //     });
         // }
 
-        
+
         function fetchHistory(companyName, brandId, productId, selectedDate) {
-    $.ajax({
-        url: "{{ route('purchase.getHistory') }}",
-        method: "GET",
-        data: {
-            company: companyName,
-            brandId: brandId,
-            productId: productId,
-            selectedDate: selectedDate
-        },
-        success: function(response) {
-            console.log(response);
+            $.ajax({
+                url: "{{ route('purchase.getHistory') }}",
+                method: "GET",
+                data: {
+                    company: companyName,
+                    brandId: brandId,
+                    productId: productId,
+                    selectedDate: selectedDate
+                },
+                success: function(response) {
+                    console.log(response);
 
-            const data = response.data || {};
-            const table = $('#stocktable').DataTable();
-            table.clear(); // Clear existing rows
+                    const data = response.data || {};
+                    const table = $('#stocktable').DataTable();
+                    table.clear(); // Clear existing rows
 
-            // Loop through the response data
-            for (const [key, productDetails] of Object.entries(data)) {
-                const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
-                const row = `
+                    // Loop through the response data
+                    for (const [key, productDetails] of Object.entries(data)) {
+                        const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+                        const row = `
                     <tr>
                          <td>${productDetails?.product_id || "N/A"}</td>
                         <td>${productDetails?.brand_name || "N/A"}</td>
@@ -397,26 +422,28 @@
                         </td>
                     </tr>
                 `;
-                table.row.add($(row)); // Add the row to DataTable
-            }
+                        table.row.add($(row)); // Add the row to DataTable
+                    }
 
-            table.draw(); // Redraw the table
+                    table.draw(); // Redraw the table
 
-            // Bind click event for dynamically added buttons
-            $('#stocktable').off('click', '.edit-stock-btn').on('click', '.edit-stock-btn', function(event) {
-                event.preventDefault();
-                const url = $(this).data('url');
-                const confirmed = confirm('Are you sure you want to edit this item?');
-                if (confirmed) {
-                    window.location.href = url;
+                    // Bind click event for dynamically added buttons
+                    $('#stocktable').off('click', '.edit-stock-btn').on('click', '.edit-stock-btn',
+                        function(event) {
+                            event.preventDefault();
+                            const url = $(this).data('url');
+                            const confirmed = confirm(
+                                'Are you sure you want to edit this item?');
+                            if (confirmed) {
+                                window.location.href = url;
+                            }
+                        });
+                },
+                error: function() {
+                    alert("Error fetching stock data.");
                 }
             });
-        },
-        error: function() {
-            alert("Error fetching stock data.");
         }
-    });
-}
 
 
 
@@ -444,7 +471,7 @@
                         } else {
                             toastr.success(
                                 'Product and its related batches and cartons deleted successfully.'
-                                );
+                            );
                         }
                     },
                     error: function() {

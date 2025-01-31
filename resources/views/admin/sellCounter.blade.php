@@ -44,9 +44,9 @@
 
 
                                     <div class="mb-3">
-                                        <label for="selectSku" class="form-label">Select SKU</label>
+                                        <label for="selectSku" class="form-label">Select Product</label>
                                         <select id="SKU" name="SKU" class="form-select select2 SKU sku-input">
-                                            <option selected disabled>Select Product / SKU</option>
+                                            <option selected disabled>Select Product</option>
                                         </select>
                                     </div>
                                 </div>
@@ -181,7 +181,7 @@
               function(response) {
                  console.log(response.products,"gggg")
                   if (response.products) {
-                      $('.SKU').html('<option selected disabled>Select Product / SKU</option>');
+                      $('.SKU').html('<option selected disabled>Select Product</option>');
                       $.each(response.products, function(index, product) {
                         
                            console.log(product?.product[0]?.id, "product")
@@ -189,7 +189,7 @@
                           //     `<option value="${product.sku}">${product.sku}</option>`
                           // );
                           $('.SKU').append(
-                              `<option value="${product?.product[0]?.id}">${product?.product[0].name} / ${product?.product[0]?.id}</option>`
+                              `<option value="${product?.product[0]?.id}">${product?.product[0].name}</option>`
                           );
                       });
                   }

@@ -161,9 +161,10 @@
                             $('#SKU').html('<option selected disabled>Select Product</option>');
                             $.each(response.products, function(index, product) {
                                 $('#SKU').append(
-                                    `<option value="${product.id}">${product.name}</option>`
+                                    `<option value="${product.productId}">${product.name}</option>`
                                 );
                             });
+                            console.log(id,"idjj")
                             $('#SKU').val(id).change();
                         }
                     }
@@ -220,13 +221,14 @@
             function renderBatchData(batchData) {
                 let purchaseContainer = $('#purchaseContainer');
                 purchaseContainer.empty();
-
+               
                 if (!Array.isArray(batchData)) {
                     batchData = Object.values(batchData);
                 }
-               
+                console.log(batchData[0].product_id,"batch batch")
                 getProducts(batchData[0].product_id)
                 batchData[0].batches.forEach((batch) => {
+                   
                     $('#unit').val(batch.unit)
                     $('#invoice').val(batch.invoice_no)
                   

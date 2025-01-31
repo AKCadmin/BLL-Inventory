@@ -41,6 +41,12 @@ class AppServiceProvider extends ServiceProvider
             'view-sell' => 9,
             'view-sell-counter' => 10,
             'view-order' => 11,
+            'view-invoice' => 12,
+            'view-organization' => 13,
+            'view-customer' => 14,
+            'view-purchase-history' => 15,
+            'view-sale-history' => 16,
+
         ];
 
         $editPages = [
@@ -55,6 +61,11 @@ class AppServiceProvider extends ServiceProvider
             'edit-sell' => 9,
             'edit-sell-counter' => 10,
             'edit-order' => 11,
+            'edit-invoice' => 12,
+            'edit-organization' => 13,
+            'edit-customer' => 14,
+            'edit-purchase-history' => 15,
+            'edit-sale-history' => 16,
         ];
 
         $addPages = [
@@ -69,6 +80,11 @@ class AppServiceProvider extends ServiceProvider
             'add-sell' => 9,
             'add-sell-counter' => 10,
             'add-order' => 11,
+            'add-invoice' => 12,
+            'add-organization' => 13,
+            'add-customer' => 14,
+            'add-purchase-history' => 15,
+            'add-sale-history' => 16,
         ];
 
         $deletePages = [
@@ -83,6 +99,11 @@ class AppServiceProvider extends ServiceProvider
             'delete-sell' => 9,
             'delete-sell-counter' => 10,
             'delete-order' => 11,
+            'delete-invoice' => 12,
+            'delete-organization' => 13,
+            'delete-customer' => 14,
+            'delete-purchase-history' => 15,
+            'delete-sale-history' => 16,
         ];
 
         foreach ($ViewPages as $gate => $pageId) {

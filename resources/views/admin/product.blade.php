@@ -62,11 +62,11 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            
+
                                             {{-- <th>SKU</th> --}}
                                             <th>Organization Name</th>
-                                            <th>Brand Name</th>         
-                                           
+                                            <th>Brand Name</th>
+
                                             <th>Product Name</th>
                                             <th>Unit</th>
                                             <th>Description</th>
@@ -85,11 +85,12 @@
                                             @endphp
                                             <tr>
                                                 <td>{{ $product->id }}</td>
-                                                
+
                                                 {{-- <td>{{ $product->sku }}</td> --}}
-                                                <td>{{ $product->organization ? str_replace('_', ' ', $product->organization->name) : 'N/A' }}</td>
-                                                <td>{{ $product->brand?$product->brand->name:null }}</td>
-                                                
+                                                <td>{{ $product->organization ? str_replace('_', ' ', $product->organization->name) : 'N/A' }}
+                                                </td>
+                                                <td>{{ $product->brand ? $product->brand->name : null }}</td>
+
                                                 <td>{{ $product->name }}</td>
                                                 <td>{{ $product->unit }}</td>
                                                 <td>
@@ -160,33 +161,33 @@
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="product_id"
                                                     name="product_id" value="">
-                                                    <div class="mb-3">
-                                                        <label for="autoSizingSelect">Select Organization</label>
-                                                        <select class="form-select company" id="companyId"
-                                                            id="autoSizingSelect" name="company_id">
-                                                            <option value="">Select Organization &ensp;</option>
-                                                            @foreach ($companies as $company)
-                                                                <option value="{{ $company->id }}"
-                                                                    {{ old('company_id') == $company->id ? 'selected' : '' }}>
-                                                                    {{ $company->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+                                                <div class="mb-3">
+                                                    <label for="autoSizingSelect">Select Organization</label>
+                                                    <select class="form-select company" id="companyId"
+                                                        id="autoSizingSelect" name="company_id">
+                                                        <option value="">Select Organization &ensp;</option>
+                                                        @foreach ($companies as $company)
+                                                            <option value="{{ $company->id }}"
+                                                                {{ old('company_id') == $company->id ? 'selected' : '' }}>
+                                                                {{ $company->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="autoSizingSelect">Select Brand</label>
-                                                        <select class="form-select brand" id="brandId"
-                                                            id="autoSizingSelect" name="brand_id">
-                                                            <option value="">Select Brand &ensp;</option>
-                                                            @foreach ($brands as $brand)
-                                                                <option value="{{ $brand->id }}"
-                                                                    {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
-                                                                    {{ $brand->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+                                                <div class="mb-3">
+                                                    <label for="autoSizingSelect">Select Brand</label>
+                                                    <select class="form-select brand" id="brandId"
+                                                        id="autoSizingSelect" name="brand_id">
+                                                        <option value="">Select Brand &ensp;</option>
+                                                        @foreach ($brands as $brand)
+                                                            <option value="{{ $brand->id }}"
+                                                                {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
+                                                                {{ $brand->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
 
 
 
@@ -268,6 +269,26 @@
 
 <script>
     $(document).ready(function() {
+        $('#organizationModal').show();
+
+        $('#closeModalBtn').click(function() {
+            $('#organizationModal').hide();
+        });
+
+        $('#saveSelectionBtn').click(saveSelection);
+
+        function saveSelection() {
+            const selected = $('input[name="selectedOrganization"]:checked');
+            if (selected.length > 0) {
+                let companyName = selected.val();
+                let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+                fetchProducts(formattedName)
+                $('#organizationModal').hide();
+                $('#organization-filter').val(companyName)
+            } else {
+                alert('Please select an organization');
+            }
+        }
 
         $('#createProduct').on('click', function() {
             $('#productModal').show();
@@ -287,6 +308,61 @@
 
         });
 
+        // function fetchProducts(companyName) {
+        //     const route = "/product/data/get";
+        //     $.ajax({
+        //         url: route,
+        //         method: "GET",
+        //         data: {
+        //             company: companyName,
+        //         },
+        //         success: function(response) {
+        //             console.log(response, "response");
+        //             const products = response
+        //                 .products; // Assuming the response has a 'products' array
+        //             const tableBody = $('#product-table-body');
+        //             tableBody.empty(); // Clear any existing rows
+
+        //             products.forEach((product) => {
+        //                 const truncatedDescription =
+        //                     product.description.length > 10 ?
+        //                     product.description.substring(0, 10) + '...' :
+        //                     product.description;
+
+        //                 const productRow = `
+        //             <tr>
+        //                 <td>${product.id}</td>
+        //                 <td>${product.name}</td>
+        //                 <td>
+        //                     <span title="${product.description}" data-toggle="tooltip" data-placement="top">
+        //                         ${truncatedDescription}
+        //                     </span>
+        //                 </td>
+        //                 <td>
+        //                     <label class="switch">
+        //                         <input type="checkbox" class="toggle-status"
+        //                             data-id="${product.id}" data-toggle="toggle"
+        //                             data-on="Available" data-off="Unavailable"
+        //                             ${product.status === 'available' ? 'checked' : ''}>
+        //                         <span class="slider round"></span>
+        //                     </label>
+        //                 </td>
+        //                 <td>
+        //                     <a href="#" class="btn btn-sm btn-warning edit-product-btn" data-id="${product.id}">Edit</a>
+        //                     <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}">Delete</button>
+        //                 </td>
+        //             </tr>
+        //         `;
+
+        //                 tableBody.append(productRow); // Append the row to the table
+        //             });
+        //         },
+        //         error: function() {
+        //             alert("Error fetching product data.");
+        //         },
+        //     });
+        // }
+
         function fetchProducts(companyName) {
             const route = "/product/data/get";
             $.ajax({
@@ -297,26 +373,27 @@
                 },
                 success: function(response) {
                     console.log(response, "response");
-                    const products = response
-                        .products; // Assuming the response has a 'products' array
+                    const products = response.products;
                     const tableBody = $('#product-table-body');
-                    tableBody.empty(); // Clear any existing rows
+                    tableBody.empty(); // Clear existing rows
 
-                    products.forEach((product) => {
+                    products.forEach((product, index) => {
                         const truncatedDescription =
                             product.description.length > 10 ?
                             product.description.substring(0, 10) + '...' :
                             product.description;
-
                         const productRow = `
-                    <tr>
-                        <td>${product.id}</td>
-                        <td>${product.name}</td>
-                        <td>
-                            <span title="${product.description}" data-toggle="tooltip" data-placement="top">
-                                ${truncatedDescription}
-                            </span>
-                        </td>
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${product.organization_name || 'N/A'}</td>
+                    <td>${product.brand_name || 'N/A'}</td>
+                    <td>${product.name}</td>
+                    <td>${product.unit}</td>
+                    <td>
+                        <span title="${product.description}" data-toggle="tooltip" data-placement="top">
+                            ${truncatedDescription}
+                        </span>
+                    </td>
                         <td>
                             <label class="switch">
                                 <input type="checkbox" class="toggle-status"
@@ -326,14 +403,15 @@
                                 <span class="slider round"></span>
                             </label>
                         </td>
+                    
                         <td>
                             <a href="#" class="btn btn-sm btn-warning edit-product-btn" data-id="${product.id}">Edit</a>
                             <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}">Delete</button>
                         </td>
-                    </tr>
+                    
+                </tr>
                 `;
-
-                        tableBody.append(productRow); // Append the row to the table
+                        tableBody.append(productRow);
                     });
                 },
                 error: function() {
@@ -341,6 +419,7 @@
                 },
             });
         }
+
 
 
         ajaxRequest(

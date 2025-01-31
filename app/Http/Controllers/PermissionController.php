@@ -248,30 +248,42 @@ class PermissionController extends Controller
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'permissions' => 'required|array',
-                'permissions.*' => 'array',  // Ensure each page has an array of permission values
-                'permissions.*.*' => 'in:1,2,3,4',  // Only allow values 1, 2, 3, 4 (representing view, add, edit, delete)
+                'permissions.*' => 'array',
+                'permissions.*.*' => 'in:1,2,3,4',
             ]);
     
-            // Loop through the permissions array and store each one
+            DB::beginTransaction();
+    
+            // Get all page IDs from the request
+            $pageIds = array_keys($validated['permissions']);
+    
+            // Delete permissions for pages that are not in the request
+            DB::table('user_page_permissions')
+                ->where('user_id', $validated['user_id'])
+                ->whereNotIn('page_id', $pageIds)
+                ->delete();
+    
+            // Update or create remaining permissions
             foreach ($validated['permissions'] as $pageId => $permission) {
+                // Filter out any invalid values that might have passed validation
+                $cleanPermissions = array_filter($permission, fn($p) => in_array($p, ['1', '2', '3', '4']));
+                
                 DB::table('user_page_permissions')->updateOrInsert(
                     ['user_id' => $validated['user_id'], 'page_id' => $pageId],
-                    ['page_permission' => json_encode($permission)]
+                    ['page_permission' => json_encode(array_values($cleanPermissions))]
                 );
             }
     
-            return response()->json(['success'=>200,'message' => 'Permissions saved successfully.']);
-        } catch (\ValidationException $e) {
+            DB::commit();
+    
+            return response()->json(['success' => 200, 'message' => 'Permissions saved successfully.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'error' => 'Validation Error',
                 'details' => $e->errors()
             ], 422);
-        } catch (\QueryException $e) {
-            return response()->json([
-                'error' => 'Database Error',
-                'details' => $e->getMessage()
-            ], 500);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'error' => 'An unexpected error occurred',
                 'details' => $e->getMessage()

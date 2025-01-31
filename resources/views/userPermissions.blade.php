@@ -34,7 +34,7 @@
                                     <div class="mb-3">
                                         <label for="userSelect" class="form-label">Select User:</label>
                                         <select id="userSelect" name="user_id" class="form-select">
-                                            <option value="" disabled selected>Select a user</option>
+                                            <option value="" selected>Select a user</option>
                                             {{-- @foreach ($users as $user)
                                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                                             @endforeach --}}
@@ -126,6 +126,8 @@
         });
         $('#userSelect').on('change', function() {
             const userId = $(this).val();
+            // Add exact page names that should only have View permission
+            const viewOnlyPages = ['Dashboard', 'Purchase History', 'Sale History','Invoice','Order','Stock List'];
 
             if (userId) {
                 $.ajax({
@@ -138,66 +140,74 @@
                     success: function(response) {
                         if (response.length > 0) {
                             let permissionsHtml = `
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Page</th>
-                                            <th>View</th>
-                                            <th>Add</th>
-                                            <th>Edit</th>
-                                            <th>Delete</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                        `;
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Page</th>
+                                        <th>View</th>
+                                        <th>Add</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
 
                             response.forEach(page => {
-                                // Extract permissions if available
                                 const permissions = page.permissions.length > 0 ?
                                     JSON.parse(page.permissions[0]
                                     .page_permission) : [];
 
-                                permissionsHtml += `
+                                if (viewOnlyPages.includes(page.name)) {
+                                    // Only show View permission
+                                    permissionsHtml += `
                                 <tr>
                                     <td>${page.name}</td>
                                     <td>
-                                        <input type="checkbox" name="permissions[${page.id}][]" value="1" class="form-check-input"
-                                               ${permissions.includes("1") ? 'checked' : ''}>
+                                        <input type="checkbox" 
+                                            name="permissions[${page.id}][]" 
+                                            value="1" 
+                                            class="form-check-input" 
+                                            ${permissions.includes("1") ? 'checked' : ''}>
+                                    </td>
+                                    
+                                </tr>`;
+                                } else {
+                                    // Show all permissions
+                                    permissionsHtml += `
+                                <tr>
+                                    <td>${page.name}</td>
+                                    <td>
+                                        <input type="checkbox" name="permissions[${page.id}][]" value="1" 
+                                            class="form-check-input" ${permissions.includes("1") ? 'checked' : ''}>
                                     </td>
                                     <td>
-                                        <input type="checkbox" name="permissions[${page.id}][]" value="2" class="form-check-input"
-                                               ${permissions.includes("2") ? 'checked' : ''}>
+                                        <input type="checkbox" name="permissions[${page.id}][]" value="2" 
+                                            class="form-check-input" ${permissions.includes("2") ? 'checked' : ''}>
                                     </td>
                                     <td>
-                                        <input type="checkbox" name="permissions[${page.id}][]" value="3" class="form-check-input"
-                                               ${permissions.includes("3") ? 'checked' : ''}>
+                                        <input type="checkbox" name="permissions[${page.id}][]" value="3" 
+                                            class="form-check-input" ${permissions.includes("3") ? 'checked' : ''}>
                                     </td>
                                     <td>
-                                        <input type="checkbox" name="permissions[${page.id}][]" value="4" class="form-check-input"
-                                               ${permissions.includes("4") ? 'checked' : ''}>
+                                        <input type="checkbox" name="permissions[${page.id}][]" value="4" 
+                                            class="form-check-input" ${permissions.includes("4") ? 'checked' : ''}>
                                     </td>
-                                </tr>
-                            `;
+                                </tr>`;
+                                }
                             });
 
-                            permissionsHtml += `
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-
+                            permissionsHtml += `</tbody></table></div>`;
                             $('#permissionsTable').html(permissionsHtml);
                         } else {
                             $('#permissionsTable').html(
-                                '<p class="text-warning">No permissions found for this user.</p>'
-                                );
+                                '<p class="text-warning">No permissions found.</p>');
                         }
                     },
                     error: function(error) {
-                        console.error('Error fetching permissions:', error);
+                        console.error('Error:', error);
                         $('#permissionsTable').html(
-                            '<p class="text-danger">Failed to load permissions.</p>');
+                            '<p class="text-danger">Error loading permissions.</p>');
                     }
                 });
             }

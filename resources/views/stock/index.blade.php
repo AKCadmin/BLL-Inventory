@@ -71,13 +71,21 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="unit" class="form-label">Unit</label>
                                 <input type="text" name="unit" id="unit" class="form-control unit" readonly
                                     style="background-color: #e9ecef; cursor: not-allowed;">
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label for="customer" class="form-label">Select Purchase Customer</label>
+                                        <select id="customer" name="customer"
+                                            class="form-select select2 customer sku-input">
+                                            <option selected disabled>Select Customer</option>
+                                        </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
                                 <label for="invoice" class="form-label">Invoice</label>
                                 <input type="text" name="invoice" id="invoice" class="form-control invoice">
                             </div>
@@ -309,6 +317,23 @@
             placeholder: "Select an option",
             allowClear: true
         });
+
+        let url = `{{ route('customers.list') }}`;
+        ajaxRequest(url, 'GET', {},
+            function(response) {
+                console.log(response, "response")
+                if (response.customers && response.customers.length > 0) {
+                    $('#customer').html('<option selected disabled>Select Purchase Customer</option>');
+                    $.each(response.customers, function(index, customer) {
+
+                        $('#customer').append(
+                            `<option value="${customer.id}">${customer?.name}</option>`
+                        );
+                    });
+                }
+            }
+        );
+
         // let url = `{{ route('product.getData') }}`;
         // ajaxRequest(url, 'GET', {},
         //     function(response) {

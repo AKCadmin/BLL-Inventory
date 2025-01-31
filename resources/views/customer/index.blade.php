@@ -1,10 +1,118 @@
 @include('partials.session')
 @include('partials.main')
 @include('partials.head')
+
 <head>
     <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'brand Management']); ?>
     @include('partials.link')
     @include('partials.head-css')
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .organization-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .organization-item {
+            padding: 0.75rem;
+            border: 1px solid #eee;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .organization-item:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        .organization-item label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            cursor: pointer;
+            color: #495057;
+            font-size: 1rem;
+        }
+
+        .organization-item input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #0d6efd;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5c636a;
+        }
+    </style>
 </head>
 
 @include('partials.body')
@@ -21,20 +129,22 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                @can('add-customer')
                                 <div class="RoleTableHeader">
                                     <h4 class="card-title"></h4>
                                     <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
-                                        id="openSaleUserModalBtn">Create Sales User
+                                        id="openSaleUserModalBtn">Create Customer
                                         <i class="mdi mdi-arrow-right ms-1"></i>
                                     </a>
                                 </div><br>
+                                @endcan
 
                                 <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
                                             <th>Organization</th>
-                                            <th>Name</th>
+                                            <th>Name / Shop Name</th>
                                             <th>Phone Number</th>
                                             <th>Address</th>
                                             <th>Credit Limit</th>
@@ -70,10 +180,14 @@
                                                 <td>{{ $user->type_of_customer }}</td>
                                                 <td>{{ $user->sale_user_status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
+                                                    @can('edit-customer')
                                                     <a href="#" class="btn btn-sm btn-warning edit-customer-btn"
                                                         data-id="{{ $user->id }}">Edit</a>
+                                                    @endcan
+                                                    @if(auth()->user()->id == 1)
                                                     <button class="btn btn-sm btn-danger delete-customer-btn"
                                                         data-id="{{ $user->id }}">Delete</button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -95,7 +209,7 @@
                                         <div class="row" id="popup_row">
                                             <div class="col-7">
                                                 <div class="text-primary p-4">
-                                                    <h5 class="text-primary" id="modal_header">Add New Sales User</h5>
+                                                    <h5 class="text-primary" id="modal_header">Add New Customer</h5>
                                                 </div>
                                             </div>
                                             <div class="col-3">
@@ -127,7 +241,7 @@
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="user_id" name="user_id"
                                                     value="">
-
+                                               @if(auth()->user()->role == 1)
                                                 <div class="mb-3">
                                                     <label for="autoSizingSelect">Select Organization</label>
                                                     <select class="form-select organization" id="organizationId"
@@ -141,9 +255,10 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
+                                                @endif
 
                                                 <div class="mb-3">
-                                                    <label for="name" class="form-label">Name</label>
+                                                    <label for="name" class="form-label">Name / Shop Name</label>
                                                     <input type="text" class="form-control" id="name"
                                                         name="name" required placeholder="Enter Name">
                                                 </div>
@@ -207,6 +322,7 @@
                     </div>
                 </div>
 
+
             </div> <!-- container-fluid -->
         </div> <!-- End Page-content -->
 
@@ -221,6 +337,75 @@
 <script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 <script>
     $(document).ready(function() {
+       
+        // Handle organization item click
+
+    });
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#organization-filter').change(function(e) {
+            e.preventDefault();
+            let companyName = $(this).val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            console.log(formattedName,"formattedName")
+            CustomerList(formattedName)
+
+        });
+
+        function CustomerList(companyName){
+            $.ajax({
+                url: "{{ route('customers.list') }}", // Use the named route
+                type: "GET",
+                dataType: "json",
+                data: {
+                    company: companyName,
+                },
+                success: function(response) {
+                    var customers = response.customers;
+                    var tableBody = $('#datatable tbody'); // Target the table body
+                    tableBody.empty(); // Clear existing rows
+
+                    $.each(customers, function(index, user) {
+                        var addressLimit = 15;
+                        var truncatedAddress = user.address.length > addressLimit ?
+                            user.address.substring(0, addressLimit) + '...' :
+                            user.address;
+
+                        var row = '<tr>' +
+                            '<td>' + user.id + '</td>' +
+                            '<td>' + (user.organizationName	 ? user.organizationName.replace('_',
+                                ' ') : null) + '</td>' +
+                            '<td>' + user.name + '</td>' +
+                            '<td>' + user.phone_number + '</td>' +
+                            '<td><span title="' + user.address +
+                            '" data-toggle="tooltip" data-placement="top">' + truncatedAddress +
+                            '</span></td>' +
+                            '<td>' + user.credit_limit + '</td>' +
+                            '<td>' + user.payment_days + '</td>' +
+                            '<td>' + user.type_of_customer + '</td>' +
+                            '<td>' + (user.sale_user_status ? 'Active' : 'Inactive') + '</td>' +
+                            '<td>' +
+                            '<a href="#" class="btn btn-sm btn-warning edit-customer-btn" data-id="' +
+                            user.id + '">Edit</a> ' +
+                            '<button class="btn btn-sm btn-danger delete-customer-btn" data-id="' +
+                            user.id + '">Delete</button>' +
+                            '</td>' +
+                            '</tr>';
+                        tableBody.append(row);
+                    });
+
+                    // Initialize tooltips after appending rows
+                    $('[data-toggle="tooltip"]').tooltip();
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", xhr, status, error);
+                    alert("Error fetching sales user data.");
+                }
+            });
+        }
 
         $('#phone_number').on('input', function() {
             let phone = $(this).val();
@@ -239,7 +424,7 @@
             $('#salesUserModal').show();
             $('#user_id').val('');
             $('#salesUserForm')[0].reset();
-            $('#modal_header').text('Add New Sale User');
+            $('#modal_header').text('Add New Customer');
         });
 
 
@@ -279,7 +464,7 @@
                 })
                 .done(function(response) {
                     if (response.success) {
-                        toastr.success('Sale user saved successfully!');
+                        toastr.success('Customer saved successfully!');
                         $("#global-loader").fadeOut();
                         $('#salesUserModal').hide();
                         location.reload();
@@ -311,6 +496,7 @@
                     $('#sale_user_status').val(response.customer.sale_user_status == true ? 1 :
                         0);
                     $('#salesUserModal').show();
+                    $('#modal_header').text('Update Customer');
                 } else {
                     toastr.error('Error: ' + response.message);
                 }
@@ -319,15 +505,15 @@
 
 
         $('#datatable').on('click', '.delete-customer-btn', function() {
-            let customerId = $(this).data('id'); 
+            let customerId = $(this).data('id');
             let url = `{{ route('customer.destroy', ':id') }}`.replace(':id',
-            customerId); 
+                customerId);
 
             if (confirm('Are you sure you want to delete this customer?')) {
                 ajaxRequest(url, 'DELETE', {}, function(response) {
                     if (response.success) {
                         toastr.success(response.message);
-                        window.reload();
+                        location.reload();
                     } else {
                         toastr.error('Error: ' + response.message);
                     }
