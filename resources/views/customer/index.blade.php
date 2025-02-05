@@ -130,13 +130,13 @@
                         <div class="card">
                             <div class="card-body">
                                 @can('add-customer')
-                                <div class="RoleTableHeader">
-                                    <h4 class="card-title"></h4>
-                                    <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
-                                        id="openSaleUserModalBtn">Create Customer
-                                        <i class="mdi mdi-arrow-right ms-1"></i>
-                                    </a>
-                                </div><br>
+                                    <div class="RoleTableHeader">
+                                        <h4 class="card-title"></h4>
+                                        <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
+                                            id="openSaleUserModalBtn">Create Customer
+                                            <i class="mdi mdi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div><br>
                                 @endcan
 
                                 <table id="datatable" class="table table-bordered dt-responsive nowrap w-100">
@@ -181,12 +181,12 @@
                                                 <td>{{ $user->sale_user_status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
                                                     @can('edit-customer')
-                                                    <a href="#" class="btn btn-sm btn-warning edit-customer-btn"
-                                                        data-id="{{ $user->id }}">Edit</a>
+                                                        <a href="#" class="btn btn-sm btn-warning edit-customer-btn"
+                                                            data-id="{{ $user->id }}">Edit</a>
                                                     @endcan
-                                                    @if(auth()->user()->id == 1)
-                                                    <button class="btn btn-sm btn-danger delete-customer-btn"
-                                                        data-id="{{ $user->id }}">Delete</button>
+                                                    @if (auth()->user()->id == 1)
+                                                        <button class="btn btn-sm btn-danger delete-customer-btn"
+                                                            data-id="{{ $user->id }}">Delete</button>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -241,20 +241,20 @@
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="user_id" name="user_id"
                                                     value="">
-                                               @if(auth()->user()->role == 1)
-                                                <div class="mb-3">
-                                                    <label for="autoSizingSelect">Select Organization</label>
-                                                    <select class="form-select organization" id="organizationId"
-                                                        id="autoSizingSelect" name="organization_id">
-                                                        <option value="">Select Organization &ensp;</option>
-                                                        @foreach ($organizations as $organization)
-                                                            <option value="{{ $organization->id }}"
-                                                                {{ old('organization_id') == $organization->id ? 'selected' : '' }}>
-                                                                {{ Str::replaceFirst('_', ' ', $organization->name) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                @if (auth()->user()->role == 1)
+                                                    <div class="mb-3">
+                                                        <label for="autoSizingSelect">Select Organization</label>
+                                                        <select class="form-select organization" id="organizationId"
+                                                            id="autoSizingSelect" name="organization_id">
+                                                            <option value="">Select Organization &ensp;</option>
+                                                            @foreach ($organizations as $organization)
+                                                                <option value="{{ $organization->id }}"
+                                                                    {{ old('organization_id') == $organization->id ? 'selected' : '' }}>
+                                                                    {{ Str::replaceFirst('_', ' ', $organization->name) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                 @endif
 
                                                 <div class="mb-3">
@@ -262,6 +262,13 @@
                                                     <input type="text" class="form-control" id="name"
                                                         name="name" required placeholder="Enter Name">
                                                 </div>
+
+                                                <div class="mb-3">
+                                                    <label for="retailShop" class="form-label">Retail Shop</label>
+                                                    <input type="checkbox" id="retailShop" name="retail_shop"
+                                                        value="1">
+                                                </div>
+
 
                                                 <div class="mb-3">
                                                     <label for="phone_number" class="form-label">Phone Number</label>
@@ -337,7 +344,7 @@
 <script src="{{ asset('assets/js/customJs/validation.js') }}"></script>
 <script>
     $(document).ready(function() {
-       
+
         // Handle organization item click
 
     });
@@ -350,12 +357,12 @@
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            console.log(formattedName,"formattedName")
+            console.log(formattedName, "formattedName")
             CustomerList(formattedName)
 
         });
 
-        function CustomerList(companyName){
+        function CustomerList(companyName) {
             $.ajax({
                 url: "{{ route('customers.list') }}", // Use the named route
                 type: "GET",
@@ -376,17 +383,20 @@
 
                         var row = '<tr>' +
                             '<td>' + user.id + '</td>' +
-                            '<td>' + (user.organizationName	 ? user.organizationName.replace('_',
+                            '<td>' + (user.organizationName ? user.organizationName.replace(
+                                '_',
                                 ' ') : null) + '</td>' +
                             '<td>' + user.name + '</td>' +
                             '<td>' + user.phone_number + '</td>' +
                             '<td><span title="' + user.address +
-                            '" data-toggle="tooltip" data-placement="top">' + truncatedAddress +
+                            '" data-toggle="tooltip" data-placement="top">' +
+                            truncatedAddress +
                             '</span></td>' +
                             '<td>' + user.credit_limit + '</td>' +
                             '<td>' + user.payment_days + '</td>' +
                             '<td>' + user.type_of_customer + '</td>' +
-                            '<td>' + (user.sale_user_status ? 'Active' : 'Inactive') + '</td>' +
+                            '<td>' + (user.sale_user_status ? 'Active' : 'Inactive') +
+                            '</td>' +
                             '<td>' +
                             '<a href="#" class="btn btn-sm btn-warning edit-customer-btn" data-id="' +
                             user.id + '">Edit</a> ' +
@@ -495,6 +505,11 @@
                         'change');
                     $('#sale_user_status').val(response.customer.sale_user_status == true ? 1 :
                         0);
+                    if (response.customer.retail_shop) {
+                        $('#retailShop').prop('checked', true);
+                    } else {
+                        $('#retailShop').prop('checked', false);
+                    }
                     $('#salesUserModal').show();
                     $('#modal_header').text('Update Customer');
                 } else {

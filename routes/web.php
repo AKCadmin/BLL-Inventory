@@ -114,7 +114,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/switch-organization', [OrganizationController::class, 'switchOrganization'])->name('switch.organization');
 
     //brands routes
-    Route::resource('brand', BrandController::class);
+    Route::resource('supplier', BrandController::class)->names('supplier');
     Route::get('brand/edit/{company}', [BrandController::class, 'edit'])->name('brand.editbrand');
     Route::Post('brand/{brand}', [BrandController::class, 'destroy']);
     Route::get('brand/data', [BrandController::class, 'brandData'])->name('brand.getData');
@@ -134,7 +134,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //stock routes
     Route::resource('stock', StockController::class);
-    Route::get('stockList', [StockController::class, 'list'])->name('stock.list');
+    Route::get('purchaseList', [StockController::class, 'list'])->name('stock.list');
     Route::get('stockList/bycompany', [StockController::class, 'listByCompany'])->name('stocks.bycompany');
     Route::get('stockList/byproduct', [StockController::class, 'listByProduct'])->name('stocks.byproduct');
     route::view('stockEdit', 'admin.edit')->name('stock.editStock');
@@ -148,9 +148,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
     Route::get('/batches/{sku}', [SellController::class, 'getBatchesBySku'])->name('batch.getBatchesBySku');
 
-    //  sale user
+    //  Customer routes
     Route::resource('customer', CustomerController::class);
     Route::get('customers/list', [CustomerController::class,'customerList'])->name('customers.list');
+    Route::get('retail/customers/list', [CustomerController::class,'retailCustomerList'])->name('retail.customers.list');
 
     // sell counter Management routes
     Route::resource('sellCounter', SellCornerController::class);

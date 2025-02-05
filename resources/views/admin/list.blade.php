@@ -102,43 +102,7 @@
                                                 <td>{{ $data['total_buy_price'] }}</td>
                                                 <td>{{ $data['total_no_of_unit'] }}</td>
                                                 <td>{{ $data['total_quantity'] }}</td>
-                                                {{-- <td>
-                                                    @php
-                                                        $totalBuyPrice = 0;
-                                                        foreach ($data['batches'] as $batch) {
-                                                            $totalBuyPrice += $batch['buy_price'];
-                                                        }
-                                                    @endphp
-                                                    {{ number_format($totalBuyPrice, 2) }}
-                                                </td> --}}
-                                                {{-- <td>{{ count($data['batches']) }}</td> --}}
-                                                {{-- <td>
-                                                    @php
-                                                        $totalCartons = 0;
-                                                        foreach ($data['batches'] as $batch) {
-                                                            $totalCartons += $batch['cartons'];
-                                                        }
-                                                    @endphp
-                                                    {{ $totalCartons }}
-                                                </td> --}}
-                                                {{-- <td>
-                                                    @php
-                                                        $totalItems = 0;
-                                                        foreach ($data['batches'] as $batch) {
-                                                            $totalItems += $batch['total_items'];
-                                                        }
-                                                    @endphp
-                                                    {{ $totalItems }}
-                                                </td> --}}
-                                                {{-- <td>
-                                                    @php
-                                                        $missingItems = 0;
-                                                        foreach ($data['batches'] as $batch) {
-                                                            $missingItems += $batch['missing_items'];
-                                                        }
-                                                    @endphp
-                                                    {{ $missingItems }}
-                                                </td> --}}
+                                               
                                                 <td>
                                                     @php
                                                         $created_at = '';

@@ -26,6 +26,7 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+       // dd($request->input('retail_shop'));
         try {
 
             $validator = Validator::make($request->all(), [
@@ -37,6 +38,7 @@ class CustomerController extends Controller
                 'payment_days' => 'required|numeric|min:0',
                 'type_of_customer' => 'required|string|max:255',
                 'sale_user_status' => 'required|boolean',
+                'retail_shop' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -65,6 +67,13 @@ class CustomerController extends Controller
                 $organizationId = $request->input('organization_id');
             }
 
+            $retail_shop = false;
+            if($request->input('retail_shop') == 1){
+                $retail_shop = true;
+            }
+
+            
+
             $saleUser = Customer::create([
                 'organization_id' => $organizationId,
                 'name' => $request->input('name'),
@@ -74,6 +83,7 @@ class CustomerController extends Controller
                 'payment_days' => $request->input('payment_days'),
                 'type_of_customer' => $request->input('type_of_customer'),
                 'sale_user_status' => $request->input('sale_user_status'),
+                'retail_shop' => $retail_shop,
             ]);
 
             return response()->json([
@@ -107,6 +117,7 @@ class CustomerController extends Controller
                 'payment_days' => 'required|numeric|min:0',
                 'type_of_customer' => 'required|string|max:255',
                 'sale_user_status' => 'required|boolean',
+                'retail_shop' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -145,6 +156,12 @@ class CustomerController extends Controller
                 $organizationId = $request->input('organization_id');
             }
 
+            $retail_shop = false;
+            if($request->input('retail_shop') == 1){
+                $retail_shop = true;
+            }
+
+           
             // Update the SaleUser record
             $saleUser->update([
                 'organization_id' => $organizationId,
@@ -155,6 +172,7 @@ class CustomerController extends Controller
                 'payment_days' => $request->input('payment_days'),
                 'type_of_customer' => $request->input('type_of_customer'),
                 'sale_user_status' => $request->input('sale_user_status'),
+                'retail_shop' => $retail_shop,
             ]);
 
             return response()->json([
@@ -234,6 +252,43 @@ class CustomerController extends Controller
                 $customers = Customer::select('customers.*', 'organizations.name as organizationName')
                     ->join('organizations', 'customers.organization_id', '=', 'organizations.id')
                     ->where('customers.organization_id', $organization->id)->get();
+                // dd($customers);
+            }
+            return response()->json(['customers' => $customers]);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again later.',
+                'error' => $e->getMessage(),
+            ], 500); // 500 Internal Server Error
+        }
+    }
+
+    public function retailCustomerList(Request $request)
+    {
+        try {
+            $databaseName = Session::get('db_name');
+            if (!$databaseName) {
+                return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+            }
+            config(['database.connections.pgsql.database' => $databaseName]);
+            DB::purge('pgsql');
+            DB::connection('pgsql')->getPdo();
+
+            if ($request->company) {
+
+                $organization = Organization::where(['id' => $request->company])->first();
+            } else {
+                $organization = Organization::where(['name' => $databaseName])->first();
+            }
+
+            if ($request->has('customerId')) {
+                $customers = Customer::where(['organization_id' => $organization->id, 'id' => $request->customerId,'retail_shop' => true])->get();
+            } else {
+                $customers = Customer::select('customers.*', 'organizations.name as organizationName')
+                    ->join('organizations', 'customers.organization_id', '=', 'organizations.id')
+                    ->where(['customers.organization_id' => $organization->id,'retail_shop' => true])->get();
                 // dd($customers);
             }
             return response()->json(['customers' => $customers]);

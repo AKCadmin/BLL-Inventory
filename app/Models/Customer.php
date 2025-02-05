@@ -19,7 +19,9 @@ class Customer extends Model
         'payment_days',
         'type_of_customer',
         'sale_user_status',
-        'organization_id'
+        'organization_id',
+        'retail_shop',
+        'customer'
     ];
 
     public function organization()

@@ -270,6 +270,7 @@ class StockController extends Controller
     public function store(Request $request)
     {
 
+          
         try {
             if (auth()->user()->cannot('add-purchase')) {
                 abort(403);
@@ -283,6 +284,7 @@ class StockController extends Controller
             }
             $productSku = $request->input('SKU');
             $product = Product::where('id', $productSku)->first();
+          
             // Set the primary database connection
             config(['database.connections.pgsql.database' => $databaseName]);
             DB::purge('pgsql');
@@ -318,6 +320,7 @@ class StockController extends Controller
                 $batchModel->product_id = $product->id;
                 $batchModel->brand_id = $request->brand_id;
                 $batchModel->unit = $request->unit;
+                $batchModel->internal_purchase = $request->internal_purchase == 1 ? true : false;
                 $batchModel->manufacturing_date = $batch['manufacturingDate'] ?: null;
                 $batchModel->expiry_date = $batch['expiryDate'] ?: null;
                 $batchModel->base_price = $batch['basePrice'];
@@ -325,7 +328,8 @@ class StockController extends Controller
                 $batchModel->buy_price = $batch['buyPrice'];
                 $batchModel->no_of_units = $batch['noOfUnits'];
                 $batchModel->quantity = $batch['qty'];
-                $batchModel->invoice_no = $batch['invoice'];
+                $batchModel->invoice_no = $request->invoice;
+                $batchModel->customer = $product->customer;
                 // $batchModel->notes = $batch['notes'];
                 $batchModel->save();
 
@@ -769,63 +773,55 @@ class StockController extends Controller
 
     public function listByCompany(Request $request)
     {
-       
         try {
-            $organization = Organization::where('id', '=', $request->company)->first();
+            $organization = Organization::where('id', $request->company)->first();
             $selectedDate = $request->selectedDate;
-            $isToday = $selectedDate === now()->toDateString();
             $productId = $request->productId;
             $brandId = $request->brandId;
-
-            // Get all products with their brands
+    
             $products = Product::with('brand')->get();
-
-            // Switch database to the organization's database
+    
             config(['database.connections.pgsql.database' => $organization->name]);
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
-
-            // Build the query for batches and cartons
+    
+            $sellCounterSubquery = DB::table('sell_counter')
+                ->select('batch_id', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
+                ->whereDate('created_at', $selectedDate)
+                ->groupBy('batch_id');
+    
             $query = DB::table('batches')
-                
-            ->select(
-                // 'batches.*',
-                // 'batches.batch_number as batch_no',                       
-                'batches.product_id',
-                'batches.unit',                     
-                // 'batches.id as batch_id',
-                DB::raw('SUM(batches.quantity) as total_quantity'),
-                DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
-                DB::raw('SUM(batches.buy_price) as total_buy_price'),
-                DB::raw('MAX(batches.created_at) as first_created_at'),
-                DB::raw('MAX(batches.expiry_date) as expiry_date')
-            )
-            // ->whereNotIn('batches.id', $excludedBatchIds)
-            ->groupBy('batches.product_id', 'batches.unit')
-            ->orderBy('product_id', 'ASC');
-
-            // Execute the query and get the stocks list
+                ->leftJoinSub($sellCounterSubquery, 'sc', function ($join) {
+                    $join->on('batches.id', '=', 'sc.batch_id');
+                })
+                ->select(
+                    'batches.product_id',
+                    'batches.unit',
+                    DB::raw('SUM(batches.quantity - COALESCE(sc.total_provided, 0)) as total_quantity'),
+                    DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
+                    DB::raw('SUM(batches.buy_price) as total_buy_price'),
+                    DB::raw('MAX(batches.created_at) as first_created_at'),
+                    DB::raw('MAX(batches.expiry_date) as expiry_date')
+                )
+                ->whereDate('batches.created_at', $selectedDate)
+                ->groupBy('batches.product_id', 'batches.unit')
+                ->orderBy('product_id', 'ASC');
+    
             $stocksList = $query->get();
-
-            // Filter by productId if provided
+    // dd($stocksList);
             if ($productId) {
                 $stocksList = $stocksList->filter(function ($stock) use ($productId) {
                     return $stock->product_id == $productId;
                 });
             }
-
+    
             if ($brandId) {
                 $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
                     $product = $products->firstWhere('id', $stock->product_id);
                     return $product && $product->brand_id == $brandId;
                 });
             }
-
-            // Match and map the stocks with the product details
-            $matchingStocks = $stocksList->filter(function ($stock) use ($products) {
-                return $products->contains('id', $stock->product_id);
-            });
-
+    
             $groupedData = $stocksList->groupBy('product_id')->map(function ($stocks, $productId) use ($products) {
                 $product = $products->firstWhere('id', $productId);
                 return [
@@ -836,18 +832,18 @@ class StockController extends Controller
                     'unit' => $product->unit,
                     'total_quantity' => $stocks[0]->total_quantity,
                     'total_no_of_unit' => $stocks[0]->total_no_of_unit,
-                    'status' => $product->status ?? null,  
-                    'expiry_date' => $stocks[0]->expiry_date ?? null,  
-                    'created_at' => $stocks[0]->first_created_at ?? null, 
+                    'status' => $product->status ?? null,
+                    'expiry_date' => $stocks[0]->expiry_date ?? null,
+                    'created_at' => $stocks[0]->first_created_at ?? null,
                 ];
             });
-
-            // dd($groupedData);
+    
             return response()->json($groupedData);
         } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    
 
 
 

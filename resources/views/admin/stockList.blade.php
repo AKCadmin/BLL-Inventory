@@ -65,8 +65,9 @@
                                             <th>Available</th> --}}
 
                                             <th>Id</th>
-                                            <th>Brand Name</th>
+                                            <th>Supplier Name</th>
                                             <th>Product Name</th>
+                                            
                                             <th>Unit</th>
                                             <th>Expire Date</th>
                                             <th>No of Unit Per Cartoon</th>
@@ -156,12 +157,19 @@
 
         $('#saveSelectionBtn').click(saveSelection);
 
+        let table = $('#stocktable').DataTable();
+        var selectedDate = new Date().toISOString().split('T')[0];
+        $('#datePicker').attr('max', selectedDate);
+        $('#organization-filter').val("");
+        var productId = "";
+        var brandId = "";
+
         function saveSelection() {
             const selected = $('input[name="selectedOrganization"]:checked');
             if (selected.length > 0) {
                 let companyName = selected.val();
                 let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-                fetchStocks(formattedName, null, productId, selectedDate)
+                fetchStocks(formattedName, selectedDate, productId, selectedDate)
                 productsList(formattedName)
                 $('#organizationModal').hide();
                 $('#organization-filter').val(companyName)
@@ -169,13 +177,6 @@
                 alert('Please select an organization');
             }
         }
-
-        let table = $('#stocktable').DataTable();
-        var selectedDate = new Date().toISOString().split('T')[0];
-        $('#datePicker').attr('max', selectedDate);
-        $('#organization-filter').val("");
-        var productId = "";
-        var brandId = "";
 
         $('#organization-filter').change(function(e) {
             e.preventDefault();
@@ -265,7 +266,7 @@
                         var deleteButton =
                             // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
                             `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.product_id}">Delete</button>`;
-
+                            var totalQuantity = stock.total_quantity.replace(/-/g, '');
                         table.row.add([
                             stock.product_id,
                             stock.brand_name,
@@ -273,7 +274,7 @@
                             stock.unit,
                             stock.expiry_date,
                             stock.total_no_of_unit,
-                            stock.total_quantity,
+                            totalQuantity,
                             stock.status,
                             // `${editButton} ${deleteButton}`
                         ]);

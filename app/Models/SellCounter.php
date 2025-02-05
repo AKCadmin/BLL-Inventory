@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class SellCounter extends Model
 {
     use SoftDeletes;
-    protected $table="sell_counter";
+    protected $table = "sell_counter";
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer', 'id');
+    }
 }

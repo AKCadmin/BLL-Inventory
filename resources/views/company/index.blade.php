@@ -27,7 +27,7 @@
                                     <h4 class="card-title"></h4>
 
                                     <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
-                                        id="openModalBtn">Create a brand
+                                        id="openModalBtn">Create supplier
                                         <i class="mdi mdi-arrow-right ms-1"></i>
                                     </a>
 
@@ -110,7 +110,7 @@
                                         <div class="row" id="popup_row">
                                             <div class="col-7">
                                                 <div class="text-primary p-4">
-                                                    <h5 class="text-primary" id="modal_header">Add New brand</h5>
+                                                    <h5 class="text-primary" id="modal_header">Add New supplier</h5>
                                                 </div>
                                             </div>
                                             <div class="col-3">
@@ -138,22 +138,21 @@
                                                 @endif
                                             </div>
 
-                                            <form id="brandForm" method="post" action="{{ route('brand.store') }}">
+                                            <form id="brandForm" method="post" action="{{ route('supplier.store') }}">
                                                 @csrf
                                                 <input type="hidden" class="form-control" id="brand_id"
                                                     name="brand_id" value="">
 
                                                 <div class="mb-3">
-                                                    <label for="brand_name" class="form-label">Brand Owner Name</label>
+                                                    <label for="brand_name" class="form-label">supplier Name</label>
                                                     <input type="text" class="form-control" id="brand_name"
-                                                        name="brand_name" required placeholder="Enter brand Name">
+                                                        name="brand_name" required placeholder="Enter supplier Name">
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label for="brand_address" class="form-label">Brand Owner
-                                                        Address</label>
+                                                    <label for="brand_address" class="form-label">supplier Address</label>
                                                     <input type="tel" class="form-control" id="brand_address"
-                                                        name="brand_address" required placeholder="Enter brand Address">
+                                                        name="brand_address" required placeholder="Enter supplier Address">
                                                 </div>
 
                                                 <div class="mb-3">
@@ -247,7 +246,7 @@
             $('#brandModal').show();
             $('#brand_id').val('');
             $('#brandForm')[0].reset();
-            $('#modal_header').text('Add New brand');
+            $('#modal_header').text('Add New Supplier');
         });
 
 
@@ -278,8 +277,8 @@
             let formData = $(this).serialize();
             let user = @json(auth()->user());
             let url = brandId ?
-                '{{ route('brand.update', ':id') }}'.replace(':id', brandId) :
-                '{{ route('brand.store') }}';
+                '{{ route('supplier.update', ':id') }}'.replace(':id', brandId) :
+                '{{ route('supplier.store') }}';
             let requestType = brandId ? 'PUT' : 'POST';
 
             $.ajax({

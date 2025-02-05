@@ -26,9 +26,9 @@ if (!empty($_SESSION['lang'])) {
 
                 {{-- @if (auth()->user()->role != 2 && auth()->user()->role != 3) --}}
                     @can('view-company')
-                        <li><a href="{{ route('brand.index') }}" key="t-brand"><i class="bx bx-buildings"></i><span
+                        <li><a href="{{ route('supplier.index') }}" key="t-brand"><i class="bx bx-buildings"></i><span
                                     key="t-brands">
-                                    Brand Owner</span></a></li> <!-- Building Icon -->
+                                    Suppliers</span></a></li> <!-- Building Icon -->
                     @endcan
                     @can('view-organization')
                     <li><a href="{{ route('organization.index') }}" key="t-role-manager"><i class="bx bx-buildings"></i>
@@ -151,8 +151,10 @@ if (!empty($_SESSION['lang'])) {
                         <ul class="sub-menu" aria-expanded="false">
 
                             @can('add-sell-counter')
-                                <li><a href="{{ route('sellCounter.index') }}" class=""><i
-                                            class="bx bx-add-to-queue"></i> Add Sell</a></li> <!-- Queue Icon -->
+                                <li><a href="{{ route('sellCounter.create') }}" class=""><i
+                                            class="bx bx-add-to-queue"></i> Add Sell</a></li>
+                                 <li><a href="{{ route('sellCounter.index') }}" class=""><i
+                                            class="bx bx-list-check"></i> Sell List</a></li> 
                             @endcan
                             @can('view-order')
                                 <li><a href="{{ route('sell.orders.list') }}" class=""><i class="bx bx-receipt"></i>

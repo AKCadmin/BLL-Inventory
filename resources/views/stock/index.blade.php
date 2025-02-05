@@ -77,12 +77,20 @@
                                     style="background-color: #e9ecef; cursor: not-allowed;">
                             </div>
 
-                            <div class="col-md-4 mb-3">
-                                <label for="customer" class="form-label">Select Purchase Customer</label>
-                                        <select id="customer" name="customer"
-                                            class="form-select select2 customer sku-input">
-                                            <option selected disabled>Select Customer</option>
-                                        </select>
+                            <div class="col-md-4">
+                                <label class="form-label">Purchase Type</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="1" id="internalPurchase"
+                                        name="internal_purchase">
+                                    <label class="form-check-label" for="internalPurchase">Internal Purchase</label>
+                                </div>
+                            </div>
+
+                            <div id="customerDiv" class="hidden col-md-4" style="display: none">
+                                <label class="block text-sm font-medium mb-2">Select Customer</label>
+                                <select name="customer" id="customer" class="form-select w-full rounded-lg border p-2">
+                                    <option value="">Select Customer</option>
+                                </select>
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -127,13 +135,13 @@
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="buyPrice" class="form-label">Buy Price</label>
-                                    <input type="text" name="buyPrice" id="buyPrice" class="form-control buyPrice"
-                                        placeholder="Enter Buy Price">
+                                    <input type="text" name="buyPrice" id="buyPrice"
+                                        class="form-control buyPrice" placeholder="Enter Buy Price">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
-                                    <input type="number" name="noOfUnits" id="noOfUnits" class="form-control noOfUnits"
-                                        placeholder="Enter No of Units">
+                                    <input type="number" name="noOfUnits" id="noOfUnits"
+                                        class="form-control noOfUnits" placeholder="Enter No of Units">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="qty" class="form-label">Total No of Cartoons</label>
@@ -223,10 +231,10 @@
             $('#unit').val("");
             let url = `{{ route('product.getDataById') }}`;
             ajaxRequest(url, 'GET', {
-                brandId
+                    brandId
                 },
                 function(response) {
-                    console.log(response,"response")
+                    console.log(response, "response")
                     if (response.data && response.data.length > 0) {
                         $('#SKU').html('<option selected disabled>Select Product</option>');
                         $.each(response.data, function(index, product) {
@@ -318,21 +326,39 @@
             allowClear: true
         });
 
-        let url = `{{ route('customers.list') }}`;
-        ajaxRequest(url, 'GET', {},
-            function(response) {
-                console.log(response, "response")
-                if (response.customers && response.customers.length > 0) {
-                    $('#customer').html('<option selected disabled>Select Purchase Customer</option>');
-                    $.each(response.customers, function(index, customer) {
+        $('#internalPurchase').change(function() {
+            const customerDiv = $('#customerDiv');
+            const customerSelect = $('#customer');
 
-                        $('#customer').append(
-                            `<option value="${customer.id}">${customer?.name}</option>`
-                        );
-                    });
-                }
+            if ($(this).is(':checked')) {
+                customerDiv.show();
+                customerSelect.html('<option selected disabled>Loading Customers...</option>');
+
+                const url = `{{ route('retail.customers.list') }}`;
+                ajaxRequest(url, 'GET', {}, function(response) {
+                    console.log(response, "response");
+
+                    if (response.customers && response.customers.length > 0) {
+                        customerSelect.html(
+                            '<option selected disabled>Select Purchase Customer</option>');
+                        $.each(response.customers, function(index, customer) {
+                            customerSelect.append(
+                                `<option value="${customer.id}">${customer.name || 'Unnamed Customer'}</option>`
+                            );
+                        });
+                    } else {
+                        customerSelect.html('<option disabled>No Customers Found</option>');
+                    }
+                }, function(error) {
+                    console.error('Error fetching customers:', error);
+                    customerSelect.html('<option disabled>Error Loading Customers</option>');
+                });
+            } else {
+                customerDiv.hide();
+                customerSelect.html('<option selected disabled>Select Purchase Customer</option>');
             }
-        );
+        });
+
 
         // let url = `{{ route('product.getData') }}`;
         // ajaxRequest(url, 'GET', {},
