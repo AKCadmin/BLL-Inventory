@@ -134,7 +134,7 @@ if (!empty($_SESSION['lang'])) {
                                             Purchase</a></li>
                                 @endcan
                                 @can('view-purchase')
-                                <li><a href="{{ route('stock.list') }}" key="t-role-manager"><i
+                                <li><a href="{{ route('purchase.list') }}" key="t-role-manager"><i
                                             class="bx bx-list-check"></i> Purchase List</a></li>
                                 @endcan
 

@@ -29,6 +29,7 @@
 
                 <?php includeFileWithVariables('partials/page-title.php', ['pagetitle' => 'Tables', 'title' => 'Data Tables']); ?>
                 <form id="productForm">
+                    <input type="hidden" value="{{$orderId}}" name="orderId" id="orderId">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Purchase Type</label>
@@ -781,35 +782,37 @@
 
 <script>
     $(document).ready(function() {
-        const responseData = [{
-                "customer": "2",
-                "customerType": "2",
-                "customerTypeName": "wholesale (10000.00)",
-                "rowIndex": 0,
-                "sku": "2",
-                "batchNo": "S9879",
-                "unitsPerCarton": "20",
-                "availableQtyCarton": "10",
-                "packagingType": {
-                    "byCarton": true,
-                    "quantity": "5"
-                }
-            },
-            {
-                "customer": "2",
-                "customerType": "2",
-                "customerTypeName": "wholesale (10000.00)",
-                "rowIndex": 1,
-                "sku": "3",
-                "batchNo": "T9090",
-                "unitsPerCarton": "10",
-                "availableQtyCarton": "5",
-                "packagingType": {
-                    "byCarton": true,
-                    "quantity": "3"
-                }
-            }
-        ];
+        // const responseData = [{
+        //         "customer": "2",
+        //         "customerType": "2",
+        //         "customerTypeName": "wholesale (10000.00)",
+        //         "rowIndex": 0,
+        //         "sku": "2",
+        //         "batchNo": "S9879",
+        //         "unitsPerCarton": "20",
+        //         "availableQtyCarton": "10",
+        //         "packagingType": {
+        //             "byCarton": true,
+        //             "quantity": "5"
+        //         }
+        //     },
+        //     {
+        //         "customer": "2",
+        //         "customerType": "2",
+        //         "customerTypeName": "wholesale (10000.00)",
+        //         "rowIndex": 1,
+        //         "sku": "3",
+        //         "batchNo": "T9090",
+        //         "unitsPerCarton": "10",
+        //         "availableQtyCarton": "5",
+        //         "packagingType": {
+        //             "byCarton": true,
+        //             "quantity": "3"
+        //         }
+        //     }
+        // ];
+        const responseData = @json($responseData);
+        console.log(responseData,"responseData")
 
         function customerList() {
             let url = `{{ route('customers.list') }}`;
@@ -823,6 +826,7 @@
                         );
                     });
                     $('#customer').val(responseData[0].customer);
+                    $('#customerType').val(responseData[0].customerType);
                     $('#customerTypeName').val(responseData[0].customerTypeName);
                     populateForm(responseData);
                 }
@@ -841,7 +845,7 @@
                             </div>
                              <div class="mb-3">
                                 <label for="SKU${index}" class="form-label">Select Product</label>
-                                <select id="SKU${index}" name="SKU" class="form-select select2 SKU sku-input">
+                                <select id="SKU_${index}" name="SKU" class="form-select select2 SKU sku-input">
                                     <option selected disabled>Select Product</option>
                                 </select>
                             </div>
@@ -852,7 +856,7 @@
                             </div>
                             <div class="mb-3 batch-row">
                                 <label for="batchNoSelect${index}" class="form-label">Batch No</label>
-                                <select id="batchNoSelect${index}" class="form-select select2 batchNoSelect batch-input">
+                                <select id="batchNoSelect_${index}" class="form-select select2 batchNoSelect batch-input">
                                     <option value="${item.batchNo}" selected>${item.batchNo}</option>
                                 </select>
                             </div>                         
@@ -861,13 +865,13 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="unitsPerCarton${index}">Number of Unit Per Carton</label>
-                                <input type="number" class="form-control" id="unitsPerCarton${index}" name="unitsPerCarton" value="${item.unitsPerCarton}" readonly>
+                                <input type="number" class="form-control" id="unitsPerCarton_${index}" name="unitsPerCarton" value="${item.unitsPerCarton}" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="availableQtyCarton${index}">Available Total No of Carton</label>
-                                <input type="number" class="form-control" id="availableQtyCarton${index}" name="availableQtyCarton" value="${item.availableQtyCarton}" readonly>
+                                <input type="number" class="form-control" id="availableQtyCarton_${index}" name="availableQtyCarton" value="${item.availableQtyCarton}" readonly>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -878,7 +882,7 @@
                                     <label class="form-check-label" for="byCarton${index}">By Carton</label>
                                     <div id="quantityBox${index}" style="${item.packagingType.byCarton ? '' : 'display: none;'}; width:20%; margin-top: 10px;">
                                         <label class="form-label" for="quantity${index}">Enter Number of Carton</label>
-                                        <input type="number" class="form-control" id="quantity${index}" name="quantity" value="${item.packagingType.quantity}">
+                                        <input type="number" class="form-control" id="quantity_${index}" name="quantity" value="${item.packagingType.quantity}">
                                     </div>
                                 </div>
                             </div>
@@ -888,7 +892,7 @@
                 );
 
                 $('#skuRows').append(row);
-                $(`#SKU${index}`).select2({
+                $(`#SKU_${index}`).select2({
                     placeholder: "Select a Product",
                     allowClear: true
                 }).on('select2:select', function() { // Use Select2's select event
@@ -950,7 +954,7 @@
                 response = res; // Assign the response to the outer scope variable
                 var productData = response.products;
                 if (response.products) {
-                    const $select = $(`#SKU${rowIndex}`);
+                    const $select = $(`#SKU_${rowIndex}`);
                     $select.html('<option selected disabled>Select Product</option>');
                     $.each(response.products, function(index, product) {
                         const productId = product?.product[0]?.id;
@@ -1255,6 +1259,114 @@
 </script>
 
 <script>
+    $("#productForm").on("submit", async function(e) { // Added async here
+        e.preventDefault();
+        const submitButton = $("#sellSubmit");
+        let orderId = $('#orderId').val();
+
+        // Array to store all rows' data
+        const formData = [];
+
+        // Get customer and customer type from the first row (common fields)
+        const commonData = {
+            customer: $("#customer").val(),
+            customerType: $("#customerType").val(),
+            customerTypeName: $("#customerTypeName").val()
+        };
+
+        // Loop through each SKU row
+        $(".skuRow").each(function(index) {
+            console.log(index,"skuIndex");
+            const rowData = {
+                ...commonData,
+                rowIndex: index,
+                sku: $(`#SKU_${index}`).val() || $("#SKU").val(),
+                batchNo: $(`#batchNoSelect_${index}`).val() || $("#batchNoSelect").val(),
+                unitsPerCarton: $(`#unitsPerCarton_${index}`).val() || $("#unitsPerCarton")
+                    .val(),
+                availableQtyCarton: $(`#availableQtyCarton_${index}`).val() || $(
+                    "#availableQtyCarton").val(),
+                packagingType: {
+                    byCarton: $(`#byCarton_${index}`).is(":checked") || $("#byCarton").is(
+                        ":checked"),
+                    quantity: $(`#quantity_${index}`).val() || $("#quantity").val()
+                }
+            };
+
+            // Get selected carton checkboxes if they exist
+            const cartonCheckboxes = [];
+            $(`#cartonCheckboxes_${index} input:checked`).each(function() {
+                cartonCheckboxes.push($(this).val());
+            });
+            if (cartonCheckboxes.length) {
+                rowData.selectedCartons = cartonCheckboxes;
+            }
+
+            // Get selected item box checkboxes if they exist
+            const itemBoxCheckboxes = [];
+            $(`#itemBoxCheckboxes_${index} input:checked`).each(function() {
+                itemBoxCheckboxes.push($(this).val());
+            });
+            if (itemBoxCheckboxes.length) {
+                rowData.selectedItemBoxes = itemBoxCheckboxes;
+            }
+
+            formData.push(rowData);
+        });
+
+        // Log the collected data
+        console.log("Form Data:", formData);
+
+        // Disable submit button to prevent multiple submissions
+        submitButton.prop('disabled', true); // Changed to jQuery's prop method
+        const isUpdate = orderId && orderId !== '';
+        const url = isUpdate 
+            ? `{{ route('sellCounter.update', '') }}/${orderId}`
+            : "{{ route('sellCounter.store') }}";
+
+        try {
+            const response = await fetch(url, {
+                method: isUpdate ? "PUT" : "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                toastr.success("Form submitted successfully!");
+                console.log(result);
+                location.reload();
+            } else {
+                const error = await response.json();
+                toastr.error(
+                    `Error: ${error.error}<br>File: ${error.file}<br>Line: ${error.line}`,
+                    'Submission Error', {
+                        closeButton: true,
+                        timeOut: 5000,
+                        extendedTimeOut: 2000,
+                        progressBar: true
+                    }
+                );
+            }
+        } catch (err) {
+            toastr.error(`An error occurred: ${err.message}`, 'Error', {
+                closeButton: true,
+                timeOut: 5000,
+                extendedTimeOut: 2000,
+                progressBar: true
+            });
+            console.error("Submission error:", err);
+        } finally {
+            // Re-enable the submit button
+            submitButton.prop('disabled', false); // Changed to jQuery's prop method
+        }
+    });
+</script>
+
+{{-- <script>
     document.addEventListener("DOMContentLoaded", function() {
         const productForm = document.getElementById("productForm");
         const submitButton = document.getElementById("sellSubmit");
@@ -1452,7 +1564,7 @@
             }
         });
     });
-</script>
+</script> --}}
 
 
 

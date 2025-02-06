@@ -65,7 +65,7 @@
 
                                             {{-- <th>SKU</th> --}}
                                             <th>Organization Name</th>
-                                            <th>Brand Name</th>
+                                            <th>Supplier Name</th>
 
                                             <th>Product Name</th>
                                             <th>Unit</th>
@@ -176,10 +176,10 @@
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label for="autoSizingSelect">Select Brand</label>
+                                                    <label for="autoSizingSelect">Select Supplier</label>
                                                     <select class="form-select brand" id="brandId"
                                                         id="autoSizingSelect" name="brand_id">
-                                                        <option value="">Select Brand &ensp;</option>
+                                                        <option value="">Select Supplier &ensp;</option>
                                                         @foreach ($brands as $brand)
                                                             <option value="{{ $brand->id }}"
                                                                 {{ old('brand_id') == $brand->id ? 'selected' : '' }}>

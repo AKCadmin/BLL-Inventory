@@ -82,10 +82,10 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Brand Name</th>
+                                            <th>Supplier Name</th>
                                             <th>Product Name</th>
                                             <th>Total Buy Price</th>
-                                            <th>Total No. of Unit Per Cartoon</th>
+                                            <th>Total No. of Item Per Cartoon</th>
                                             <th>Total No. of Cartoons</th>
                                             {{-- <th>Total Items</th>
                                             <th>Missing Items</th> --}}

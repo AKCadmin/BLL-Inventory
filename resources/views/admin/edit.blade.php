@@ -45,7 +45,7 @@
         <div class="page-content">
             <div class="container-fluid">
                 <div class="col-md-6 mb-3">
-                    <label for="autoSizingSelect">Select Brand</label>
+                    <label for="autoSizingSelect">Select Supplier</label>
                     <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">             
                             <option value="{{ $brand->id }}"
                                selected>

@@ -97,14 +97,16 @@
                                             <th>Action</th> --}}
 
                                         <th>Id</th>
-                                        <th>Brand Name</th>
+                                        <th>Supplier Name</th>
                                         <th>Product Name</th>
+                                        <th>Unit</th>
                                         <th>Total Buy Price</th>
-                                        <th>Total No. of Unit Per Cartoon</th>
+                                        <th>Total No. of Item Per Cartoon</th>
                                         <th>Total No. of Cartoons</th>
+                                        <th>Invoice</th>
                                         {{-- <th>Total Items</th>
                                             <th>Missing Items</th> --}}
-                                        <th>Date</th>
+                                        {{-- <th>Date</th> --}}
                                         <th>Action</th>
                                         </tr>
                                     </thead>
@@ -171,7 +173,7 @@
     $(document).ready(function() {
         $('#organizationModal').show();
 
-        $('#closeModalBtn').click(function(){
+        $('#closeModalBtn').click(function() {
             $('#organizationModal').hide();
         });
 
@@ -401,22 +403,30 @@
                     // Loop through the response data
                     for (const [key, productDetails] of Object.entries(data)) {
                         const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+
+                        function safeBase64Encode(str) {
+                            return btoa(unescape(encodeURIComponent(str)));
+                        }
+
+                        const purchaseDetailsCreatedAt = safeBase64Encode(productDetails?.created_at
+                            .toString())
                         const row = `
                     <tr>
-                         <td>${productDetails?.product_id || "N/A"}</td>
+                        <td>${productDetails?.product_id || "N/A"}</td>
                         <td>${productDetails?.brand_name || "N/A"}</td>
                         <td>${productDetails?.product_name || "N/A"}</td>
+                        <td>${productDetails?.unit || "N/A"}</td>
                         <td>${productDetails?.total_buy_price || "N/A"}</td>
                         <td>${productDetails?.total_no_of_unit || "N/A"}</td>
                         <td>${productDetails?.total_quantity || "N/A"}</td>
-                        <td>${created_at}</td>
+                        <td>${productDetails?.invoice || "N/A"}</td>
+                        
                         <td>
-                            <a href="/purchase/details/${productDetails?.product_id}/${productDetails?.brand_name}" 
+                            <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}" 
                                class="btn btn-sm btn-info" 
                                target="_blank">Details</a>
-                            <a href="#" 
-                               class="btn btn-sm btn-warning edit-stock-btn" 
-                               data-url="{{ route('stock.show', '') }}/${productDetails?.product_id}">Edit</a>
+                            <a href="/purchaseHistory/show/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}" 
+                               class="btn btn-sm btn-warning" target="_blank">Edit</a>
                             <button class="btn btn-sm btn-danger delete-stock-btn" 
                                     data-id="${productDetails?.product_id}">Delete</button>
                         </td>

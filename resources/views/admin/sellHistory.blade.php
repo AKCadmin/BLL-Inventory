@@ -82,13 +82,13 @@
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Batch No</th>
-                                            <th>Hospital Price</th>
-                                            <th>Wholesale Price</th>
-                                            <th>Retail Price</th>
-                                            <th>Valid From</th>
-                                            <th>Valid To</th>
-                                            <th>Date</th>
+                                            <th>Supplier Name</th>
+                                            <th>Product Name</th>
+                                            <th>Unit</th>
+                                            <th>Total Buy Price</th>
+                                            <th>Total No. of Item Per Cartoon</th>
+                                            <th>Total No. of Cartoons</th>
+                                            <th>Order Id</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -155,11 +155,12 @@
         var productId = "";
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
+        
         $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
             let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
-            fetchHistory(formattedName)
+            fetchHistory(formattedName, null, null, selectedDate)
             productsList(formattedName)
         });
 
@@ -227,42 +228,58 @@
                     selectedDate: selectedDate
                 },
                 success: function(response) {
-                    const data = response.data;
+                    console.log(response);
+
+                    const data = response.data || {};
                     const table = $('#stocktable').DataTable();
+                   
+
                     table.clear(); // Clear existing rows
 
-                    data.forEach(function(item) {
+                    // Loop through the response data
+                    for (const [key, productDetails] of Object.entries(data)) {
+                        const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+                        const editUrl = `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
                         const row = `
                     <tr>
-                        <td>${item.id}</td>
-                        <td>${item.batch_no}</td>
-                        <td>${item.hospital_price}</td>
-                        <td>${item.wholesale_price}</td>
-                        <td>${item.retail_price}</td>
-                        <td>${item.valid_from}</td>
-                        <td>${item.valid_to}</td>
-                        <td>${item.created_at.split("T")[0]}</td>
+                        <td>${productDetails?.product_id || "N/A"}</td>
+                        <td>${productDetails?.brand_name || "N/A"}</td>
+                        <td>${productDetails?.product_name || "N/A"}</td>
+                        <td>${productDetails?.unit || "N/A"}</td>
+                        <td>${productDetails?.total_buy_price || "N/A"}</td>
+                        <td>${productDetails?.total_no_of_unit || "N/A"}</td>
+                        <td>${productDetails?.total_quantity || "N/A"}</td>
+                        <td>${productDetails?.order_id || "N/A"}</td>
+                        
                         <td>
-                           <a href="#" class="btn btn-sm btn-primary edit-sell-btn" data-id="${item.sku}" data-url="/sell/${item.sku}/edit">Edit</a>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">Delete</button>
+                            <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${encodeURIComponent(productDetails?.created_at)}" 
+                               class="btn btn-sm btn-info" 
+                               target="_blank">Details</a>
+
+                           <a href="${editUrl}" 
+                            class="btn btn-sm btn-warning" target="_blank">Edit</a>
+
+                            <button class="btn btn-sm btn-danger delete-stock-btn" 
+                                    data-id="${productDetails?.product_id}">Delete</button>
                         </td>
                     </tr>
                 `;
-                        table.row.add($(row)); 
-                    });
+                        table.row.add($(row)); // Add the row to DataTable
+                    }
 
-                   
-                    table.draw();
+                    table.draw(); // Redraw the table
 
-                    $('#stocktable').on('click', '.edit-sell-btn', function(event) {
-                        event.preventDefault();
-                        const url = $(this).data('url');
-                        const confirmed = confirm(
-                            'Are you sure you want to edit this sell item?');
-                        if (confirmed) {
-                            window.location.href = url;
-                        }
-                    });
+                    // Bind click event for dynamically added buttons
+                    $('#stocktable').off('click', '.edit-stock-btn').on('click', '.edit-stock-btn',
+                        function(event) {
+                            event.preventDefault();
+                            const url = $(this).data('url');
+                            const confirmed = confirm(
+                                'Are you sure you want to edit this item?');
+                            if (confirmed) {
+                                window.location.href = url;
+                            }
+                        });
                 },
                 error: function() {
                     alert("Error fetching stock data.");

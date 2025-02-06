@@ -52,9 +52,9 @@
                         <div class="row align-items-center">
 
                             <div class="col-md-6 mb-3">
-                                <label for="autoSizingSelect">Select Brand</label>
+                                <label for="autoSizingSelect">Select Supplier</label>
                                 <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">
-                                    <option value="">Select Brand &ensp;</option>
+                                    <option value="">Select Supplier &ensp;</option>
                                     @foreach ($brands as $brand)
                                         <option value="{{ $brand->id }}"
                                             {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
@@ -310,8 +310,14 @@
                 .then(data => {
                     if (data.success) {
                         toastr.success('Form submitted successfully!');
+                        let user = "{{auth()->user()->role}}";
+                        if(user == 1){
                         window.location.href =
                             '{{ route('stock.list') }}';
+                        }else{
+                            window.location.href =
+                            '{{ route('purchase.list') }}';
+                        }
                     } else {
                         toastr.error('Submission failed: ' + data.message);
                     }

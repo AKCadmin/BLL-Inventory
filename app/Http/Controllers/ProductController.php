@@ -56,12 +56,14 @@ class ProductController extends Controller
                 'status' => 'required|string|max:50',
             ]);
     
+            $brand = Brand::where('id',$request->brand_id)->first();
+            $productName =  $request->name . " (". $brand->name . ")";
           
             $product = new Product();
             $product->brand_id = $request->brand_id;
              $product->company_id = $request->company_id;
             // $product->sku = $request->sku;
-            $product->name = $request->name;
+            $product->name = $productName;
             $product->unit = $request->unit;
             $product->description = $request->description;
             $product->status = $request->status;

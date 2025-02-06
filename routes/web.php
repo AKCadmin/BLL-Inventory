@@ -99,12 +99,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/purchase/get/history', [HistoryController::class, 'getHistory'])->name('purchase.getHistory');
     Route::get('/purchase/details/{id}/{companyName}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory');
     Route::get('history/products/options', [HistoryController::class, 'historyProducts'])->name('purchase.historyProducts');
+    Route::get('/purchaseHistory/show/{productId}/{createdAt}', [HistoryController::class, 'purchaseHistoryShow'])->name('purchaseHistoryShow');
     //organizations routes
 
     //sell history routes
 
     Route::get('/sell/history', [HistoryController::class, 'sellHistory'])->name('sell.history');
     Route::get('/sell/get/history', [HistoryController::class, 'getSellHistory'])->name('sell.getHistory');
+    Route::get('/sellHistory/show/{productId}/{createdAt}', [HistoryController::class, 'sellHistoryShow'])->name('sellHistoryShow');
+
 
     Route::resource('organization', OrganizationController::class);
     Route::get('organization/edit/{organization}', [OrganizationController::class, 'edit'])->name('organization.editorganization');
@@ -134,11 +137,13 @@ Route::group(['middleware' => 'auth'], function () {
 
     //stock routes
     Route::resource('stock', StockController::class);
-    Route::get('purchaseList', [StockController::class, 'list'])->name('stock.list');
+    Route::get('purchaseList', [StockController::class, 'list'])->name('purchase.list');
+    Route::get('stockList', [StockController::class, 'stockList'])->name('stock.list');
     Route::get('stockList/bycompany', [StockController::class, 'listByCompany'])->name('stocks.bycompany');
     Route::get('stockList/byproduct', [StockController::class, 'listByProduct'])->name('stocks.byproduct');
     route::view('stockEdit', 'admin.edit')->name('stock.editStock');
     route::post('/stock/update/batch', [StockController::class, 'update'])->name('stock.batch.update');
+    route::get('/stock/details/{id}/{date}', [StockController::class, 'stockDetails'])->name('stockDetails');
    
 
     // Sell Management routes

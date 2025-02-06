@@ -67,7 +67,7 @@
                                             <th>Id</th>
                                             <th>Supplier Name</th>
                                             <th>Product Name</th>
-                                            
+
                                             <th>Unit</th>
                                             <th>Expire Date</th>
                                             <th>No of Unit Per Cartoon</th>
@@ -75,7 +75,7 @@
                                             {{-- <th>Purchased sales</th> --}}
                                             <th>Status</th>
 
-                                            {{-- <th>Action</th> --}}
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -266,7 +266,21 @@
                         var deleteButton =
                             // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
                             `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.product_id}">Delete</button>`;
-                            var totalQuantity = stock.total_quantity.replace(/-/g, '');
+
+                        const created_at = stock?.created_at?.split(" ")[0] ||
+                            "N/A";
+
+                        function safeBase64Encode(str) {
+                            return btoa(unescape(encodeURIComponent(str)));
+                        }
+
+                        const stockCreatedAt = safeBase64Encode(stock
+                            ?.created_at
+                            .toString())
+                        var viewButton =
+                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}" class="btn btn-sm btn-warning view-stock-btn" target="_blank">View</a>`;
+
+                        // var totalQuantity = stock.total_quantity.replace(/-/g, '');
                         table.row.add([
                             stock.product_id,
                             stock.brand_name,
@@ -274,8 +288,9 @@
                             stock.unit,
                             stock.expiry_date,
                             stock.total_no_of_unit,
-                            totalQuantity,
+                            stock.total_quantity,
                             stock.status,
+                            `${viewButton}`
                             // `${editButton} ${deleteButton}`
                         ]);
                     });
