@@ -27,7 +27,7 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title mb-4">Stock List</h4>
+                                <h4 class="card-title mb-4">Purchase List</h4>
 
                                 <div class="row mb-3">
                                     <div class="row mb-3">

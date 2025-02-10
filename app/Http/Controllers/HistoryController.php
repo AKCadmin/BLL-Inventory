@@ -745,11 +745,12 @@ class HistoryController extends Controller
     // }
 
 
-    public function detailHistory(Request $request, $productId, $encodedCreatedAt)
+    public function detailHistory(Request $request, $productId, $createdAt)
     {
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
-        $createdAt = base64_decode($encodedCreatedAt);
+        // $createdAt = base64_decode($encodedCreatedAt);
+        // dd($encodedCreatedAt);
 
         $databaseName = Session::get('db_name');
 

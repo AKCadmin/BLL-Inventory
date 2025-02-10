@@ -74,6 +74,7 @@
                     <h3>Supplier Name: {{ $brand->name }}</h3>
                     <h3>Product Name: {{ $product->name }}</h3>
                     <h3>Created At: {{ \Carbon\Carbon::parse($createdAt)->format('d M Y') }}</h3>
+                    <h3>Invoice No: {{$data[0]->invoice_no}}</h3>
                 </div>
                 <div class="row">
 

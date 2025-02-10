@@ -18,7 +18,7 @@ if (!empty($_SESSION['lang'])) {
                 <li class="menu-title" key="t-menu"><?php echo $lang['Menu']; ?></li>
 
                 <li>
-                    <a href="home" class="">
+                    <a href="{{route('home')}}" class="">
                         <i class="bx bx-home"></i> <!-- Home Icon -->
                         <span key="t-dashboards"><?php echo $lang['Dashboard']; ?></span>
                     </a>

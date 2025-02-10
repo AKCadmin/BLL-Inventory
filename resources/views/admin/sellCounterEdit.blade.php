@@ -122,7 +122,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="unitsPerCarton">Number of Unit Per
+                                        <label class="form-label" for="unitsPerCarton">Number of Item Per
                                             Carton</label>
                                         <input type="number" class="form-control" id="unitsPerCarton"
                                             name="unitsPerCarton" readonly placeholder="Enter units per carton"
@@ -866,7 +866,7 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="unitsPerCarton${index}">Number of Unit Per Carton</label>
+                                <label class="form-label" for="unitsPerCarton${index}">Number of Item Per Carton</label>
                                 <input type="number" class="form-control" id="unitsPerCarton_${index}" name="unitsPerCarton" disabled value="${item.unitsPerCarton}" readonly>
                             </div>
                         </div>
@@ -1078,7 +1078,7 @@
                 </div>
                                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="unitsPerCarton_${rowIndex}">Number of Unit Per
+                                        <label class="form-label" for="unitsPerCarton_${rowIndex}">Number of Item Per
                                             Carton</label>
                                         <input type="number" class="form-control unitsPerCarton" id="unitsPerCarton_${rowIndex}"
                                             name="unitsPerCarton" readonly placeholder="Enter units per carton" disabled>

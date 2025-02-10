@@ -63,7 +63,7 @@ $(document).ready(function () {
     
         if (id) {
             $.ajax({
-                url: appUrl + "/api/user/update",
+                url: "/api/user/update",
                 type: "POST",
                 data: formData,
             })
@@ -85,7 +85,7 @@ $(document).ready(function () {
             });
         } else {
             $.ajax({
-                url: appUrl + "/api/user/create",
+                url: "/api/user/create",
                 type: "POST",
                 data: formData,
             })
@@ -311,8 +311,8 @@ $(document).ready(function () {
     $(document).on("click", ".edit-user-btn", function (e) {
         e.preventDefault();
         const userId = $(this).data("id");
-        var appUrl = $("#appUrl").val();
-        let route = appUrl + "/api/user/" + userId + "/edit";
+        //var appUrl = $("#appUrl").val();
+        let route = "/api/user/" + userId + "/edit";
         $.ajax({
             url: route,
             type: "GET",

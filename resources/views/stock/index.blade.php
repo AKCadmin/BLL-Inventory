@@ -139,7 +139,7 @@
                                         class="form-control buyPrice" placeholder="Enter Buy Price">
                                 </div>
                                 <div class="col-md-4 mb-2">
-                                    <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
+                                    <label for="noOfUnits" class="form-label">No of Item Per Cartoon</label>
                                     <input type="number" name="noOfUnits" id="noOfUnits"
                                         class="form-control noOfUnits" placeholder="Enter No of Units">
                                 </div>
@@ -409,7 +409,7 @@
                 </div>
 
                                 <div class="col-md-4 mb-2">
-                                    <label for="noOfUnits" class="form-label">No of Unit Per Cartoon</label>
+                                    <label for="noOfUnits" class="form-label">No of Item Per Cartoon</label>
                                     <input type="number" name="noOfUnits" id="noOfUnits" class="form-control noOfUnits"
                                         placeholder="Enter No of Units">
                                 </div>

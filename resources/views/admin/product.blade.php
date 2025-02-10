@@ -33,6 +33,7 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                <h4 class="card-title mb-2">Products List</h4>
                                 <div class="RoleTableHeader">
                                     <h4 class="card-title"></h4>
 
