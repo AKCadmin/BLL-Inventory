@@ -185,7 +185,7 @@
         background-color: #5c636a;
     }
 </style> --}}
-<input type="hidden" id="appUrl" value="https://bll.techwens.com">
+<input type="hidden" id="appUrl" value="{{env('APP_URL')}}">
 <header id="page-topbar">
     <div class="navbar-header">
         <div class="d-flex">
