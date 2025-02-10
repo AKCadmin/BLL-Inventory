@@ -72,7 +72,8 @@
                                     <div class="mb-3">
                                         <label for="customerType" class="form-label">Select Customer Type</label>
                                         <input type="hidden" id="customerType" class="customer-type">
-                                        <input type="text" class="form-control" id="customerTypeName">
+                                        <input type="text" disabled readonly class="form-control"
+                                            id="customerTypeName">
                                         {{-- <select class="form-select customer-type" id="customerType" required> --}}
                                         {{-- <option value="" disabled selected>Select customer type</option> --}}
                                         {{-- <option value="hospital">hospital</option>
@@ -775,23 +776,52 @@
                 },
                 body: JSON.stringify(formData),
             });
-
-            if (response.ok) {
-                const result = await response.json();
+            const result = await response.json();
+            if (response.ok) {          
                 toastr.success("Form submitted successfully!");
                 console.log(result);
                 location.reload();
             } else {
-                const error = await response.json();
-                toastr.error(
-                    `Error: ${error.error}<br>File: ${error.file}<br>Line: ${error.line}`,
-                    'Submission Error', {
+                // Handle validation errors (422 status)
+                if (response.status === 422) {
+                    const errorMessages = result.messages;
+                    let errorHtml = '<ul style="list-style-type: none; padding-left: 0;">';
+
+                    // Convert validation errors into readable format
+                    Object.keys(errorMessages).forEach(key => {
+                        errorMessages[key].forEach(message => {
+                            // Extract the index from the key (e.g., "0.customer" -> "0")
+                            const rowIndex = key.split('.')[0];
+                            // Make the message more user-friendly
+                            const friendlyMessage = message.replace(/\.\d+/g,
+                                ` in row ${parseInt(rowIndex) + 1}`);
+                            errorHtml += `<li>${friendlyMessage}</li>`;
+                        });
+                    });
+
+                    errorHtml += '</ul>';
+
+                    toastr.error(errorHtml, 'Validation Error', {
                         closeButton: true,
-                        timeOut: 5000,
-                        extendedTimeOut: 2000,
-                        progressBar: true
-                    }
-                );
+                        timeOut: 0, // Don't auto-close for validation errors
+                        extendedTimeOut: 0,
+                        progressBar: false,
+                        enableHtml: true,
+                        escapeHtml: false
+                    });
+                } else {
+                    // Handle other types of errors
+                    toastr.error(
+                        `Error: ${result.error}<br>File: ${result.file}<br>Line: ${result.line}`,
+                        'Submission Error', {
+                            closeButton: true,
+                            timeOut: 5000,
+                            extendedTimeOut: 2000,
+                            progressBar: true,
+                            enableHtml: true
+                        }
+                    );
+                }
             }
         } catch (err) {
             toastr.error(`An error occurred: ${err.message}`, 'Error', {

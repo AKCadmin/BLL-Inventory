@@ -40,6 +40,7 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
                     <div class="col-md-6">
 
                         <div class="mb-3">
@@ -62,12 +63,13 @@
                         <div class="mb-3">
                             <label for="customerType" class="form-label">Select Customer Type</label>
                             <input type="hidden" id="customerType" class="customer-type">
-                            <input type="text" class="form-control" id="customerTypeName">
+                            <input type="text" disabled readonly class="form-control" id="customerTypeName">
 
                         </div>
                         <div class="mb-3">
                         </div>
                     </div>
+                </div>
                     <div id="skuRows">
                         <div class="skuRow">
                             <div class="row">
@@ -865,13 +867,13 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="unitsPerCarton${index}">Number of Unit Per Carton</label>
-                                <input type="number" class="form-control" id="unitsPerCarton_${index}" name="unitsPerCarton" value="${item.unitsPerCarton}" readonly>
+                                <input type="number" class="form-control" id="unitsPerCarton_${index}" name="unitsPerCarton" disabled value="${item.unitsPerCarton}" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="availableQtyCarton${index}">Available Total No of Carton</label>
-                                <input type="number" class="form-control" id="availableQtyCarton_${index}" name="availableQtyCarton" value="${item.availableQtyCarton}" readonly>
+                                <input type="number" class="form-control" id="availableQtyCarton_${index}" disabled name="availableQtyCarton" value="${item.availableQtyCarton}" readonly>
                             </div>
                         </div>
                         <div class="col-md-12">

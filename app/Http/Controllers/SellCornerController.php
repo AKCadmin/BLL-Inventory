@@ -12,6 +12,7 @@ use App\Models\SellCounter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class SellCornerController extends Controller
 {
@@ -247,6 +248,39 @@ class SellCornerController extends Controller
         // dd($request->all());
         if (auth()->user()->cannot('add-sell-counter')) {
             abort(403);
+        }
+
+        $rules = [
+            '*.customer' => 'required|string',
+            '*.customerType' => 'required|string',
+            '*.customerTypeName' => 'required|string',
+            '*.rowIndex' => 'required|integer|min:0',
+            '*.sku' => 'required|exists:products,id',
+            '*.batchNo' => 'required|string',
+            '*.unitsPerCarton' => 'required|integer|min:1',
+            '*.availableQtyCarton' => 'required|integer|min:0',
+            '*.packagingType' => 'required|array',
+            '*.packagingType.byCarton' => 'required|boolean',
+            '*.packagingType.quantity' => 'required|integer|min:1'
+        ];
+    
+        $messages = [
+            '*.customer.required' => 'Customer is required for all items',
+            '*.customerType.required' => 'Customer type is required for all items',
+            '*.sku.exists' => 'Invalid product SKU',
+            '*.batchNo.required' => 'Batch number is required for all items',
+            '*.packagingType.quantity.min' => 'Quantity must be at least 1',
+            '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
+        ];
+    
+        // Validate request
+        $validator = Validator::make($request->all(), $rules, $messages);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $validator->errors()
+            ], 422);
         }
 
         DB::beginTransaction(); // Start a database transaction
