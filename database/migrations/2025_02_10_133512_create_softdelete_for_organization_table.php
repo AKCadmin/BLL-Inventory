@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tables = [
-            'batches',
-            'sell_counter'
-        ];
+        $tables = ['batches', 'sell_counter'];
 
-        foreach ($tables as $table) {
-            Schema::table($table, function (Blueprint $table) {
-                $table->softDeletes();
-            });
+        foreach ($tables as $tableName) {
+            if (Schema::hasTable($tableName) && !Schema::hasColumn($tableName, 'deleted_at')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->softDeletes();
+                });
+            }
         }
     }
 
@@ -28,15 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tables = [       
-            'batches',
-            'sell_counter'
-        ];
+        $tables = ['batches', 'sell_counter'];
 
-        foreach ($tables as $table) {
-            Schema::table($table, function (Blueprint $table) {
-                $table->dropSoftDeletes();
-            });
+        foreach ($tables as $tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'deleted_at')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->dropSoftDeletes();
+                });
+            }
         }
     }
 };
