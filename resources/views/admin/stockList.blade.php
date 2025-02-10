@@ -69,7 +69,7 @@
                                             <th>Product Name</th>
 
                                             <th>Unit</th>
-                                            <th>Expire Date</th>
+                                            
                                             <th>No of Unit Per Cartoon</th>
                                             <th>Total No of Cartoons</th>
                                             {{-- <th>Purchased sales</th> --}}
@@ -286,7 +286,6 @@
                             stock.brand_name,
                             stock.product_name,
                             stock.unit,
-                            stock.expiry_date,
                             stock.total_no_of_unit,
                             stock.total_quantity,
                             stock.status,

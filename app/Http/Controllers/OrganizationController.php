@@ -116,7 +116,7 @@ class OrganizationController extends Controller
             $addBrandIdInProductsMigrationPath = 'database/migrations/2024_12_26_141516_add_brand_id_to_products_table.php';
             $modifyBatchesMigrationPath = 'database/migrations/2024_12_27_051546_modify_product_id_in_batches_table.php';
             $modifySellCartonMigrationPath = 'database/migrations/2024_12_27_051742_drop_foreign_key_from_product_id_in_batches_table.php';
-            $updatesoftdeleteMigrationPath = 'database/migrations/2025_01_31_104635_create_softdelete_table.php';
+            $updatesoftdeleteMigrationPath = 'database/migrations/2025_02_10_133512_create_softdelete_for_organization_table.php';
             // $customerRetailsMigrationPath = 'database/migrations/2025_02_03_071547_update_customer_table.php';
             $updatebatchMigrationPath = 'database/migrations/2025_02_03_082708_update_batch_table.php';
             

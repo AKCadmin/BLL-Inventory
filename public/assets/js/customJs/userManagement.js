@@ -4,7 +4,7 @@ $(document).ready(function () {
     $('#phone_number').on('input', function () {
         let phone = $(this).val();
         if (phone.length > 10) {
-            $('#phone-error').text('Phone number must be 10 digits.');
+            // $('#phone-error').text('Phone number must be 10 digits.');
             $(this).val(phone.substring(0, 10)); 
         } else if (!/^\d*$/.test(phone)) {
             $(this).val(phone.replace(/\D/g, '')); 

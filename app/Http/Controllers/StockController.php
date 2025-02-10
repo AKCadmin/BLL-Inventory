@@ -307,20 +307,20 @@ class StockController extends Controller
 
             foreach ($decodedBatches as $batch) {
                 $existingBatch = Batch::where('batch_number', $batch['batchNo'])->first();
-                if ($existingBatch) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Batch number '{$batch['batchNo']}' already exists."
-                    ], 409);
-                }
+                // if ($existingBatch) {
+                //     DB::rollBack();
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => "Batch number '{$batch['batchNo']}' already exists."
+                //     ], 409);
+                // }
 
                 $batchModel = new Batch();
                 $batchModel->batch_number = $batch['batchNo'];
                 $batchModel->product_id = $product->id;
                 $batchModel->brand_id = $request->brand_id;
                 $batchModel->unit = $request->unit;
-                $batchModel->internal_purchase = $request->internal_purchase == 1 ? true : false;
+                 $batchModel->internal_purchase = $request->internal_purchase == 1 ? true : false;
                 $batchModel->manufacturing_date = $batch['manufacturingDate'] ?: null;
                 $batchModel->expiry_date = $batch['expiryDate'] ?: null;
                 $batchModel->base_price = $batch['basePrice'];
@@ -329,7 +329,7 @@ class StockController extends Controller
                 $batchModel->no_of_units = $batch['noOfUnits'];
                 $batchModel->quantity = $batch['qty'];
                 $batchModel->invoice_no = $request->invoice;
-                $batchModel->customer = $product->customer;
+                 $batchModel->customer = $product->customer;
                 $batchModel->notes = $request->notes;
                 $batchModel->save();
 

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('batches', function (Blueprint $table) {
             $table->boolean('internal_purchase')->nullable();
+            $table->integer('customer')->nullable();
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('batches', function (Blueprint $table) {
             $table->dropColumn('internal_purchase');
+            $table->dropColumn('customer');
         });
     }
 };

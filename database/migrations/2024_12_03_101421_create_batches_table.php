@@ -10,7 +10,7 @@ class CreateBatchesTable extends Migration
         Schema::create('batches', function (Blueprint $table) {
             $table->id();
 
-            $table->string('batch_number')->unique()->notNullable();
+            $table->string('batch_number')->notNullable();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->integer('brand_id');
             $table->string('unit');
