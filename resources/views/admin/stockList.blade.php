@@ -70,7 +70,7 @@
 
                                             <th>Unit</th>
                                             
-                                            <th>No of Unit Per Cartoon</th>
+                                            <th>Total No. of Unit Per Cartoon</th>
                                             <th>Total No of Cartoons</th>
                                             {{-- <th>Purchased sales</th> --}}
                                             <th>Status</th>

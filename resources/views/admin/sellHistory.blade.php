@@ -86,7 +86,7 @@
                                             <th>Product Name</th>
                                             <th>Unit</th>
                                             <th>Total Buy Price</th>
-                                            <th>Total No. of Item Per Cartoon</th>
+                                            <th>Total No. of Unit Per Cartoon</th>
                                             <th>Total No. of Cartoons</th>
                                             <th>Order Id</th>
                                             <th>Action</th>

@@ -16,8 +16,6 @@ return new class extends Migration
             'products',
             'organizations',
             'brands',
-            'batches',
-            'sell_counter'
         ];
 
         foreach ($tables as $table) {
@@ -37,9 +35,6 @@ return new class extends Migration
             'products',
             'organizations',
             'brands',
-            'batches',
-            'sell',
-            'sell_counter'
         ];
 
         foreach ($tables as $table) {
