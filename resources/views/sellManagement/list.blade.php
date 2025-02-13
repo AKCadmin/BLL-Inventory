@@ -150,6 +150,12 @@
 @include('partials.vendor-scripts')
 @include('partials.script')
 <script>
+    window.userPermissions = @json([
+        'canEdit' => auth()->user()->can('edit-sell-counter'),
+        'canDelete' => auth()->user()->can('delete-sell-counter'),
+    ]);
+</script>
+<script>
     $(document).ready(function() {
         var brandName = ""
         var productId = "";
@@ -240,8 +246,17 @@
                     // Loop through the response data
                     for (const [key, productDetails] of Object.entries(data)) {
                         const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+                        const userPermissions = window.userPermissions || {};
                         const editUrl =
-                            `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
+                        `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
+                        const editButton = userPermissions.canEdit ?
+                            `<a href="${editUrl}" class="btn btn-sm btn-warning" target="_blank">Edit</a>` :
+                            '';
+
+                        const deleteButton = userPermissions.canDelete ?
+                            `<button class="btn btn-sm btn-danger delete-stock-btn" 
+                             data-id="${productDetails?.product_id}">Delete</button>` : '';
+                       
                         const invoiceUrl =
                             `/invoice/${encodeURIComponent(productDetails?.order_id)}/download`;
 
@@ -263,13 +278,8 @@
                         <td>${productDetails?.order_id || "N/A"}</td>
                         
                         <td>
-                            
-
-                           <a href="${editUrl}" 
-                            class="btn btn-sm btn-warning" target="_blank">Edit</a>
-
-                            <button class="btn btn-sm btn-danger delete-stock-btn" 
-                                    data-id="${productDetails?.product_id}">Delete</button>
+                            ${editButton}
+                             ${deleteButton}
                              ${invoiceButton}
                         </td>
                     </tr>

@@ -197,50 +197,6 @@ class PermissionController extends Controller
     }
 
 
-    // public function savePermissions(Request $request)
-    // {
-    //     dd($request->all());
-    //     // Get the selected user
-    //     $user = User::find($request->user_id);
-
-    //     // Loop through the selected permissions for each page
-    //     foreach ($request->permissions as $pageId => $permissions) {
-    //         // Find the page by ID
-    //         $page = Page::find($pageId);
-
-    //         // Loop through the permissions and store each one in the user_page_permissions table
-    //         foreach ($permissions as $permissionSlug => $permissionValue) {
-    //             $permission = PagePermission::where('name', $permissionSlug)->first();
-
-    //             if ($permission) {
-    //                 // Check if permission already exists for this user, page, and permission
-    //                 $userPagePermission = UserPagePermission::where('user_id', $user->id)
-    //                     ->where('page_id', $page->id)
-    //                     ->where('permission_id', $permission->id)
-    //                     ->first();
-
-    //                 if ($userPagePermission) {
-    //                     // If record exists, update it
-    //                     $userPagePermission->update([
-    //                         'permission_id' => $permission->id,
-    //                     ]);
-    //                 } else {
-    //                     // If record doesn't exist, create a new one
-    //                     UserPagePermission::create([
-    //                         'user_id' => $user->id,
-    //                         'page_id' => $page->id,
-    //                         'permission_id' => $permission->id,
-    //                         // 'company_id' => $request->company_id, // Assuming company_id is part of the form
-    //                     ]);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // Redirect or return a success message
-    //     return redirect()->route('permissions.index')->with('success', 'Permissions updated successfully.');
-    // }
-
     public function savePermissions(Request $request)
     {
         try {

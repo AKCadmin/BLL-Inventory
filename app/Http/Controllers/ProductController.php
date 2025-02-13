@@ -69,24 +69,6 @@ class ProductController extends Controller
             $product->status = $request->status;
             $product->save();
     
-           
-            // $company = Organization::findOrFail($request->company_id);
-            // $normalizedCompanyName = strtolower(str_replace(' ', '_', $company->name));
-           
-            // config(['database.connections.pgsql.database' => $normalizedCompanyName]);
-    
-            
-            // DB::purge('pgsql');
-            // DB::reconnect('pgsql');
-    
-            // $secondaryProduct = new Product();
-            // $secondaryProduct->setConnection('pgsql'); 
-            // // $secondaryProduct->sku = $request->sku;
-            // $secondaryProduct->name = $request->name;
-            // $secondaryProduct->description = $request->description;
-            // $secondaryProduct->status = $request->status;
-            // $secondaryProduct->save();
-    
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully in both databases.',

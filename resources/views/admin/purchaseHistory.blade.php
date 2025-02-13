@@ -424,7 +424,7 @@
                     <td>${productDetails?.unit || "N/A"}</td>
                     <td>${productDetails?.total_buy_price || "N/A"}</td>
                     <td>${productDetails?.total_no_of_unit || "N/A"}</td>
-                    <td>${productDetails?.total_quantity}</td>
+                    <td>${productDetails?.previous_total_no_of_quantity}</td>
                     <td>${productDetails?.invoice || "N/A"}</td>
                     
                         <td>

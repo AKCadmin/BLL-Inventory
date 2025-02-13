@@ -222,14 +222,6 @@ class SellController extends Controller
                 ], 500);
             }
             DB::commit();
-            //  config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
-            //  DB::purge('pgsql');
-            //  DB::connection('pgsql')->getPdo();
-
-
-            // $sellSecondary = new Sell($validatedData); 
-            // $sellSecondary->setConnection('pgsql'); 
-            // $sellSecondary->update($validatedData);
 
             // Return success response
             return response()->json([

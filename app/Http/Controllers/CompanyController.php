@@ -97,11 +97,6 @@ class CompanyController extends Controller
             }
 
             $usersMigrationPath = '\\database\\migrations\\0001_01_01_000000_create_users_table.php';
-            // $userRole = '\\database\\migrations\\2024_08_08_003839_add_role_to_users_table.php';
-            // $permissionsMigrationPath = '\\database\\migrations\\2024_08_09_014220_create_permissions_table.php';
-            // $rolesMigrationPath = '\\database\\migrations\\2024_10_15_131421_roles.php';
-            // $menuMigrationPath = '\\database\\migrations\\2024_08_24_222034_create_menu_table.php';
-            // $companyMigrationPath = '\\database\\migrations\\2024_12_03_101211_create_companies_table.php';
             $productMigrationPath = '\\database\\migrations\\2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = '\\database\\migrations\\2024_12_03_101421_create_batches_table.php';
             $cartonsigrationPath = '\\database\\migrations\\2024_12_03_101422_create_cartons_table.php';
@@ -113,11 +108,6 @@ class CompanyController extends Controller
 
             $migrations = [
                 $usersMigrationPath,
-                // $rolesMigrationPath,
-                // $userRole,
-                // $menuMigrationPath,
-                // $permissionsMigrationPath,
-                // $companyMigrationPath,
                 $productMigrationPath,
                 $batchMigrationPath,
                 $cartonsigrationPath,
@@ -139,21 +129,6 @@ class CompanyController extends Controller
             }
             DB::purge('pgsql');
             DB::reconnect('pgsql');
-
-            // DB::connection('pgsql')->table('users')->insert([
-            //     'name' => $userData['admin_firstname'] . ' ' . $userData['admin_lastname'],
-            //     'username' => $userData['admin_username'],
-            //     'role' => 'Admin',
-            //     'phone' => $userData['phone_number'],
-            //     'email' => $userData['email'],
-            //     'password' => Hash::make($userData['password']),
-            //     'status' => $userData['current_status'],
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ]);
-
-
-
             return response()->json(['success' => true, 'db_name' => $request->db_name, 'user' => $request->db_name, 'message' => 'Migrations for roles and permissions applied successfully on ' . $dbName]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to apply migrations.', 'error' => $e->getMessage()]);

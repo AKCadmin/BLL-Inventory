@@ -160,23 +160,6 @@ class OrganizationController extends Controller
                     ]);
                 }
             }
-            // DB::purge('pgsql');
-            // DB::reconnect('pgsql');
-
-            // DB::connection('pgsql')->table('users')->insert([
-            //     'name' => $userData['admin_firstname'] . ' ' . $userData['admin_lastname'],
-            //     'username' => $userData['admin_username'],
-            //     'role' => 'Admin',
-            //     'phone' => $userData['phone_number'],
-            //     'email' => $userData['email'],
-            //     'password' => Hash::make($userData['password']),
-            //     'status' => $userData['current_status'],
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ]);
-
-
-
             return response()->json(['success' => true, 'db_name' => $request->db_name, 'user' => $request->db_name, 'message' => 'Migrations for roles and permissions applied successfully on ' . $dbName]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to apply migrations.', 'error' => $e->getMessage()]);
@@ -294,8 +277,7 @@ class OrganizationController extends Controller
                         $products->where('organizations.id', $request->company);
                     }
                     $products = $products->orderBy('productId', 'desc')->get();
-                    // dd($products);
-                // dd($request->company);
+                   
             } else {
                 
                 // setDatabaseConnection();
@@ -323,36 +305,8 @@ class OrganizationController extends Controller
             // Fetch the database details for the selected organization
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
             session(['db_name' => $organization->name]);
-            // if (!$organization) {
-            //     return redirect()->back()->with('error', 'Organization not found.');
-            // }
-
-            // // Set the database connection dynamically
-            // Config::set('database.connections.dynamic', [
-            //     'driver' => 'pgsql',
-            //     'url' => env('DB_URL'),
-            //     'host' => env('DB_HOST', '127.0.0.1'),
-            //     'port' => env('DB_PORT', '5432'),
-            //     'database' => $organization->name,
-            //     'username' => env('DB_USERNAME', 'root'),
-            //     'password' => env('DB_PASSWORD', ''),
-            //     'charset' => env('DB_CHARSET', 'utf8'),
-            //     'prefix' => '',
-            //     'prefix_indexes' => true,
-            //     'search_path' => 'public',
-            //     'sslmode' => 'prefer',
-            // ]);
-
-            // // Use the dynamic connection
-            // DB::purge('dynamic');
-            // DB::setDefaultConnection('dynamic');
-
-            // $currentDatabase = DB::select('SELECT current_database() AS name'); // For PostgreSQL
-            // $currentDatabaseName = $currentDatabase[0]->name;
-
-            // dd($currentDatabaseName);
             return response()->json(['message' => 'Switched to ' . $organization->name . ' database.']);
-            // return redirect()->back()->with('success', 'Switched to ' . $organization->name . ' database.');
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
