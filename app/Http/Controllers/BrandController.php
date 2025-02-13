@@ -33,7 +33,7 @@ class BrandController extends Controller
             $brand->address = $request->brand_address;
             $brand->contact_person = $request->brand_contact;
             $brand->phone_no = $request->phone_no;
-            $brand->category = $request->brand_category; 
+            $brand->category = $request->brand_category;
             $brand->description = $request->brand_description;
             $brand->status = $request->brand_status;
             $brand->save();
@@ -304,5 +304,44 @@ class BrandController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    //     public function showLedger($id)
+    //     {
+    //         $brand = Brand::findOrFail($id);
+    //         setDatabaseConnection();
+    //         $transactions = DB::table('batches')
+    //             ->where('brand_id', $id)
+    //             ->select(
+    //                 'created_at as date',
+    //                 'invoice_no',
+    //                 DB::raw('(base_price * quantity) as amount'),
+    //             )
+    //             ->orderBy('created_at')
+    //             ->get();
+    // // dd($transactions);
+    //         return view('company.ledger', compact('brand', 'transactions'));
+    //     }
+
+    public function showLedger($id)
+    {
+        $brand = Brand::findOrFail($id);
+        setDatabaseConnection();
+
+        // Group transactions by invoice_no and calculate total amount for each invoice
+        $transactions = DB::table('batches')
+            ->where('brand_id', $id)
+            ->select(
+                'created_at as date',
+                'invoice_no',
+                DB::raw('SUM(base_price * exchange_rate) as amount') // Aggregate total amount for each invoice
+            )
+            ->groupBy('invoice_no', 'created_at') // Group by invoice_no and date
+            ->orderBy('created_at')
+            ->get();
+
+        // dd($transactions); // Uncomment to debug the grouped data
+
+        return view('company.ledger', compact('brand', 'transactions'));
     }
 }

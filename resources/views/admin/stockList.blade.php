@@ -255,7 +255,8 @@
                     table.clear();
 
                     // Append new rows
-                    $.each(data, function(index, stock) {
+                    $.each(data, function(index, stocks) {
+                        $.each(stocks, function(index, stock) {
                         console.log(stock, "stocks");
                         // var batchExists = stock.batch_no ? true : false;
 
@@ -278,7 +279,7 @@
                             ?.created_at
                             .toString())
                         var viewButton =
-                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}" class="btn btn-sm btn-warning view-stock-btn" target="_blank">View</a>`;
+                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}" class="btn btn-sm btn-warning view-stock-btn" target="_blank">View</a>`;
 
                         // var totalQuantity = stock.total_quantity.replace(/-/g, '');
                         table.row.add([
@@ -292,6 +293,7 @@
                             `${viewButton}`
                             // `${editButton} ${deleteButton}`
                         ]);
+                    });
                     });
 
                     // Redraw the table

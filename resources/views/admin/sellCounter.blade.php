@@ -117,12 +117,12 @@
 
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label class="form-label">Select Packaging Type</label>
+                                        {{-- <label class="form-label">Select Packaging Type</label> --}}
                                         <div class="form-check">
                                             <input class="form-check-input packaging-type byCarton" type="checkbox"
                                                 id="byCarton" name="packagingType" value="byCarton">
                                             <label class="form-check-label" for="byCarton">
-                                                By Carton
+                                                Sale
                                             </label>
                                             <div id="quantityBox" style="display: none; width:20%; margin-top: 10px;">
                                                 <label class="form-label" for="quantity">Enter Number of Carton</label>
@@ -207,26 +207,26 @@
             }
         });
 
-        $('input[name="packagingType"]').change(function() {
-            if ($('#byCarton').is(':checked')) {
-                $('#quantityBox').slideDown();
-            } else {
-                $('#quantityBox').slideUp();
-            }
-            console.log($(this).val(), "jj")
-            if ($(this).val() == 'byCarton') {
+        // $('input[name="packagingType"]').change(function() {
+        //     if ($('#byCarton').is(':checked')) {
+        //         $('#quantityBox').slideDown();
+        //     } else {
+        //         $('#quantityBox').slideUp();
+        //     }
+        //     console.log($(this).val(), "jj")
+        //     if ($(this).val() == 'byCarton') {
 
-                // $('.cartonInput').show();
-                // $('.itemBoxInput').hide();
-                // $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-                // $('.cartonCheckboxes').find('input[type="number"]').val('');
-            } else if ($(this).val() == 'byItemBox') {
-                // $('.itemBoxInput').show();
-                // $('.cartonInput').hide();
-                // $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-                // $('.itemBoxCheckboxes').find('input[type="number"]').val('');
-            }
-        });
+        //         // $('.cartonInput').show();
+        //         // $('.itemBoxInput').hide();
+        //         // $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+        //         // $('.cartonCheckboxes').find('input[type="number"]').val('');
+        //     } else if ($(this).val() == 'byItemBox') {
+        //         // $('.itemBoxInput').show();
+        //         // $('.cartonInput').hide();
+        //         // $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+        //         // $('.itemBoxCheckboxes').find('input[type="number"]').val('');
+        //     }
+        // });
 
         function customerList() {
             let url = `{{ route('customers.list') }}`;
@@ -297,7 +297,8 @@
 
                     if (response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
-                            batchSelect.append('<option value="' + batch.batch_no +
+                            console.log(batch.batch_id,"jjjaaj")
+                            batchSelect.append('<option value="' + batch.batch_id +
                                 '">' + batch.batch_no + '</option>');
                         });
                     } else {
@@ -318,7 +319,7 @@
 
         $('.batchNoSelect').on('change', function() {
             var selectedBatch = $(this).val();
-
+              console.log(selectedBatch,"selectedBatch")
             if (selectedBatch) {
                 loadBatchData(selectedBatch);
             } else {
@@ -487,7 +488,7 @@
                                             <input class="form-check-input packaging-type byCarton"  type="checkbox"
                                                 id="byCarton_${rowIndex}" name="packagingType_${rowIndex}" value="byCarton">
                                             <label class="form-check-label" for="byCarton_${rowIndex}">
-                                                By Carton
+                                                Sale
                                             </label>
                                             <div id="quantityBox_${rowIndex}"  style="display: none; width:20%; margin-top: 10px;">
                                                 <label class="form-label" for="quantity_${rowIndex}">Enter Number of Carton</label>
@@ -537,14 +538,14 @@
                 }
             });
 
-            $(document).on('change', `#byCarton_${rowIndex}`, function() {
-                const quantityBox = $(`#quantityBox_${rowIndex}`);
-                if ($(this).is(':checked')) {
-                    quantityBox.show();
-                } else {
-                    quantityBox.hide();
-                }
-            });
+            // $(document).on('change', `#byCarton_${rowIndex}`, function() {
+            //     const quantityBox = $(`#quantityBox_${rowIndex}`);
+            //     if ($(this).is(':checked')) {
+            //         quantityBox.show();
+            //     } else {
+            //         quantityBox.hide();
+            //     }
+            // });
         });
 
         function loadBatchData(batchId, $row) {
@@ -664,8 +665,9 @@
 
                     if (response.batches && response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
+                            console.log(batch,"abcbatch")
                             $batchSelect.append(
-                                `<option value="${batch.batch_no}">${batch.batch_no} (${batch.valid_to})</option>`
+                                `<option value="${batch.batch_id}">${batch.batch_no} (${batch.valid_to})</option>`
                             );
                         });
                     } else {

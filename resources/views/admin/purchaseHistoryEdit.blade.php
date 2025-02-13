@@ -79,6 +79,8 @@
                     <div class="row rowTemplate border p-3 rounded mb-2">
                         <div class="col-md-3 mb-2">
                             <label for="batchNo" class="form-label">Batch No.</label>
+                            <input type="text" class="form-control batchId" id="batchId"
+                                placeholder="Enter Batch No.">
                             <input type="text" class="form-control batchNo" id="batchNo"
                                 placeholder="Enter Batch No.">
                         </div>
@@ -236,6 +238,7 @@
                 <div class="row rowTemplate border p-3 rounded mb-2">
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Batch No.</label>
+                        <input type="hidden" class="form-control batchId" value="${batch.batch_id}" >
                         <input type="text" class="form-control batchNo" value="${batch.batch_number}" >
                     </div>
                     <div class="col-md-4 mb-2">
@@ -377,6 +380,7 @@
                         brand_id: $('#brandId').val(),
                         unit: $('#unit').val(),
                         invoice: $('#invoice').val(),
+                        batch_id: $(this).find('.batchId').val(),
                         batch_no: $(this).find('.batchNo').val(),
                         manufacturing_date: $(this).find('.manufacturingDate').val(),
                         expiry_date: $(this).find('.expiryDate').val(),
@@ -471,6 +475,7 @@
             <div class="row rowTemplate border p-3 rounded mb-2">
                 <div class="col-md-4 mb-2">
                     <label for="batchNo" class="form-label">Batch No.</label>
+                    <input type="hidden" class="form-control batchId" placeholder="Enter Batch No.">
                     <input type="text" class="form-control batchNo" placeholder="Enter Batch No.">
                 </div>
                 <div class="col-md-4 mb-2">

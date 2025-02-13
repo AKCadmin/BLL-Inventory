@@ -421,24 +421,22 @@ class HistoryController extends Controller
                 ->select(
                     'batches.product_id',
                     'batches.unit',
-                    // DB::raw('SUM(batches.quantity - COALESCE(sc.total_provided, 0)) as total_quantity'),
+                    'batches.no_of_units',
                     DB::raw('SUM(batches.quantity) as total_quantity'),
                     DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
-                    DB::raw('SUM(batches.buy_price) as total_buy_price'),
+                     DB::raw('SUM(batches.buy_price) as total_buy_price'),
                     DB::raw('MAX(batches.created_at) as first_created_at'),
                     DB::raw('MAX(batches.invoice_no) as invoice'),
                     DB::raw('MAX(batches.expiry_date) as expiry_date')
                 )
                 ->whereDate('batches.created_at', $selectedDate)
-                ->groupBy('batches.product_id', 'batches.unit')
+                ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
                 ->orderBy('product_id', 'ASC');
     
             $stocksList = $query->get();
-    
+    // dd($stocksList);
             if ($productId) {
-                $stocksList = $stocksList->filter(function ($stock) use ($productId) {
-                    return $stock->product_id == $productId;
-                });
+                $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
             }
     
             if ($brandId) {
@@ -448,22 +446,26 @@ class HistoryController extends Controller
                 });
             }
     
-            $groupedData = $stocksList->groupBy('product_id')->map(function ($stocks, $productId) use ($products) {
-                $product = $products->firstWhere('id', $productId);
-                return [
-                    'product_id' => $productId,
-                    'product_name' => $product->name ?? null,
-                    'total_buy_price' => $stocks[0]->total_buy_price,
-                    'brand_name' => $product->brand->name ?? null,
-                    'unit' => $product->unit,
-                    'total_quantity' => $stocks[0]->total_quantity,
-                    'total_no_of_unit' => $stocks[0]->total_no_of_unit,
-                    'status' => $product->status ?? null,
-                    'expiry_date' => $stocks[0]->expiry_date ?? null,
-                    'created_at' => $stocks[0]->first_created_at ?? null,
-                    'invoice' => $stocks[0]->invoice ?? null,
-                ];
+            $groupedData = $stocksList->groupBy(['product_id'])->map(function ($stocks, $productId) use ($products) {
+                return $stocks->map(function ($stock) use ($products, $productId) {
+                    $product = $products->firstWhere('id', $productId);
+                    return [
+                        'product_id' => $productId,
+                        'product_name' => $product->name ?? null,
+                         'total_buy_price' => $stock->total_buy_price ?? null,
+                        'brand_name' => $product->brand->name ?? null,
+                        'unit' => $product->unit,
+                        'no_of_units' => $stock->no_of_units,
+                        'total_quantity' => $stock->total_quantity,
+                        'total_no_of_unit' => $stock->total_no_of_unit,
+                        'status' => $product->status ?? null,
+                        'expiry_date' => $stock->expiry_date ?? null,
+                        'created_at' => $stock->first_created_at ?? null,
+                        'invoice' => $stock->invoice ?? null,
+                    ];
+                });
             });
+    
     // dd($groupedData);
             return response()->json(['data' => $groupedData]);
 
@@ -472,8 +474,9 @@ class HistoryController extends Controller
         }
     }
 
-    public function purchaseHistoryShow($id,$encodedCreatedAt)
+    public function purchaseHistoryShow($id,$encodedCreatedAt,$noOfcartoon)
     {
+        
         $product = Product::where('id', $id)->first();
         $brand = Brand::where('id', $product->brand_id)->first();
         $createdAt = base64_decode($encodedCreatedAt);
@@ -502,6 +505,7 @@ class HistoryController extends Controller
                 'batches.invoice_no',
             )
             ->where('product_id', $id)
+            ->where(['batches.no_of_units' => $noOfcartoon])
             ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
             ->get();
 
@@ -745,12 +749,12 @@ class HistoryController extends Controller
     // }
 
 
-    public function detailHistory(Request $request, $productId, $createdAt)
+    public function detailHistory(Request $request, $productId, $encodedCreatedAt,$noOfcartoon)
     {
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
-        // $createdAt = base64_decode($encodedCreatedAt);
-        // dd($encodedCreatedAt);
+         $createdAt = base64_decode($encodedCreatedAt);
+        //  dd($noOfcartoon);
 
         $databaseName = Session::get('db_name');
 
@@ -791,6 +795,7 @@ class HistoryController extends Controller
             DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
         )
         // ->where(['batches.invoice_no'=> $invoice])
+        ->where(['batches.no_of_units' => $noOfcartoon])
         ->where(['batches.product_id'=> $productId])
         ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
         ->groupBy(
@@ -855,6 +860,91 @@ class HistoryController extends Controller
         //     return response()->json(['error' => $e->getMessage()], 500);
         // }
 
+        // try {
+        //     if(auth()->user()->role == 1){
+        //         $organization = Organization::where('id', $request->company)->first();
+        //     }else{
+        //         $organization = Organization::where('name', $request->company)->first();         
+        //     }
+        //     $selectedDate = $request->selectedDate;
+        //     $productId = $request->productId;
+        //     $brandId = $request->brandId;
+    
+        //     $products = Product::with('brand')->get();
+    
+        //     config(['database.connections.pgsql.database' => $organization->name]);
+        //     DB::purge('pgsql');
+        //     DB::connection('pgsql')->getPdo();
+    
+        //     $sellCounterSubquery = DB::table('sell_counter')
+        //         ->select('batch_id','order_id','status','deleted_at', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
+        //         ->whereDate('created_at', $selectedDate)
+        //         ->where('sell_counter.deleted_at',null)
+        //         ->groupBy('batch_id','order_id','deleted_at','status');
+    
+        //     $query = DB::table('batches')
+        //         ->JoinSub($sellCounterSubquery, 'sc', function ($join) {
+        //             $join->on('batches.id', '=', 'sc.batch_id');
+        //         })
+        //         ->select(
+        //             'batches.product_id',
+        //             'batches.unit',
+        //             'sc.order_id',
+        //             // 'sc.status',
+        //             // DB::raw('SUM(batches.quantity - COALESCE(sc.total_provided, 0)) as total_quantity'),
+        //             DB::raw('SUM(batches.quantity) as total_quantity'),
+        //             DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
+        //             DB::raw('SUM(batches.buy_price) as total_buy_price'),
+        //             DB::raw('MAX(batches.created_at) as first_created_at'),
+        //             DB::raw('MAX(batches.invoice_no) as invoice'),
+        //             DB::raw('MAX(batches.expiry_date) as expiry_date'),
+        //             // DB::raw('MAX(sc.status) as status'),
+                    
+        //         )
+        //         // ->whereDate('batches.created_at', $selectedDate)
+        //         ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id')
+        //         ->orderBy('product_id', 'ASC');
+    
+        //     $stocksList = $query->get();
+
+        //     if ($productId) {
+        //         $stocksList = $stocksList->filter(function ($stock) use ($productId) {
+        //             return $stock->product_id == $productId;
+        //         });
+        //     }
+    
+        //     if ($brandId) {
+        //         $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
+        //             $product = $products->firstWhere('id', $stock->product_id);
+        //             return $product && $product->brand_id == $brandId;
+        //         });
+        //     }
+    
+        //     $groupedData = $stocksList->groupBy('product_id','order_id')->map(function ($stocks, $productId) use ($products) {
+        //         $product = $products->firstWhere('id', $productId);
+        //         return [
+        //             'product_id' => $productId,
+        //             'product_name' => $product->name ?? null,
+        //             'total_buy_price' => $stocks[0]->total_buy_price,
+        //             'brand_name' => $product->brand->name ?? null,
+        //             'unit' => $product->unit ?? null,
+        //             'total_quantity' => $stocks[0]->total_quantity,
+        //             'total_no_of_unit' => $stocks[0]->total_no_of_unit,
+        //             'status' => $product->status ?? null,
+        //             'expiry_date' => $stocks[0]->expiry_date ?? null,
+        //             'created_at' => $stocks[0]->first_created_at ?? null,
+        //             'invoice' => $stocks[0]->invoice ?? null,
+        //             'order_id' => $stocks[0]->order_id ?? null, 
+        //             // 'status' => $stocks[0]->status ?? null, 
+        //         ];
+        //     });
+    
+        //     // dd($groupedData);
+        //     return response()->json(['data' => $groupedData]);
+        // } catch (\Throwable $e) {
+        //     return response()->json(['error' => $e->getMessage()], 500);
+        // }
+
         try {
             if(auth()->user()->role == 1){
                 $organization = Organization::where('id', $request->company)->first();
@@ -864,19 +954,19 @@ class HistoryController extends Controller
             $selectedDate = $request->selectedDate;
             $productId = $request->productId;
             $brandId = $request->brandId;
-    
+        
             $products = Product::with('brand')->get();
-    
+        
             config(['database.connections.pgsql.database' => $organization->name]);
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
-    
+        
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id','order_id','deleted_at', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
+                ->select('batch_id','order_id','status','deleted_at', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
                 ->whereDate('created_at', $selectedDate)
                 ->where('sell_counter.deleted_at',null)
-                ->groupBy('batch_id','order_id','deleted_at');
-    
+                ->groupBy('batch_id','order_id','deleted_at','status');
+        
             $query = DB::table('batches')
                 ->JoinSub($sellCounterSubquery, 'sc', function ($join) {
                     $join->on('batches.id', '=', 'sc.batch_id');
@@ -885,52 +975,52 @@ class HistoryController extends Controller
                     'batches.product_id',
                     'batches.unit',
                     'sc.order_id',
-                    // DB::raw('SUM(batches.quantity - COALESCE(sc.total_provided, 0)) as total_quantity'),
+                    'sc.status as approve_status',
                     DB::raw('SUM(batches.quantity) as total_quantity'),
                     DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
                     DB::raw('SUM(batches.buy_price) as total_buy_price'),
                     DB::raw('MAX(batches.created_at) as first_created_at'),
                     DB::raw('MAX(batches.invoice_no) as invoice'),
-                    DB::raw('MAX(batches.expiry_date) as expiry_date')
+                    DB::raw('MAX(batches.expiry_date) as expiry_date'),
                 )
-                // ->whereDate('batches.created_at', $selectedDate)
-                ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id')
+                ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id','sc.status')
                 ->orderBy('product_id', 'ASC');
-    
+        
             $stocksList = $query->get();
-  
+        
             if ($productId) {
                 $stocksList = $stocksList->filter(function ($stock) use ($productId) {
                     return $stock->product_id == $productId;
                 });
             }
-    
+        
             if ($brandId) {
                 $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
                     $product = $products->firstWhere('id', $stock->product_id);
                     return $product && $product->brand_id == $brandId;
                 });
             }
-    
-            $groupedData = $stocksList->groupBy('product_id')->map(function ($stocks, $productId) use ($products) {
-                $product = $products->firstWhere('id', $productId);
+        
+            // Modified this part to maintain separate entries for different order IDs
+            $groupedData = $stocksList->map(function ($stock) use ($products) {
+                $product = $products->firstWhere('id', $stock->product_id);
                 return [
-                    'product_id' => $productId,
+                    'product_id' => $stock->product_id,
                     'product_name' => $product->name ?? null,
-                    'total_buy_price' => $stocks[0]->total_buy_price,
+                    'total_buy_price' => $stock->total_buy_price,
                     'brand_name' => $product->brand->name ?? null,
-                    'unit' => $product->unit,
-                    'total_quantity' => $stocks[0]->total_quantity,
-                    'total_no_of_unit' => $stocks[0]->total_no_of_unit,
+                    'unit' => $product->unit ?? null,
+                    'total_quantity' => $stock->total_quantity,
+                    'total_no_of_unit' => $stock->total_no_of_unit,
                     'status' => $product->status ?? null,
-                    'expiry_date' => $stocks[0]->expiry_date ?? null,
-                    'created_at' => $stocks[0]->first_created_at ?? null,
-                    'invoice' => $stocks[0]->invoice ?? null,
-                    'order_id' => $stocks[0]->order_id ?? null, 
+                    'expiry_date' => $stock->expiry_date ?? null,
+                    'created_at' => $stock->first_created_at ?? null,
+                    'invoice' => $stock->invoice ?? null,
+                    'order_id' => $stock->order_id ?? null,
+                    'approve_status' => $stock->approve_status,
                 ];
             });
-    
-            // dd($groupedData);
+        
             return response()->json(['data' => $groupedData]);
         } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -957,5 +1047,86 @@ class HistoryController extends Controller
     public function sellHistoryShow(Request $request, $productId, $createdAt)
     {
 
+    }
+
+    public function saleDetailHistory(Request $request, $productId, $encodedCreatedAt, $orderId)
+    {
+       
+        $product = Product::find($productId);
+        $brand = Brand::find($product->brand_id);
+         $createdAt = base64_decode($encodedCreatedAt);
+        // dd($encodedCreatedAt);
+
+        $databaseName = Session::get('db_name');
+
+        if (!$databaseName) {
+            return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+        }
+
+        config(['database.connections.pgsql.database' => $databaseName]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
+
+        // dd($invoice);
+        $data = DB::table('batches')
+        ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
+        ->leftJoin('sell','batches.batch_number','=','sell.batch_no')
+        ->select(
+            'batches.batch_number',
+            'batches.product_id',
+            'batches.brand_id',
+            'batches.unit',
+            'batches.base_price',
+            'batches.buy_price',
+            'batches.quantity as batch_quantity',
+            'batches.no_of_units',
+            'batches.manufacturing_date',
+            'batches.invoice_no',
+            'batches.created_at',
+            'batches.expiry_date',
+            'batches.exchange_rate',
+            'batches.notes',
+            'sell_counter.price',
+            'sell_counter.customer_type',
+            'sell.retail_price',
+            'sell.wholesale_price',
+            'sell.hospital_price',
+            'sell_counter.order_id',
+            DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
+            DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
+            DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
+        )
+        // ->where(['batches.invoice_no'=> $invoice])
+        ->where(['sell_counter.order_id' => $orderId])
+        ->where(['batches.product_id'=> $productId])
+        ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
+        ->groupBy(
+            'batches.id',
+            'batches.batch_number',
+            'batches.product_id',
+            'batches.brand_id',
+            'batches.unit',
+            'batches.no_of_units',
+            'batches.base_price',
+            'batches.buy_price',
+            'batches.quantity',
+            'batches.invoice_no',
+            'batches.created_at',
+            'batches.manufacturing_date',
+            'batches.expiry_date',
+            'batches.exchange_rate',
+            'batches.notes',
+            'sell_counter.price',
+            'sell_counter.customer_type',
+            'sell.retail_price',
+            'sell.wholesale_price',
+            'sell.hospital_price',
+            'sell_counter.order_id'
+        )
+        ->get();
+
+        // dd($data);
+
+        return view('admin.purchaseHistoryDetails', compact('data','product','brand','createdAt'));
     }
 }

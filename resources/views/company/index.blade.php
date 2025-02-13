@@ -84,6 +84,7 @@
                                                 </td>
                                                 <td>{{ $brand->status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
+                                                    <a href="{{ route('brand.ledger', $brand->id) }}" class="btn btn-sm btn-info">View</a>
 
                                                     <a href="#" class="btn btn-sm btn-warning edit-brand-btn"
                                                         data-id="{{ $brand->id }}">Edit</a>

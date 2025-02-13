@@ -155,7 +155,7 @@
         var productId = "";
         var selectedDate = new Date().toISOString().split('T')[0];
         $('#datePicker').attr('max', selectedDate);
-        
+
         $('#organization-filter').change(function(e) {
             e.preventDefault();
             let companyName = $(this).val();
@@ -232,14 +232,26 @@
 
                     const data = response.data || {};
                     const table = $('#stocktable').DataTable();
-                   
+
 
                     table.clear(); // Clear existing rows
 
                     // Loop through the response data
                     for (const [key, productDetails] of Object.entries(data)) {
                         const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
-                        const editUrl = `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
+                        const editUrl =
+                            `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
+
+                        function safeBase64Encode(str) {
+                            return btoa(unescape(encodeURIComponent(str)));
+                        }
+
+                        const purchaseDetailsCreatedAt = safeBase64Encode(productDetails?.created_at
+                            .toString())
+                        const AppoveBtn = productDetails?.approve_status == true ?
+                            `<button class="btn btn-sm approve-stock-btn btn-secondary" >Approved</button>` :
+                            `<button class="btn btn-sm btn-success approve-stock-btn" 
+                        data-id="${productDetails?.order_id}">Approve</button>`;
                         const row = `
                     <tr>
                         <td>${productDetails?.product_id || "N/A"}</td>
@@ -248,11 +260,11 @@
                         <td>${productDetails?.unit || "N/A"}</td>
                         <td>${productDetails?.total_buy_price || "N/A"}</td>
                         <td>${productDetails?.total_no_of_unit || "N/A"}</td>
-                        <td>${productDetails?.total_quantity || "N/A"}</td>
+                        <td>${productDetails?.total_quantity }</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
                         
                         <td>
-                            <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${encodeURIComponent(productDetails?.created_at)}" 
+                            <a href="/sell/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails.order_id}" 
                                class="btn btn-sm btn-info" 
                                target="_blank">Details</a>
 
@@ -261,6 +273,7 @@
 
                             <button class="btn btn-sm btn-danger delete-stock-btn" 
                                     data-id="${productDetails?.product_id}">Delete</button>
+                            ${AppoveBtn}
                         </td>
                     </tr>
                 `;
@@ -287,6 +300,33 @@
             });
         }
 
+        $('#stocktable').on('click', '.approve-stock-btn', function() {
+            const order_id = $(this).data('id');
+            const button = $(this);
+
+            if (confirm("Are you sure you want to approve this item?")) {
+                $.ajax({
+                    url: "{{ route('sell.approveStock') }}", // Update with actual route
+                    method: "POST",
+                    data: {
+                        order_id: order_id,
+                        _token: "{{ csrf_token() }}" // Include CSRF token if using Laravel
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success("Stock approved successfully!");
+                            button.removeClass('btn-success').addClass('btn-secondary')
+                                .text("Approved").prop('disabled', true);
+                        } else {
+                            toastr.error("Failed to approve stock.");
+                        }
+                    },
+                    error: function() {
+                        toastr.error("Error approving stock.");
+                    }
+                });
+            }
+        });
 
 
 

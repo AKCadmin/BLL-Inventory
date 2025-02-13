@@ -26,7 +26,7 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-       // dd($request->input('retail_shop'));
+        // dd($request->input('retail_shop'));
         try {
 
             $validator = Validator::make($request->all(), [
@@ -68,11 +68,11 @@ class CustomerController extends Controller
             }
 
             $retail_shop = false;
-            if($request->input('retail_shop') == 1){
+            if ($request->input('retail_shop') == 1) {
                 $retail_shop = true;
             }
 
-            
+
 
             $saleUser = Customer::create([
                 'organization_id' => $organizationId,
@@ -109,7 +109,7 @@ class CustomerController extends Controller
 
             // Validate the incoming request
             $validator = Validator::make($request->all(), [
-               // 'organization_id' => 'required|integer',
+                // 'organization_id' => 'required|integer',
                 'name' => 'required|string|max:255',
                 'phone_number' => 'required|digits:10',
                 'address' => 'required|string|max:255',
@@ -157,11 +157,11 @@ class CustomerController extends Controller
             }
 
             $retail_shop = false;
-            if($request->input('retail_shop') == 1){
+            if ($request->input('retail_shop') == 1) {
                 $retail_shop = true;
             }
 
-           
+
             // Update the SaleUser record
             $saleUser->update([
                 'organization_id' => $organizationId,
@@ -284,11 +284,11 @@ class CustomerController extends Controller
             }
 
             if ($request->has('customerId')) {
-                $customers = Customer::where(['organization_id' => $organization->id, 'id' => $request->customerId,'retail_shop' => true])->get();
+                $customers = Customer::where(['organization_id' => $organization->id, 'id' => $request->customerId, 'retail_shop' => true])->get();
             } else {
                 $customers = Customer::select('customers.*', 'organizations.name as organizationName')
                     ->join('organizations', 'customers.organization_id', '=', 'organizations.id')
-                    ->where(['customers.organization_id' => $organization->id,'retail_shop' => true])->get();
+                    ->where(['customers.organization_id' => $organization->id, 'retail_shop' => true])->get();
                 // dd($customers);
             }
             return response()->json(['customers' => $customers]);
@@ -300,5 +300,14 @@ class CustomerController extends Controller
                 'error' => $e->getMessage(),
             ], 500); // 500 Internal Server Error
         }
+    }
+
+    public function detail(Customer $customer)
+    {
+        $transactions = Customer::where('id', $customer->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('customer.detail', compact('customer', 'transactions'));
     }
 }

@@ -181,6 +181,7 @@
                                                 <td>{{ $user->type_of_customer }}</td>
                                                 <td>{{ $user->sale_user_status ? 'Active' : 'Inactive' }}</td>
                                                 <td>
+                                                    <a href="{{ route('customers.detail', $user->id) }}" class="btn btn-sm btn-info">Detail</a>
                                                     @can('edit-customer')
                                                         <a href="#" class="btn btn-sm btn-warning edit-customer-btn"
                                                             data-id="{{ $user->id }}">Edit</a>

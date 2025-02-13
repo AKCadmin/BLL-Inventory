@@ -97,9 +97,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/user-list', [userManagement::class, 'list'])->name('users.list');
     Route::get('/purchase/history', [HistoryController::class, 'history'])->name('purchase.history');
     Route::get('/purchase/get/history', [HistoryController::class, 'getHistory'])->name('purchase.getHistory');
-    Route::get('/purchase/details/{id}/{companyName}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory');
+    Route::get('/purchase/details/{id}/{companyName}/{noOfCartoon}', [HistoryController::class, 'detailHistory'])->name('purchase.detailHistory')->can('view-purchase-history');
     Route::get('history/products/options', [HistoryController::class, 'historyProducts'])->name('purchase.historyProducts');
-    Route::get('/purchaseHistory/show/{productId}/{createdAt}', [HistoryController::class, 'purchaseHistoryShow'])->name('purchaseHistoryShow');
+    Route::get('/purchaseHistory/show/{productId}/{createdAt}/{noOfCartoon}', [HistoryController::class, 'purchaseHistoryShow'])->name('purchaseHistoryShow');
     //organizations routes
 
     //sell history routes
@@ -107,6 +107,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sell/history', [HistoryController::class, 'sellHistory'])->name('sell.history');
     Route::get('/sell/get/history', [HistoryController::class, 'getSellHistory'])->name('sell.getHistory');
     Route::get('/sellHistory/show/{productId}/{createdAt}', [HistoryController::class, 'sellHistoryShow'])->name('sellHistoryShow');
+    Route::get('/sell/details/{id}/{companyName}/{orderId}', [HistoryController::class, 'saleDetailHistory'])->name('sell.detailHistory');
+
 
 
     Route::resource('organization', OrganizationController::class);
@@ -121,6 +123,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('brand/edit/{company}', [BrandController::class, 'edit'])->name('brand.editbrand');
     Route::Post('brand/{brand}', [BrandController::class, 'destroy']);
     Route::get('brand/data', [BrandController::class, 'brandData'])->name('brand.getData');
+    Route::get('brand/ledger/{id}', [BrandController::class, 'showLedger'])->name('brand.ledger');
 
     //company routes
     Route::resource('company', CompanyController::class);
@@ -143,7 +146,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('stockList/byproduct', [StockController::class, 'listByProduct'])->name('stocks.byproduct');
     route::view('stockEdit', 'admin.edit')->name('stock.editStock');
     route::post('/stock/update/batch', [StockController::class, 'update'])->name('stock.batch.update');
-    route::get('/stock/details/{id}/{date}', [StockController::class, 'stockDetails'])->name('stockDetails');
+    route::get('/stock/details/{id}/{date}/{totalUnit}', [StockController::class, 'stockDetails'])->name('stockDetails');
    
 
     // Sell Management routes
@@ -152,11 +155,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/sell/update/{sell}', [SellController::class, 'update'])->name('sell.updateSell');
     Route::get('/sell/batches/{sku}', [SellController::class, 'getSellBatchesBySku'])->name('batch.getSellBatchesBySku');
     Route::get('/batches/{sku}', [SellController::class, 'getBatchesBySku'])->name('batch.getBatchesBySku');
+    Route::post('/sell/approve', [SellController::class, 'sellApprove'])->name('sell.approveStock');
+
 
     //  Customer routes
     Route::resource('customer', CustomerController::class);
     Route::get('customers/list', [CustomerController::class,'customerList'])->name('customers.list');
     Route::get('retail/customers/list', [CustomerController::class,'retailCustomerList'])->name('retail.customers.list');
+    Route::get('/customers/{customer}/detail', [CustomerController::class, 'detail'])->name('customers.detail');
 
     // sell counter Management routes
     Route::resource('sellCounter', SellCornerController::class);
@@ -175,6 +181,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //invoice routes
     Route::resource('invoice', InvoiceController::class);
+    Route::get('/invoice/{orderId}/download', [InvoiceController::class, 'download'])->name('invoice.download');
 
     //report routes
     Route::resource('report', ReportController::class);

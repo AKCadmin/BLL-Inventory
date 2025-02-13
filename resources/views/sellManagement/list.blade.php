@@ -242,6 +242,15 @@
                         const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
                         const editUrl =
                             `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
+                        const invoiceUrl =
+                            `/invoice/${encodeURIComponent(productDetails?.order_id)}/download`;
+
+                        // Create invoice button HTML only if status is true
+                        const invoiceButton = productDetails?.approve_status ?
+                            `<button class="btn btn-sm btn-info download-invoice-btn" 
+                        data-order-id="${productDetails?.order_id}">
+                        Download Invoice
+                    </button>` : '';
                         const row = `
                     <tr>
                         <td>${productDetails?.product_id || "N/A"}</td>
@@ -250,7 +259,7 @@
                         <td>${productDetails?.unit || "N/A"}</td>
                         <td>${productDetails?.total_buy_price || "N/A"}</td>
                         <td>${productDetails?.total_no_of_unit || "N/A"}</td>
-                        <td>${productDetails?.total_quantity || "N/A"}</td>
+                        <td>${productDetails?.total_quantity}</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
                         
                         <td>
@@ -261,6 +270,7 @@
 
                             <button class="btn btn-sm btn-danger delete-stock-btn" 
                                     data-id="${productDetails?.product_id}">Delete</button>
+                             ${invoiceButton}
                         </td>
                     </tr>
                 `;
@@ -280,6 +290,13 @@
                                 window.location.href = url;
                             }
                         });
+                    $('#stocktable').off('click', '.download-invoice-btn').on('click',
+                        '.download-invoice-btn',
+                        function(event) {
+                            event.preventDefault();
+                            const orderId = $(this).data('order-id');
+                            downloadInvoice(orderId);
+                        });
                 },
                 error: function() {
                     alert("Error fetching stock data.");
@@ -288,7 +305,32 @@
         }
 
 
-
+        function downloadInvoice(orderId) {
+            $.ajax({
+                url: `/invoice/${orderId}/download`,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob' // Important for handling PDF/document downloads
+                },
+                success: function(response, status, xhr) {
+                    // Create blob link to download
+                    const blob = new Blob([response], {
+                        type: 'application/pdf'
+                    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `invoice-${orderId}.pdf`; // Set filename
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function() {
+                    alert("Error downloading invoice.");
+                }
+            });
+        }
 
 
         // Check if the table is already initialized before initializing it again

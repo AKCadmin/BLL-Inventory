@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('provided_no_of_cartons');
             $table->integer('price');
             $table->integer('order_id');
+            $table->boolean('status')->nullable();
             $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');

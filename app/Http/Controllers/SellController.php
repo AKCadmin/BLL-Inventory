@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Sell;
 use App\Models\SellHistory;
+use App\Models\SellCounter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -146,9 +148,8 @@ class SellController extends Controller
                 }
             }
 
-            
-                return view('admin.sellEdit', compact('sell', 'products', 'batches'));
-    
+
+            return view('admin.sellEdit', compact('sell', 'products', 'batches'));
         } catch (\Exception $e) {
             DB::rollBack();
             dd($e->getMessage());
@@ -372,4 +373,38 @@ class SellController extends Controller
 
         return view('admin.sellList', compact('sells'));
     }
+
+    public function sellApprove(Request $request)
+    {
+        try {
+            setDatabaseConnection();
+    
+            // Update status to true
+            $updated = SellCounter::where('order_id', $request->order_id)
+                ->update(['status' => true]);
+            $updatedInvoice = Invoice::where('order_id', $request->order_id)
+                ->update(['invoice_approved' => true]);
+    
+            if ($updated) {
+                return response()->json([
+                    'status' => 200,
+                    'success' => true,
+                    'message' => 'Stock approved successfully!',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'success' => false,
+                    'message' => 'No record found to update.',
+                ]);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+    
 }

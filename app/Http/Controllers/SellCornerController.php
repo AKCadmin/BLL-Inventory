@@ -259,9 +259,9 @@ class SellCornerController extends Controller
             '*.batchNo' => 'required|string',
             '*.unitsPerCarton' => 'required|integer|min:1',
             '*.availableQtyCarton' => 'required|integer|min:0',
-            '*.packagingType' => 'required|array',
+            // '*.packagingType' => 'required|array',
             '*.packagingType.byCarton' => 'required|boolean',
-            '*.packagingType.quantity' => 'required|integer|min:1'
+            // '*.packagingType.quantity' => 'required|integer|min:1'
         ];
     
         $messages = [
@@ -269,14 +269,15 @@ class SellCornerController extends Controller
             '*.customerType.required' => 'Customer type is required for all items',
             '*.sku.exists' => 'Invalid product SKU',
             '*.batchNo.required' => 'Batch number is required for all items',
-            '*.packagingType.quantity.min' => 'Quantity must be at least 1',
-            '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
+            // '*.packagingType.quantity.min' => 'Quantity must be at least 1',
+            // '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
         ];
     
         // Validate request
         $validator = Validator::make($request->all(), $rules, $messages);
     
         if ($validator->fails()) {
+            
             return response()->json([
                 'error' => 'Validation failed',
                 'messages' => $validator->errors()
@@ -297,9 +298,9 @@ class SellCornerController extends Controller
                 setDatabaseConnection(); // Consider moving this outside the loop if it's the same connection
 
                 $batchNumber = $item['batchNo'];
-                $batch = Batch::where('batch_number', $batchNumber)->firstOrFail();
+                $batch = Batch::where('id', $batchNumber)->firstOrFail();
 
-                $sellPrice = Sell::where('batch_no', $batchNumber)->first();
+                $sellPrice = Sell::where('batch_id', $batchNumber)->first();
                 if (!$sellPrice) {
                     throw new \Exception("Price not found for batch number: {$batchNumber}");
                 }
@@ -334,13 +335,15 @@ class SellCornerController extends Controller
                 $sellCounter->customer = $item['customer'];
                 $sellCounter->customer_type = $customerType;
                 $sellCounter->packaging_type = $item['packagingType']['byCarton']; // Check if byCarton exists
-                $sellCounter->provided_no_of_cartons = $quantity; // Use $quantity directly
+                // $sellCounter->provided_no_of_cartons = $quantity; // Use $quantity directly
+                $sellCounter->provided_no_of_cartons = $currentQuantity; // Use $quantity directly
                 $sellCounter->price = $itemTotal; // Store the individual item total, not cumulative
                 $sellCounter->save();
                 $sellCounterIds[] = $sellCounter->id;
 
 
-                $newQuantity = $currentQuantity - $quantity;
+                // $newQuantity = $currentQuantity - $quantity;
+                $newQuantity = 0;
                 $batch->quantity = $newQuantity;
                 $batch->save();
             }
@@ -359,6 +362,7 @@ class SellCornerController extends Controller
             return response()->json(['message' => 'Sale completed successfully', 'invoice_id' => $invoice->id], 200); // Return success message and invoice ID
 
         } catch (\Exception $e) {
+            // dd($e->getMessage());
             DB::rollBack();
             return response()->json([
                 'error' => $e->getMessage(),
@@ -710,6 +714,8 @@ class SellCornerController extends Controller
 
             setdatabaseConnection();
             $batches = Sell::where('sku', '=', $sku)
+            ->join('batches','sell.batch_id','=','batches.id')
+            ->where('batches.quantity','!=',0)
                 ->orderBy('valid_to', 'ASC')
                 ->get();
 
@@ -764,7 +770,7 @@ class SellCornerController extends Controller
     {
         try {
             setDatabaseConnection();
-            $batchId = Batch::where('batch_number', $batch)->first();
+            $batchId = Batch::where('id', $batch)->first();
             // $cartons = Carton::where('batch_id', $batchId->id)->where('no_of_items_inside', '!=', 0)
             //     ->get();
             $cartons = Carton::where('batch_id', $batchId->id)
@@ -900,7 +906,7 @@ class SellCornerController extends Controller
         try {
 
             setdatabaseConnection();
-            $batches = Batch::where('batch_number', '=', $batchId)
+            $batches = Batch::where('id', '=', $batchId)
                 ->first();
             // dd($batches);
             return response()->json([

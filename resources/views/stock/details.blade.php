@@ -2,59 +2,107 @@
 @include('partials.main')
 
 <head>
-    <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'Data Tables']); ?>
+    <?php includeFileWithVariables('partials/title-meta.php', ['title' => 'Stock List']); ?>
     @include('partials.link')
     @include('partials.head-css')
-
     <style>
-        .stock-details-title {
-            font-size: 2rem;
-            /* color: white; */
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 1rem;
-            text-align: center;
+        .stock-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
 
-        table {
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .item-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .stock-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            /* Add spacing between tables */
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
         }
 
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .stock-table th {
+            background: #f8f9fa;
+            padding: 12px 15px;
             text-align: left;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
         }
 
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
+        .stock-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-size: 14px;
         }
 
-        .section-header {
-            background-color: #e9ecef;
-            font-weight: bold;
+        .stock-table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
-        .total-row {
-            font-weight: bold;
-            background-color: #f9f9f9;
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 6px;
+            border: 1px solid #eee;
         }
 
-        .provisional-profit {
-            font-weight: bold;
-            background-color: #d4edda;
+        .secondary-text {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
         }
 
-        .batch-container {
-            /* Style for each batch container */
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-            padding: 10px;
+        @media (max-width: 768px) {
+            .stock-container {
+                padding: 15px;
+            }
+
+            .item-details-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
         }
     </style>
 </head>
@@ -62,97 +110,68 @@
 @include('partials.body')
 
 <div id="layout-wrapper">
-
     @include('partials.topbar')
     @include('partials.sidebar')
 
     <div class="main-content">
         <div class="page-content">
-            <div class="container-fluid">
-                <div class="stock-details-header">
-                    <h1 class="stock-details-title">Stock Details</h1>
-                    <h3>Supplier Name: {{ $brand->name }}</h3>
-                    <h3>Product Name: {{ $product->name }}</h3>
-                    <h3>Created At: {{ \Carbon\Carbon::parse($createdAt)->format('d M Y') }}</h3>
-                    <h3>Invoice No: {{$data[0]->invoice_no}}</h3>
-                </div>
-                <div class="row">
-
-                    @foreach ($data as $index => $item)
-                        <div class="col-6">
-
-                            <div class="batch-container">
-                                <table border="1" cellpadding="8" cellspacing="0">
-                                    <thead>
-                                        <tr class="section-header">
-                                            <th colspan="3">Batch Number: {{ $item->batch_number }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr style="background-color: #e0ffe0; font-weight: bold;">
-                                            <td colspan="3">Purchase</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;No of Unit per cartoon</td>
-                                            <td colspan="2">{{ $item->no_of_units }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Number of cartoons</td>
-                                            <td colspan="2">{{ $item->purchase_quantity }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Base Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->base_price, 2) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Buy Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->buy_price, 2) }}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Retail Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->retail_price, 2) }}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Wholesale Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->wholesale_price, 2) }}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Hospital Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->hospital_price, 2) }}</td>
-                                        </tr>
-
-                                        <tr style="background-color: #ffe0e0; font-weight: bold;">
-                                            <td colspan="3">Sale</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Customer Type</td>
-                                            <td colspan="2">{{ $item->customer_type }}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Provided No of Cartons</td>
-                                            <td colspan="2">{{ $item->sold_cartons }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>&nbsp;&nbsp;&nbsp;Sell Price</td>
-                                            <td colspan="2">₹ {{ number_format($item->price, 2) }}</td>
-                                        </tr>
-                                        <tr style="background-color: #ada7b9; font-weight: bold;">
-                                            <td>&nbsp;&nbsp;&nbsp;Remaining Number of cartoons</td>
-                                            <td colspan="2">{{ $item->batch_quantity }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
-                    @endforeach
-
+            <div class="stock-container">
+                <h1 class="page-title">Stock Details</h1>
+                
+                <!-- Item Details Grid -->
+                <div class="item-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Item Name</span>
+                        <span class="detail-value">{{ $product->name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Unit</span>
+                        <span class="detail-value">{{ $product->unit }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Batch No.</span>
+                        <span class="detail-value">{{$data[0]->batch_number}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Expiry</span>
+                        <span class="detail-value">{{$data[0]->expiry_date}}</span>
+                    </div>
                 </div>
 
+                <!-- Stock Table -->
+                <div class="table-container">
+                    <table class="stock-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Party Name</th>
+                                <th>Unit Per Carton</th>
+                                <th>Qty In</th>
+                                <th>Qty Out</th>
+                                <th>Closing Balance</th>
+                                <th>
+                                    Stock Value
+                                    <span class="secondary-text">(Balance × Purchase Price)</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($data as $index => $item)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($item->created_at)->format('d M Y') }}</td>
+                                <td>{{ $brand->name }}</td>
+                                <td>{{ $item->no_of_units }}</td>
+                                <td>{{ $item->purchase_quantity ?? '' }}</td>
+                                <td>{{ $item->sold_cartons ?? '' }}</td>
+                                <td></td>
+                                <td></td>
+                                {{-- <td>{{ $item->batch_quantity }}</td> --}}
+                                {{-- <td>₹{{ number_format($item->batch_quantity * $item->buy_price, 2) }}</td> --}}
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -160,6 +179,5 @@
     @include('partials.right-sidebar')
     @include('partials.vendor-scripts')
     @include('partials.script')
-    </body>
-
-    </html>
+</body>
+</html>

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('valid_from')->notNullable();
             $table->date('valid_to')->nullable();
             $table->date('deleted_at')->nullable();
+            $table->integer('batch_id')->notNullable();
             $table->timestamps();
         });
     }

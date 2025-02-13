@@ -394,46 +394,55 @@
                     selectedDate: selectedDate
                 },
                 success: function(response) {
-                    console.log(response);
+
 
                     const data = response.data || {};
                     const table = $('#stocktable').DataTable();
                     table.clear(); // Clear existing rows
 
                     // Loop through the response data
-                    for (const [key, productDetails] of Object.entries(data)) {
-                        const created_at = productDetails?.created_at?.split(" ")[0] || "N/A";
+                    for (const [key, productArray] of Object.entries(data)) {
+                        if (Array.isArray(productArray)) {
+                            productArray.forEach((productDetails) => {
+                              
+                                const created_at = productDetails?.created_at?.split(" ")[
+                                    0] || "N/A";
+                                const editUrl =
+                                    `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
 
-                        function safeBase64Encode(str) {
-                            return btoa(unescape(encodeURIComponent(str)));
-                        }
+                                function safeBase64Encode(str) {
+                                    return btoa(unescape(encodeURIComponent(str)));
+                                }
 
-                        const purchaseDetailsCreatedAt = safeBase64Encode(productDetails?.created_at
-                            .toString())
-                        const row = `
-                    <tr>
-                        <td>${productDetails?.product_id || "N/A"}</td>
-                        <td>${productDetails?.brand_name || "N/A"}</td>
-                        <td>${productDetails?.product_name || "N/A"}</td>
-                        <td>${productDetails?.unit || "N/A"}</td>
-                        <td>${productDetails?.total_buy_price || "N/A"}</td>
-                        <td>${productDetails?.total_no_of_unit || "N/A"}</td>
-                        <td>${productDetails?.total_quantity || "N/A"}</td>
-                        <td>${productDetails?.invoice || "N/A"}</td>
-                        
+                                const purchaseDetailsCreatedAt = safeBase64Encode(
+                                    productDetails?.created_at.toString());
+                                const row = `
+                <tr>
+                    <td>${productDetails?.product_id || "N/A"}</td>
+                    <td>${productDetails?.brand_name || "N/A"}</td>
+                    <td>${productDetails?.product_name || "N/A"}</td>
+                    <td>${productDetails?.unit || "N/A"}</td>
+                    <td>${productDetails?.total_buy_price || "N/A"}</td>
+                    <td>${productDetails?.total_no_of_unit || "N/A"}</td>
+                    <td>${productDetails?.total_quantity}</td>
+                    <td>${productDetails?.invoice || "N/A"}</td>
+                    
                         <td>
-                            <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}" 
+                            <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails?.no_of_units}" 
                                class="btn btn-sm btn-info" 
                                target="_blank">Details</a>
-                            <a href="/purchaseHistory/show/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}" 
+                            <a href="/purchaseHistory/show/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails?.no_of_units}" 
                                class="btn btn-sm btn-warning" target="_blank">Edit</a>
                             <button class="btn btn-sm btn-danger delete-stock-btn" 
                                     data-id="${productDetails?.product_id}">Delete</button>
                         </td>
-                    </tr>
-                `;
-                        table.row.add($(row)); // Add the row to DataTable
+                </tr>
+            `;
+                                table.row.add($(row));
+                            });
+                        }
                     }
+
 
                     table.draw(); // Redraw the table
 
