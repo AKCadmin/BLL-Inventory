@@ -163,9 +163,9 @@
                                                             Payment Made
                                                         @endif
                                                     </td>
-                                                    <td>{{ $transaction->amount_debit }}</td>
                                                     <td>{{ $transaction->credit_limit }}</td>
-                                                    <td>{{ $transaction->credit_limit }}</td>
+                                                    <td>{{ $transaction->amount_credit }}</td>
+                                                    <td>{{ (int)$transaction->credit_limit - (int)$transaction->amount_credit}}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

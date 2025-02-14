@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Batch;
 use App\Models\Carton;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Sell;
 use App\Models\SellCarton;
 use App\Models\SellCounter;
+use App\Models\CustomerTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -61,7 +63,7 @@ class SellCornerController extends Controller
 
     public function store(Request $request)
     {
-        
+
         // dd($request->all());
         if (auth()->user()->cannot('add-sell-counter')) {
             abort(403);
@@ -80,7 +82,7 @@ class SellCornerController extends Controller
             '*.packagingType.byCarton' => 'required|boolean',
             // '*.packagingType.quantity' => 'required|integer|min:1'
         ];
-    
+
         $messages = [
             '*.customer.required' => 'Customer is required for all items',
             '*.customerType.required' => 'Customer type is required for all items',
@@ -89,12 +91,12 @@ class SellCornerController extends Controller
             // '*.packagingType.quantity.min' => 'Quantity must be at least 1',
             // '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
         ];
-    
+
         // Validate request
         $validator = Validator::make($request->all(), $rules, $messages);
-    
+
         if ($validator->fails()) {
-            
+
             return response()->json([
                 'error' => 'Validation failed',
                 'messages' => $validator->errors()
@@ -135,7 +137,7 @@ class SellCornerController extends Controller
                     default => throw new \Exception("Invalid customer type: {$customerType}")
                 };
 
-                $quantity = $item['packagingType']['quantity'] ?? 0;
+                $quantity = $item['availableQtyCarton'] ?? 0;
                 $itemTotal = $quantity * $price;
                 $totalAmount += $itemTotal;
 
@@ -156,6 +158,40 @@ class SellCornerController extends Controller
                 $newQuantity = 0;
                 $batch->quantity = $newQuantity;
                 $batch->save();
+
+                // Fetch customer
+                // Fetch customer
+                $customer = Customer::where('id', $item['customer'])->first();
+
+                if (!$customer) {
+                    throw new \Exception("Customer not found: {$item['customer']}");
+                }
+
+                // Calculate the cost for the current item
+                $itemTotal = $quantity * $price;
+
+                // Ensure the customer has enough credit for this item
+                if ($customer->credit_limit < $itemTotal) {
+                    throw new \Exception("Insufficient credit limit for customer: {$item['customer']}");
+                }
+
+                // Store the previous credit limit
+                $previousCreditLimit = $customer->credit_limit;
+
+                // Deduct only this item's total from the customer's credit limit
+                $customer->credit_limit -= $itemTotal;
+                $customer->save();
+
+                // Log the transaction
+                CustomerTransaction::create([
+                    'customer_id' => $customer->id,
+                    'order_id' => $orderId,
+                    'amount' => -$itemTotal, // Negative because it's a deduction
+                    'transaction_type' => 'purchase',
+                    'previous_credit_limit' => $previousCreditLimit,
+                    'new_credit_limit' => $customer->credit_limit,
+                    'description' => "Purchased {$quantity} cartons of Product ID {$item['sku']}"
+                ]);
             }
 
             $invoice = new Invoice();
@@ -166,6 +202,7 @@ class SellCornerController extends Controller
             $invoice->order_id = $orderId;
             $invoice->invoice_approved = false;
             $invoice->save();
+
 
             DB::commit();
 
@@ -216,7 +253,7 @@ class SellCornerController extends Controller
         $sellCounterItems = DB::table('sell_counter')
             ->where('order_id', $orderId)
             ->join('batches', 'sell_counter.batch_id', '=', 'batches.id')
-            ->where('sell_counter.deleted_at',null)
+            ->where('sell_counter.deleted_at', null)
             // ->join('products', 'sell_counter.product_id', '=', 'products.id')
             ->select(
                 'sell_counter.*',
@@ -248,7 +285,7 @@ class SellCornerController extends Controller
         }
         // dd($responseData);
 
-        return view('admin.sellCounterEdit', ['responseData' => $responseData],['orderId'=>$orderId]);
+        return view('admin.sellCounterEdit', ['responseData' => $responseData], ['orderId' => $orderId]);
     }
 
     /**
@@ -257,7 +294,7 @@ class SellCornerController extends Controller
 
     public function update(Request $request, $orderId)
     {
-  
+
         if (auth()->user()->cannot('edit-sell-counter')) {
             abort(403);
         }
@@ -382,8 +419,8 @@ class SellCornerController extends Controller
 
             setdatabaseConnection();
             $batches = Sell::where('sku', '=', $sku)
-            ->join('batches','sell.batch_id','=','batches.id')
-            ->where('batches.quantity','!=',0)
+                ->join('batches', 'sell.batch_id', '=', 'batches.id')
+                ->where('batches.quantity', '!=', 0)
                 ->orderBy('valid_to', 'ASC')
                 ->get();
 
@@ -414,7 +451,7 @@ class SellCornerController extends Controller
             $productsList = Product::all();
             setDatabaseConnection();
             $sells = Sell::with('product')->get()->unique('sku');
-        
+
             return response()->json(['products' => $sells]);
         } catch (\Exception $e) {
             return response()->json([
