@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->foreignId('order_id')->nullable();
-            $table->decimal('amount', 10, 2);
-            $table->enum('transaction_type', ['purchase', 'payment', 'refund', 'adjustment']);
-            $table->decimal('previous_credit_limit', 10, 2);
-            $table->decimal('new_credit_limit', 10, 2);
-            $table->text('description')->nullable();
-            $table->timestamps();
-        });        
+        if (!Schema::hasTable('customer_transactions')) {
+            Schema::create('customer_transactions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+                $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('set null');
+                $table->decimal('amount', 10, 2);
+                $table->string('transaction_type')->check("transaction_type IN ('purchase', 'payment', 'refund', 'adjustment')");
+                $table->decimal('previous_credit_limit', 10, 2);
+                $table->decimal('new_credit_limit', 10, 2);
+                $table->text('description')->nullable();
+                $table->timestamps();
+            });
+        }        
     }
 
     /**
