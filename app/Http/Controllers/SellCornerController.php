@@ -11,6 +11,7 @@ use App\Models\Sell;
 use App\Models\SellCarton;
 use App\Models\SellCounter;
 use App\Models\CustomerTransaction;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -51,10 +52,11 @@ class SellCornerController extends Controller
      */
     public function create()
     {
+        $organizations = Organization::orderBy('id', 'desc')->get();
         if (auth()->user()->cannot('view-sell-counter')) {
             abort(403);
         }
-        return view('admin.sellCounter');
+        return view('admin.sellCounter', compact('organizations'));
     }
 
     /**
@@ -67,6 +69,12 @@ class SellCornerController extends Controller
         // dd($request->all());
         if (auth()->user()->cannot('add-sell-counter')) {
             abort(403);
+        }
+
+        if ($request->has('organizationName')) {
+            $databaseName = $request->organizationName;
+        } else {
+            $databaseName = Session::get('db_name');
         }
 
         $rules = [
@@ -114,7 +122,12 @@ class SellCornerController extends Controller
 
             foreach ($data as $item) {
                 $product = Product::findOrFail($item['sku']); // Use findOrFail for brevity
-                setDatabaseConnection(); // Consider moving this outside the loop if it's the same connection
+                // setDatabaseConnection(); // Consider moving this outside the loop if it's the same connection
+
+                // Set the primary database connection
+                config(['database.connections.pgsql.database' => $databaseName]);
+                DB::purge('pgsql');
+                DB::connection('pgsql')->getPdo();
 
                 $batchNumber = $item['batchNo'];
                 $batch = Batch::where('id', $batchNumber)->firstOrFail();

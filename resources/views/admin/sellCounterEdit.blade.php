@@ -1340,7 +1340,7 @@
                 const result = await response.json();
                 toastr.success("Form submitted successfully!");
                 console.log(result);
-                location.reload();
+                window.location.href = "{{ route('sellCounter.index') }}";
             } else {
                 const error = await response.json();
                 toastr.error(

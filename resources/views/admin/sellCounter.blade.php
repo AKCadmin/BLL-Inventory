@@ -43,8 +43,22 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if(auth()->user()->role == 1)
+                                <div class="col-md-6">
+                                <label for="autoSizingSelect">Select Organization</label>
+                                
+                                    <select id="organizationName" name="organizationName" class="form-control custom-select">
+                                        <option value="">Select Organization</option>
+                                        @foreach ($organizations as $organization)
+                                            <option value="{{ $organization->name }}">{{ str_replace('_', ' ', $organization->name) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @else
                                 <div class="col-md-6">
                                 </div>
+                                @endif
 
                                 <div class="col-md-6">
 
@@ -157,6 +171,7 @@
 <script src="assets/js/customJs/productManagement.js"></script>
 <script>
     $(document).ready(function() {
+        $('#organization-filter').hide();
 
         GetSKU();
         customerList();
@@ -782,7 +797,7 @@
             if (response.ok) {          
                 toastr.success("Form submitted successfully!");
                 console.log(result);
-                location.reload();
+                window.location.href = "{{ route('sellCounter.index') }}";
             } else {
                 // Handle validation errors (422 status)
                 if (response.status === 422) {

@@ -25,7 +25,8 @@ class StockController extends Controller
     public function index()
     {
         $brands = Brand::orderBy('id', 'desc')->get();
-        return view('stock.index', compact('brands'));
+        $organizations = Organization::orderBy('id', 'desc')->get();
+        return view('stock.index', compact('brands', 'organizations'));
     }
 
     /**
@@ -43,21 +44,24 @@ class StockController extends Controller
     public function store(Request $request)
     {
 
-          
         try {
             if (auth()->user()->cannot('add-purchase')) {
                 abort(403);
             }
 
             // Get the database name for the primary connection
-            $databaseName = Session::get('db_name');
+            if ($request->has('organizationName')) {
+                $databaseName = $request->organizationName;
+            } else {
+                $databaseName = Session::get('db_name');
+            }
 
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
             }
             $productSku = $request->input('SKU');
             $product = Product::where('id', $productSku)->first();
-          
+
             // Set the primary database connection
             config(['database.connections.pgsql.database' => $databaseName]);
             DB::purge('pgsql');
@@ -93,7 +97,7 @@ class StockController extends Controller
                 $batchModel->product_id = $product->id;
                 $batchModel->brand_id = $request->brand_id;
                 $batchModel->unit = $request->unit;
-                 $batchModel->internal_purchase = $request->internal_purchase == 1 ? true : false;
+                $batchModel->internal_purchase = $request->internal_purchase == 1 ? true : false;
                 $batchModel->manufacturing_date = $batch['manufacturingDate'] ?: null;
                 $batchModel->expiry_date = $batch['expiryDate'] ?: null;
                 $batchModel->base_price = $batch['basePrice'];
@@ -102,12 +106,12 @@ class StockController extends Controller
                 $batchModel->no_of_units = $batch['noOfUnits'];
                 $batchModel->quantity = $batch['qty'];
                 $batchModel->invoice_no = $request->invoice;
-                 $batchModel->customer = $product->customer;
+                $batchModel->customer = $product->customer;
                 $batchModel->notes = $request->notes;
                 $batchModel->save();
 
                 $brand = Brand::findOrFail($request->brand_id);
-                $brand->amount_credit += $batch['buyPrice']; 
+                $brand->amount_credit += $batch['buyPrice'];
                 $brand->save();
 
                 $batchDetails = [
@@ -194,7 +198,7 @@ class StockController extends Controller
                     ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price')
                     ->orderBy('batches.id', 'DESC')
                     ->get();
-                    
+
                 return view('admin.stockList', compact('stocks', 'companies', 'brands'));
             } else {
                 $products = Product::with('brand')->get();
@@ -274,7 +278,7 @@ class StockController extends Controller
                     ->orderBy('batches.id', 'DESC')
                     ->get();
                 return view('admin.stockList', compact('stocks', 'companies', 'brands'));
-            } 
+            }
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),
@@ -291,18 +295,18 @@ class StockController extends Controller
             $selectedDate = $request->selectedDate;
             $productId = $request->productId;
             $brandId = $request->brandId;
-    
+
             $products = Product::with('brand')->get();
-    
+
             config(['database.connections.pgsql.database' => $organization->name]);
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
-    
+
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
+                ->select('batch_id', 'provided_no_of_cartons', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
                 ->whereDate('created_at', $selectedDate)
-                ->groupBy('batch_id');
-    
+                ->groupBy('batch_id', 'provided_no_of_cartons');
+
             $query = DB::table('batches')
                 ->leftJoinSub($sellCounterSubquery, 'sc', function ($join) {
                     $join->on('batches.id', '=', 'sc.batch_id');
@@ -311,6 +315,7 @@ class StockController extends Controller
                     'batches.product_id',
                     'batches.unit',
                     'batches.no_of_units',
+                    DB::raw('SUM(sc.provided_no_of_cartons) as provided_no_cartons'),
                     DB::raw('SUM(batches.quantity) as total_quantity'),
                     DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
                     // DB::raw('SUM(batches.buy_price) as total_buy_price'),
@@ -321,20 +326,20 @@ class StockController extends Controller
                 ->whereDate('batches.created_at', $selectedDate)
                 ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
                 ->orderBy('product_id', 'ASC');
-    
+
             $stocksList = $query->get();
-    
+
             if ($productId) {
                 $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
             }
-    
+
             if ($brandId) {
                 $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
                     $product = $products->firstWhere('id', $stock->product_id);
                     return $product && $product->brand_id == $brandId;
                 });
             }
-    
+
             $groupedData = $stocksList->groupBy(['product_id'])->map(function ($stocks, $productId) use ($products) {
                 return $stocks->map(function ($stock) use ($products, $productId) {
                     $product = $products->firstWhere('id', $productId);
@@ -351,17 +356,18 @@ class StockController extends Controller
                         'expiry_date' => $stock->expiry_date ?? null,
                         'created_at' => $stock->first_created_at ?? null,
                         'invoice' => $stock->invoice ?? null,
+                        'provided_no_catons' => $stock->provided_no_cartons,
                     ];
                 });
             });
-    
+
             return response()->json($groupedData);
         } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
-    
+
+
 
 
 
@@ -392,7 +398,7 @@ class StockController extends Controller
 
     public function show(string $id)
     {
-      
+
         $product = Product::where('id', $id)->first();
         $brand = Brand::where('id', $product->brand_id)->first();
         // $organization = Organization::select('id','name')->where('name',3)->first();
@@ -400,7 +406,7 @@ class StockController extends Controller
         setDatabaseConnection();
 
         $batchData = DB::table('batches')
-        ->leftjoin('sell','sell.batch_no','=','batches.batch_number')
+            ->leftjoin('sell', 'sell.batch_no', '=', 'batches.batch_number')
             ->select(
                 'sell.*',
                 'batches.id as batch_id',
@@ -485,7 +491,7 @@ class StockController extends Controller
 
     public function update(Request $request)
     {
-       
+
         try {
 
             setDatabaseConnection();
@@ -660,12 +666,12 @@ class StockController extends Controller
         }
     }
 
-    public function stockDetails(Request $request, $productId,$encodedCreatedAt,$totalNoOfUnits)
+    public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits)
     {
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-// dd($totalNoOfUnits);
+        // dd($totalNoOfUnits);
         $databaseName = Session::get('db_name');
 
         if (!$databaseName) {
@@ -678,56 +684,56 @@ class StockController extends Controller
 
         // dd($invoice);
         $data = DB::table('batches')
-        ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
-        ->leftJoin('sell','batches.batch_number','=','sell.batch_no')
-        ->select(
-            'batches.batch_number',
-            'batches.product_id',
-            'batches.brand_id',
-            'batches.unit',
-            'batches.base_price',
-            'batches.buy_price',
-            'batches.quantity as batch_quantity',
-            'batches.no_of_units',
-            'batches.invoice_no',
-            'batches.created_at',
-            'batches.expiry_date',
-            'sell_counter.price',
-            'sell_counter.customer_type',
-            'sell.retail_price',
-            'sell.wholesale_price',
-            'sell.hospital_price',
-            DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
-            DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
-            DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
-        )
-        // ->where(['batches.invoice_no'=> $invoice])
-        ->where(['batches.product_id'=> $productId])
-        ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
-        ->where(['batches.no_of_units' => $totalNoOfUnits])
-        ->groupBy(
-            'batches.id',
-            'batches.batch_number',
-            'batches.product_id',
-            'batches.brand_id',
-            'batches.unit',
-            'batches.no_of_units',
-            'batches.base_price',
-            'batches.buy_price',
-            'batches.quantity',
-            'batches.invoice_no',
-            'batches.created_at',
-            'batches.expiry_date',
-            'sell_counter.price',
-            'sell_counter.customer_type',
-            'sell.retail_price',
-            'sell.wholesale_price',
-            'sell.hospital_price',
-        )
-        ->get();
+            ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
+            ->leftJoin('sell', 'batches.batch_number', '=', 'sell.batch_no')
+            ->select(
+                'batches.batch_number',
+                'batches.product_id',
+                'batches.brand_id',
+                'batches.unit',
+                'batches.base_price',
+                'batches.buy_price',
+                'batches.quantity as batch_quantity',
+                'batches.no_of_units',
+                'batches.invoice_no',
+                'batches.created_at',
+                'batches.expiry_date',
+                'sell_counter.price',
+                'sell_counter.customer_type',
+                'sell.retail_price',
+                'sell.wholesale_price',
+                'sell.hospital_price',
+                DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
+                DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
+                DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
+            )
+            // ->where(['batches.invoice_no'=> $invoice])
+            ->where(['batches.product_id' => $productId])
+            ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
+            ->where(['batches.no_of_units' => $totalNoOfUnits])
+            ->groupBy(
+                'batches.id',
+                'batches.batch_number',
+                'batches.product_id',
+                'batches.brand_id',
+                'batches.unit',
+                'batches.no_of_units',
+                'batches.base_price',
+                'batches.buy_price',
+                'batches.quantity',
+                'batches.invoice_no',
+                'batches.created_at',
+                'batches.expiry_date',
+                'sell_counter.price',
+                'sell_counter.customer_type',
+                'sell.retail_price',
+                'sell.wholesale_price',
+                'sell.hospital_price',
+            )
+            ->get();
 
         // dd($data);
 
-        return view('stock.details', compact('data','product','brand','createdAt'));
+        return view('stock.details', compact('data', 'product', 'brand', 'createdAt'));
     }
 }

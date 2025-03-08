@@ -252,6 +252,17 @@
                             `<button class="btn btn-sm approve-stock-btn btn-secondary" >Approved</button>` :
                             `<button class="btn btn-sm btn-success approve-stock-btn" 
                         data-id="${productDetails?.order_id}">Approve</button>`;
+
+                        let actionButtons = `
+    <a href="/sell/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails.order_id}" 
+       class="btn btn-sm btn-info" 
+       target="_blank">Details</a>`;
+
+                        if (!productDetails?.approve_status) {
+    actionButtons += `
+        <a href="${editUrl}" class="btn btn-sm btn-warning" target="_blank">Edit</a>
+        <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${productDetails?.product_id}">Delete</button>`;
+}
                         const row = `
                     <tr>
                         <td>${productDetails?.product_id || "N/A"}</td>
@@ -263,18 +274,7 @@
                         <td>${productDetails?.previous_total_no_of_quantity }</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
                         
-                        <td>
-                            <a href="/sell/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails.order_id}" 
-                               class="btn btn-sm btn-info" 
-                               target="_blank">Details</a>
-
-                           <a href="${editUrl}" 
-                            class="btn btn-sm btn-warning" target="_blank">Edit</a>
-
-                            <button class="btn btn-sm btn-danger delete-stock-btn" 
-                                    data-id="${productDetails?.product_id}">Delete</button>
-                            ${AppoveBtn}
-                        </td>
+                        <td>${actionButtons} ${AppoveBtn}</td>
                     </tr>
                 `;
                         table.row.add($(row)); // Add the row to DataTable

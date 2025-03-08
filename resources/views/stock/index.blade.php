@@ -51,6 +51,19 @@
                         @csrf
                         <div class="row align-items-center">
 
+                            @if(auth()->user()->role == 1)
+                            <div class="col-md-6 mb-3">
+                            <label for="autoSizingSelect">Select Organization</label>
+                            
+                                <select id="organizationName" name="organizationName" class="form-control custom-select">
+                                    <option value="">Select Organization</option>
+                                    @foreach ($organizations as $organization)
+                                        <option value="{{ $organization->name }}">{{ str_replace('_', ' ', $organization->name) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
                             <div class="col-md-6 mb-3">
                                 <label for="autoSizingSelect">Select Supplier</label>
                                 <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">
@@ -194,7 +207,7 @@
 <script src="assets/js/customJs/userManagement.js"></script>
 <Script>
     $(document).ready(function() {
-        $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
+        $('#organization-filter').hide();
         $('.basePrice, .exchangeRate, .buyPrice, .noOfCartons, .missingItems, .itemsInside', ).on('input',
             function() {
                 $(this).val($(this).val().replace(/[^0-9.]/g, ''));

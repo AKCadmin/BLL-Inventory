@@ -163,10 +163,10 @@
                                 <td>{{ $item->no_of_units }}</td>
                                 <td>{{ $item->purchase_quantity ?? '' }}</td>
                                 <td>{{ $item->sold_cartons ?? '' }}</td>
-                                <td></td>
-                                <td></td>
-                                {{-- <td>{{ $item->batch_quantity }}</td> --}}
-                                {{-- <td>₹{{ number_format($item->batch_quantity * $item->buy_price, 2) }}</td> --}}
+                                {{-- <td></td>
+                                <td></td> --}}
+                                <td>{{ $item->batch_quantity }}</td>
+                                <td>₹{{ number_format($item->batch_quantity * $item->buy_price, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>

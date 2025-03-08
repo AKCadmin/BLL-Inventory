@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerTransaction;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -304,9 +305,13 @@ class CustomerController extends Controller
 
     public function detail(Customer $customer)
     {
-        $transactions = Customer::where('id', $customer->id)
-            ->orderBy('created_at', 'desc')
+       
+
+        $transactions = CustomerTransaction::where('customer_id', $customer->id)
+            ->orderBy('created_at', 'asc')
             ->get();
+
+          
 
         return view('customer.detail', compact('customer', 'transactions'));
     }

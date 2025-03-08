@@ -275,6 +275,7 @@
                             return btoa(unescape(encodeURIComponent(str)));
                         }
 
+                        const quantity = stock.total_quantity == 0 ? stock.provided_no_catons : stock.total_quantity
                         const stockCreatedAt = safeBase64Encode(stock
                             ?.created_at
                             .toString())
@@ -288,7 +289,7 @@
                             stock.product_name,
                             stock.unit,
                             stock.total_no_of_unit,
-                            stock.total_quantity,
+                            `${quantity}`,
                             stock.status,
                             `${viewButton}`
                             // `${editButton} ${deleteButton}`

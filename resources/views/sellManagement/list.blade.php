@@ -166,10 +166,17 @@
         //     e.preventDefault();
 
         // });
-
-        var companyName = localStorage.getItem("db_name");
-        fetchHistory(companyName, null, null, selectedDate)
+        var companyName = "{{Session::get('db_name')}}";
+        fetchHistory(null, null, null, selectedDate)
         productsList(companyName)
+
+        $('#organization-filter').change(function(e) {
+            e.preventDefault();
+            let companyName = $(this).val();
+            let formattedName = companyName.toLowerCase().replace(/\s+/g, '_');
+            fetchHistory(formattedName, null, null, selectedDate)
+            productsList(formattedName)
+        });
 
         $('#brand-filter').change(function(e) {
             e.preventDefault();
@@ -277,11 +284,9 @@
                         <td>${productDetails?.total_quantity}</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
                         
-                        <td>
-                            ${editButton}
-                             ${deleteButton}
-                             ${invoiceButton}
-                        </td>
+        <td>
+            ${invoiceButton || `${editButton} ${deleteButton}`}  
+        </td>
                     </tr>
                 `;
                         table.row.add($(row)); // Add the row to DataTable

@@ -292,19 +292,29 @@ class HistoryController extends Controller
 
     public function getSellHistory(Request $request)
     {
+       
         try {
+            // dd($request->company);
+            // if(auth()->user()->role == 1 && is_string($request->company)){
+            //     return response()->json(['data' => []]);
+            // }
             if(auth()->user()->role == 1){
                 $organization = Organization::where('id', $request->company)->first();
             }else{
                 $organization = Organization::where('name', $request->company)->first();         
             }
+           
+
             $selectedDate = $request->selectedDate;
             $productId = $request->productId;
             $brandId = $request->brandId;
         
             $products = Product::with('brand')->get();
-        
+            if($request->company == null){
+                config(['database.connections.pgsql.database' => Session::get('db_name')]);
+            }else{
             config(['database.connections.pgsql.database' => $organization->name]);
+            }
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
         
