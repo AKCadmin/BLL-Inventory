@@ -231,7 +231,8 @@
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
-                $selectedOrganization = session('organization_id');
+                use Illuminate\Support\Facades\Session;
+                $selectedOrganization = Session::get('organization_id');
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
@@ -458,7 +459,7 @@
 <script>
     $(document).ready(function() {
         // $('#organization-filter').val("");
-        let selectedOrganization = "{{ session('organization_id') }}"; // Get session value
+        let selectedOrganization = "{{ Session::get('organization_id') }}"; // Get session value
         console.log(selectedOrganization,"selectedOrganization");
         if (selectedOrganization) {
             let $organizationFilter = $('#organization-filter');
