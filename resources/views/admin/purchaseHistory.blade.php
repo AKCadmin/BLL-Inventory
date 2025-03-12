@@ -423,16 +423,16 @@
                     <td>${productDetails?.product_name || "N/A"}</td>
                     <td>${productDetails?.unit || "N/A"}</td>
                     <td>${productDetails?.total_buy_price || "N/A"}</td>
-                    <td>${productDetails?.total_no_of_unit || "N/A"}</td>
+                    <td>${productDetails?.no_of_units || "N/A"}</td>
                     <td>${productDetails?.previous_total_no_of_quantity}</td>
                     <td>${productDetails?.invoice || "N/A"}</td>
                     
                         <td>
                             <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails?.no_of_units}" 
                                class="btn btn-sm btn-info" 
-                               target="_blank">Details</a>
+                               >Details</a>
                             <a href="/purchaseHistory/show/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails?.no_of_units}" 
-                               class="btn btn-sm btn-warning" target="_blank">Edit</a>
+                               class="btn btn-sm btn-warning">Edit</a>
                             <button class="btn btn-sm btn-danger delete-stock-btn" 
                                     data-id="${productDetails?.product_id}">Delete</button>
                         </td>

@@ -140,9 +140,9 @@
                                             <tr>
                                                 <th>Date</th>
                                                 <th>Particulars</th>
-                                                
-                                                <th>Amount Credit</th>
                                                 <th>Amount Debit</th>
+                                                <th>Amount Credit</th>
+                                                
                                                 <th>Balance</th>
                                             </tr>
                                         </thead>
@@ -152,21 +152,28 @@
                                                 <td>Opening Balance</td>
                                                 <td></td>
                                                 <td></td>
-                                                <td>{{ $transactions->first()->previous_credit_limit ?? 0 }}</td>
+                                                <td>{{ $customer->opening_balance ?? 0 }}</td>
                                             </tr>
                                             @foreach ($transactions as $transaction)
+                                            @php
+                                           
+                                            $creditAmount = ltrim($transaction->amount, '-');
+                                            echo $creditAmount;
+                                            @endphp
                                                 <tr>
                                                     <td>{{ $transaction->created_at }}</td>
                                                     <td>
                                                         @if ($transaction->order_id)
-                                                            Purchase ({{ $transaction->order_id }})
+                                                            Sale ({{ $transaction->order_id }})
                                                         @else
                                                             Payment Made
                                                         @endif
                                                     </td>
-                                                    <td>{{  $transaction->previous_credit_limit }}</td>
-                                                    <td>{{ $transaction->amount }}</td>
-                                                    <td>{{ $transaction->new_credit_limit}}</td>
+                                                    {{-- <td>{{  $transaction->previous_credit_limit }}</td> --}}
+                                                    <td>{{   $creditAmount }}</td>
+                                                    <td>{{ 0 }}</td>
+                                                    {{-- <td>{{ $transaction->new_credit_limit}}</td> --}}
+                                                    <td>{{ number_format($customer->opening_balance + $creditAmount, 2, '.', '') }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

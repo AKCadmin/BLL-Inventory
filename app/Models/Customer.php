@@ -21,7 +21,8 @@ class Customer extends Model
         'sale_user_status',
         'organization_id',
         'retail_shop',
-        'customer'
+        'customer',
+        'opening_balance'
     ];
 
     public function organization()

@@ -158,7 +158,7 @@
         $('#saveSelectionBtn').click(saveSelection);
 
         let table = $('#stocktable').DataTable();
-        var selectedDate = new Date().toISOString().split('T')[0];
+        var selectedDate = "";
         $('#datePicker').attr('max', selectedDate);
         $('#organization-filter').val("");
         var productId = "";
@@ -257,7 +257,10 @@
                     // Append new rows
                     $.each(data, function(index, stocks) {
                         $.each(stocks, function(index, stock) {
+                        let indexId = index+1;
                         console.log(stock, "stocks");
+                        const today = new Date().toISOString().split("T")[0];
+                        const stockCreatedAtDate = stock?.created_at ? stock.created_at.split(" ")[0] : "N/A";
                         // var batchExists = stock.batch_no ? true : false;
 
                         // `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
@@ -275,16 +278,18 @@
                             return btoa(unescape(encodeURIComponent(str)));
                         }
 
-                        const quantity = stock.total_quantity == 0 ? stock.provided_no_catons : stock.total_quantity
+                        const previousQuantity = stock.total_quantity == 0 ? stock.provided_no_catons : stock.total_quantity
                         const stockCreatedAt = safeBase64Encode(stock
                             ?.created_at
                             .toString())
                         var viewButton =
-                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}" class="btn btn-sm btn-warning view-stock-btn" target="_blank">View</a>`;
+                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}/${stock.invoice}" class="btn btn-sm btn-warning view-stock-btn">View</a>`;
 
-                        // var totalQuantity = stock.total_quantity.replace(/-/g, '');
+                        //  var totalQuantity = stock.total_quantity.replace(/-/g, '');
+                        var currentQuantity = stock.total_quantity == null ? 0 :  stock.total_quantity;
+                        var quantity =  stockCreatedAtDate == today ? currentQuantity : previousQuantity
                         table.row.add([
-                            stock.product_id,
+                            indexId,
                             stock.brand_name,
                             stock.product_name,
                             stock.unit,

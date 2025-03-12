@@ -185,7 +185,7 @@
         background-color: #5c636a;
     }
 </style> --}}
-<input type="hidden" id="appUrl" value="{{env('APP_URL')}}">
+<input type="hidden" id="appUrl" value="{{ env('APP_URL') }}">
 <header id="page-topbar">
     <div class="navbar-header">
         <div class="d-flex">
@@ -193,7 +193,8 @@
             <div class="navbar-brand-box">
                 <a href="{{ route('home') }}" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo-image" height="22">
+                        <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo-image"
+                            height="22">
                     </span>
                     <span class="logo-lg">
                         <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo-image"
@@ -230,6 +231,7 @@
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
+                $selectedOrganization = session('organization_id');
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
@@ -238,7 +240,9 @@
                         <select id="organization-filter" name="organization" class="form-control custom-select">
                             <option value="">Select Organization</option>
                             @foreach ($organizations as $organization)
-                                <option value="{{ $organization->id }}">{{ str_replace('_', ' ', $organization->name) }}
+                                <option value="{{ $organization->id }}"
+                                    {{ $selectedOrganization == $organization->id ? 'selected' : '' }}>
+                                    {{ str_replace('_', ' ', $organization->name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -388,11 +392,10 @@
                     <!-- item-->
                     <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle me-1"></i>
                         <span key="t-profile">Profile</span></a>
-                    <a class="dropdown-item" href="#"><i
-                            class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">My
+                    <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i>
+                        <span key="t-my-wallet">My
                             Wallet</span></a>
-                    <a class="dropdown-item d-block" href="#"><span
-                            class="badge bg-success float-end">11</span><i
+                    <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span><i
                             class="bx bx-wrench font-size-16 align-middle me-1"></i> <span
                             key="t-settings">Settings</span></a>
                     <a class="dropdown-item" href="#"><i
@@ -454,7 +457,18 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#organization-filter').val("");
+        // $('#organization-filter').val("");
+        let selectedOrganization = "{{ session('organization_id') }}"; // Get session value
+
+        if (selectedOrganization) {
+            let $organizationFilter = $('#organization-filter');
+
+            // Ensure the dropdown is fully loaded before setting the value
+            setTimeout(() => {
+                $organizationFilter.val(selectedOrganization).trigger('change');
+                console.log("Organization auto-selected:", selectedOrganization);
+            }, 100); // Adjust delay if needed
+        }
         $('#organization-filter').change(function() {
             let organizationId = $(this).val(); // Get selected value
             if (organizationId) {

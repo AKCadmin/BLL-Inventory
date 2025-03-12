@@ -257,7 +257,7 @@
                         const editUrl =
                         `/sellCounter/${encodeURIComponent(productDetails?.order_id)}/edit`;
                         const editButton = userPermissions.canEdit ?
-                            `<a href="${editUrl}" class="btn btn-sm btn-warning" target="_blank">Edit</a>` :
+                            `<a href="${editUrl}" class="btn btn-sm btn-warning">Edit</a>` :
                             '';
 
                         const deleteButton = userPermissions.canDelete ?

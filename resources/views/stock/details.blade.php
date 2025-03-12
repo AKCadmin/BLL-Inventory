@@ -94,6 +94,21 @@
             font-weight: normal;
         }
 
+        .batch-section {
+            margin-bottom: 40px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .batch-header {
+            background: #f1f5f9;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
         @media (max-width: 768px) {
             .stock-container {
                 padding: 15px;
@@ -129,49 +144,69 @@
                         <span class="detail-value">{{ $product->unit }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Batch No.</span>
-                        <span class="detail-value">{{$data[0]->batch_number}}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Expiry</span>
-                        <span class="detail-value">{{$data[0]->expiry_date}}</span>
+                        <span class="detail-label">Date</span>
+                        <span class="detail-value">{{ \Carbon\Carbon::parse($createdAt)->format('d M Y') }}</span>
                     </div>
                 </div>
 
-                <!-- Stock Table -->
-                <div class="table-container">
-                    <table class="stock-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Party Name</th>
-                                <th>Unit Per Carton</th>
-                                <th>Qty In</th>
-                                <th>Qty Out</th>
-                                <th>Closing Balance</th>
-                                <th>
-                                    Stock Value
-                                    <span class="secondary-text">(Balance × Purchase Price)</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($data as $index => $item)
-                            <tr>
-                                <td>{{ \Carbon\Carbon::parse($item->created_at)->format('d M Y') }}</td>
-                                <td>{{ $brand->name }}</td>
-                                <td>{{ $item->no_of_units }}</td>
-                                <td>{{ $item->purchase_quantity ?? '' }}</td>
-                                <td>{{ $item->sold_cartons ?? '' }}</td>
-                                {{-- <td></td>
-                                <td></td> --}}
-                                <td>{{ $item->batch_quantity }}</td>
-                                <td>₹{{ number_format($item->batch_quantity * $item->buy_price, 2) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                @foreach ($batchWiseData as $index => $batch)
+                <div class="batch-section">
+                    <div class="batch-header">
+                        Batch #{{ $batch['batch_number'] }} 
+                        <span style="font-size: 14px; color: #666; margin-left: 10px;">
+                            (Expiry: {{ $batch['expiry_date'] }})
+                        </span>
+                    </div>
+                    
+                    <!-- Stock Table -->
+                    <div class="table-container">
+                        <table class="stock-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Party Name</th>
+                                    <th>Unit Per Carton</th>
+                                    <th>Qty In</th>
+                                    <th>Qty Out</th>
+                                    <th>Closing Balance</th>
+                                    <th>
+                                        Stock Value
+                                        <span class="secondary-text">(Balance × Purchase Price)</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($batch['created_at'])->format('d M Y') }}</td>
+                                    <td>{{ $brand->name }}</td>
+                                    <td>{{ $batch['no_of_units'] }}</td>
+                                    <td>{{ $batch['purchase_quantity'] ?? '' }}</td>
+                                    <td>{{ $batch['sold_cartons'] ?? '' }}</td>
+                                    <td>{{ $batch['batch_quantity'] }}</td>
+                                    <td>₹{{ number_format($batch['batch_quantity'] * $batch['buy_price'], 2) }}</td>
+                                </tr>
+                                
+                                @if(isset($batch['sales_details']) && count($batch['sales_details']) > 0)
+                                @foreach($batch['sales_details'] as $sale)
+                                {{-- <tr>
+                                    <td colspan="3" class="text-right">
+                                        <span style="font-size: 13px; color: #666;">Sales - {{ $sale->customer_type }}</span>
+                                    </td>
+                                    <td></td>
+                                    <td>{{ $sale->provided_no_of_cartons }}</td>
+                                    <td colspan="2">
+                                        <span style="font-size: 13px; color: #666;">
+                                            Price: ₹{{ number_format($sale->price, 2) }}
+                                        </span>
+                                    </td>
+                                </tr> --}}
+                                @endforeach
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+                @endforeach
             </div>
         </div>
     </div>

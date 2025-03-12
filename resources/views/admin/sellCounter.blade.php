@@ -222,26 +222,26 @@
             }
         });
 
-        // $('input[name="packagingType"]').change(function() {
-        //     if ($('#byCarton').is(':checked')) {
-        //         $('#quantityBox').slideDown();
-        //     } else {
-        //         $('#quantityBox').slideUp();
-        //     }
-        //     console.log($(this).val(), "jj")
-        //     if ($(this).val() == 'byCarton') {
+        $('input[name="packagingType"]').change(function() {
+            if ($('#byCarton').is(':checked')) {
+                $('#quantityBox').slideDown();
+            } else {
+                $('#quantityBox').slideUp();
+            }
+            console.log($(this).val(), "jj")
+            if ($(this).val() == 'byCarton') {
 
-        //         // $('.cartonInput').show();
-        //         // $('.itemBoxInput').hide();
-        //         // $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-        //         // $('.cartonCheckboxes').find('input[type="number"]').val('');
-        //     } else if ($(this).val() == 'byItemBox') {
-        //         // $('.itemBoxInput').show();
-        //         // $('.cartonInput').hide();
-        //         // $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
-        //         // $('.itemBoxCheckboxes').find('input[type="number"]').val('');
-        //     }
-        // });
+                // $('.cartonInput').show();
+                // $('.itemBoxInput').hide();
+                // $('.cartonCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+                // $('.cartonCheckboxes').find('input[type="number"]').val('');
+            } else if ($(this).val() == 'byItemBox') {
+                // $('.itemBoxInput').show();
+                // $('.cartonInput').hide();
+                // $('.itemBoxCheckboxes').find('input[type="checkbox"]').prop('checked', false);
+                // $('.itemBoxCheckboxes').find('input[type="number"]').val('');
+            }
+        });
 
         function customerList() {
             let url = `{{ route('customers.list') }}`;
@@ -553,14 +553,14 @@
                 }
             });
 
-            // $(document).on('change', `#byCarton_${rowIndex}`, function() {
-            //     const quantityBox = $(`#quantityBox_${rowIndex}`);
-            //     if ($(this).is(':checked')) {
-            //         quantityBox.show();
-            //     } else {
-            //         quantityBox.hide();
-            //     }
-            // });
+            $(document).on('change', `#byCarton_${rowIndex}`, function() {
+                const quantityBox = $(`#quantityBox_${rowIndex}`);
+                if ($(this).is(':checked')) {
+                    quantityBox.show();
+                } else {
+                    quantityBox.hide();
+                }
+            });
         });
 
         function loadBatchData(batchId, $row) {

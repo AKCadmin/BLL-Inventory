@@ -40,6 +40,7 @@ class CustomerController extends Controller
                 'type_of_customer' => 'required|string|max:255',
                 'sale_user_status' => 'required|boolean',
                 'retail_shop' => 'nullable|boolean',
+                'opening_balance' => 'required|numeric|min:0',
             ]);
 
             if ($validator->fails()) {
@@ -85,6 +86,7 @@ class CustomerController extends Controller
                 'type_of_customer' => $request->input('type_of_customer'),
                 'sale_user_status' => $request->input('sale_user_status'),
                 'retail_shop' => $retail_shop,
+                'opening_balance' => $request->input('opening_balance'),
             ]);
 
             return response()->json([
@@ -119,6 +121,7 @@ class CustomerController extends Controller
                 'type_of_customer' => 'required|string|max:255',
                 'sale_user_status' => 'required|boolean',
                 'retail_shop' => 'nullable|boolean',
+                'opening_balance' => 'required|numeric|min:0',
             ]);
 
             if ($validator->fails()) {

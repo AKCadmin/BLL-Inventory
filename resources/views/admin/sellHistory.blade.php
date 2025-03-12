@@ -80,15 +80,24 @@
 
                                 <table id="stocktable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
-                                        <tr>
+                                        {{-- <tr>
                                             <th>Id</th>
-                                            <th>Supplier Name</th>
+                                            <th>Customer Name</th>
                                             <th>Product Name</th>
                                             <th>Unit</th>
                                             <th>Total Buy Price</th>
                                             <th>Total No. of Unit Per Cartoon</th>
                                             <th>Total No. of Cartoons</th>
                                             <th>Order Id</th>
+                                            <th>Action</th>
+                                        </tr> --}}
+
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Order Id</th>
+                                            <th>Customer Name</th>
+                                            <th>Total No. of Cartoons</th>
+                                            <th>Total Buy Price</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -256,24 +265,20 @@
                         let actionButtons = `
     <a href="/sell/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails.order_id}" 
        class="btn btn-sm btn-info" 
-       target="_blank">Details</a>`;
+       >Details</a>`;
 
                         if (!productDetails?.approve_status) {
     actionButtons += `
-        <a href="${editUrl}" class="btn btn-sm btn-warning" target="_blank">Edit</a>
+        <a href="${editUrl}" class="btn btn-sm btn-warning" >Edit</a>
         <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${productDetails?.product_id}">Delete</button>`;
 }
                         const row = `
                     <tr>
                         <td>${productDetails?.product_id || "N/A"}</td>
-                        <td>${productDetails?.brand_name || "N/A"}</td>
-                        <td>${productDetails?.product_name || "N/A"}</td>
-                        <td>${productDetails?.unit || "N/A"}</td>
-                        <td>${productDetails?.total_buy_price || "N/A"}</td>
-                        <td>${productDetails?.total_no_of_unit || "N/A"}</td>
-                        <td>${productDetails?.previous_total_no_of_quantity }</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
-                        
+                        <td>${productDetails?.customer_name || "N/A"}</td>
+                        <td>${productDetails?.total_no_of_unit || "N/A"}</td>
+                        <td>${productDetails?.total_buy_price || "N/A"}</td>
                         <td>${actionButtons} ${AppoveBtn}</td>
                     </tr>
                 `;

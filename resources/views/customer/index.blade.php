@@ -148,6 +148,7 @@
                                             <th>Name / Shop Name</th>
                                             <th>Phone Number</th>
                                             <th>Address</th>
+                                            <th>Opening Balance</th>
                                             <th>Credit Limit</th>
                                             <th>Payment Days</th>
                                             <th>Type of Customer</th>
@@ -176,6 +177,7 @@
                                                         {{ $truncatedAddress }}
                                                     </span>
                                                 </td>
+                                                <td>{{ $user->opening_balance }}</td>
                                                 <td>{{ $user->credit_limit }}</td>
                                                 <td>{{ $user->payment_days }}</td>
                                                 <td>{{ $user->type_of_customer }}</td>
@@ -282,6 +284,12 @@
                                                     <label for="address" class="form-label">Address</label>
                                                     <input type="text" class="form-control" id="address"
                                                         name="address" required placeholder="Enter Address">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="opening_balance" class="form-label">Opening Balance</label>
+                                                    <input type="number" class="form-control" id="opening_balance"
+                                                        name="opening_balance" required placeholder="Enter Opening Balance">
                                                 </div>
 
                                                 <div class="mb-3">
@@ -394,17 +402,20 @@
                             '" data-toggle="tooltip" data-placement="top">' +
                             truncatedAddress +
                             '</span></td>' +
+                            '<td>' + user.opening_balance + '</td>' +
                             '<td>' + user.credit_limit + '</td>' +
                             '<td>' + user.payment_days + '</td>' +
                             '<td>' + user.type_of_customer + '</td>' +
                             '<td>' + (user.sale_user_status ? 'Active' : 'Inactive') +
                             '</td>' +
                             '<td>' +
-                            '<a href="#" class="btn btn-sm btn-warning edit-customer-btn" data-id="' +
-                            user.id + '">Edit</a> ' +
-                            '<button class="btn btn-sm btn-danger delete-customer-btn" data-id="' +
-                            user.id + '">Delete</button>' +
-                            '</td>' +
+                                '<a href="' + "{{ route('customers.detail', ':id') }}".replace(':id', user.id) +
+                    '" class="btn btn-sm btn-info">Detail</a> ' + // <-- Added Detail Button
+                    '<a href="#" class="btn btn-sm btn-warning edit-customer-btn" data-id="' +
+                    user.id + '">Edit</a> ' +
+                    '<button class="btn btn-sm btn-danger delete-customer-btn" data-id="' +
+                    user.id + '">Delete</button>' +
+                    '</td>' +
                             '</tr>';
                         tableBody.append(row);
                     });

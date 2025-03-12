@@ -86,9 +86,9 @@ class SellCornerController extends Controller
             '*.batchNo' => 'required|string',
             '*.unitsPerCarton' => 'required|integer|min:1',
             '*.availableQtyCarton' => 'required|integer|min:0',
-            // '*.packagingType' => 'required|array',
+            '*.packagingType' => 'required|array',
             '*.packagingType.byCarton' => 'required|boolean',
-            // '*.packagingType.quantity' => 'required|integer|min:1'
+            '*.packagingType.quantity' => 'required|integer|min:1'
         ];
 
         $messages = [
@@ -96,8 +96,8 @@ class SellCornerController extends Controller
             '*.customerType.required' => 'Customer type is required for all items',
             '*.sku.exists' => 'Invalid product SKU',
             '*.batchNo.required' => 'Batch number is required for all items',
-            // '*.packagingType.quantity.min' => 'Quantity must be at least 1',
-            // '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
+            '*.packagingType.quantity.min' => 'Quantity must be at least 1',
+            '*.unitsPerCarton.min' => 'Units per carton must be at least 1'
         ];
 
         // Validate request
@@ -150,29 +150,11 @@ class SellCornerController extends Controller
                     default => throw new \Exception("Invalid customer type: {$customerType}")
                 };
 
-                $quantity = $item['availableQtyCarton'] ?? 0;
+                // $quantity = $item['availableQtyCarton'] ?? 0;
+                $quantity = $item['packagingType']['quantity'] ?? 0;
                 $itemTotal = $quantity * $price;
                 $totalAmount += $itemTotal;
 
-                $currentQuantity = (int)$batch->quantity;
-                $sellCounter = new SellCounter();
-                $sellCounter->company_id = 1; // Consider making this configurable
-                $sellCounter->product_id = $item['sku'];
-                $sellCounter->batch_id = $batch->id;
-                $sellCounter->order_id = $orderId;
-                $sellCounter->customer = $item['customer'];
-                $sellCounter->customer_type = $customerType;
-                $sellCounter->packaging_type = $item['packagingType']['byCarton']; // Check if byCarton exists
-                $sellCounter->provided_no_of_cartons = $currentQuantity; // Use $quantity directly
-                $sellCounter->price = $itemTotal; // Store the individual item total, not cumulative
-                $sellCounter->save();
-                $sellCounterIds[] = $sellCounter->id;
-
-                $newQuantity = 0;
-                $batch->quantity = $newQuantity;
-                $batch->save();
-
-                // Fetch customer
                 // Fetch customer
                 $customer = Customer::where('id', $item['customer'])->first();
 
@@ -188,8 +170,32 @@ class SellCornerController extends Controller
                     throw new \Exception("Insufficient credit limit for customer: {$item['customer']}");
                 }
 
+                $currentQuantity = (int)$batch->quantity;
+                $sellCounter = new SellCounter();
+                $sellCounter->company_id = 1; // Consider making this configurable
+                $sellCounter->product_id = $item['sku'];
+                $sellCounter->batch_id = $batch->id;
+                $sellCounter->order_id = $orderId;
+                $sellCounter->customer = $item['customer'];
+                $sellCounter->customer_type = $customerType;
+                $sellCounter->packaging_type = $item['packagingType']['byCarton']; // Check if byCarton exists
+                // $sellCounter->provided_no_of_cartons = $currentQuantity; // Use $quantity directly
+                $sellCounter->provided_no_of_cartons = $quantity; // Use $quantity directly
+                $sellCounter->price = $itemTotal; // Store the individual item total, not cumulative
+                $sellCounter->save();
+                $sellCounterIds[] = $sellCounter->id;
+
+                $newQuantity = $currentQuantity - $quantity;
+                $batch->quantity = $newQuantity;
+                // $newQuantity = $currentQuantity;
+                // $batch->quantity = $newQuantity;
+                $batch->save();
+
+                // Fetch customer
+
+
                 // Store the previous credit limit
-                $previousCreditLimit = $customer->credit_limit;
+                $previousCreditLimit =  $customer->credit_limit;
 
                 // Deduct only this item's total from the customer's credit limit
                 $customer->credit_limit -= $itemTotal;

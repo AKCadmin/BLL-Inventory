@@ -317,18 +317,21 @@ class StockController extends Controller
                     'batches.no_of_units',
                     DB::raw('SUM(sc.provided_no_of_cartons) as provided_no_cartons'),
                     DB::raw('SUM(batches.quantity) as total_quantity'),
-                    DB::raw('SUM(batches.no_of_units) as total_no_of_unit'),
+                    DB::raw('MAX(batches.no_of_units) as total_no_of_unit'),
                     // DB::raw('SUM(batches.buy_price) as total_buy_price'),
                     DB::raw('MAX(batches.created_at) as first_created_at'),
                     DB::raw('MAX(batches.invoice_no) as invoice'),
                     DB::raw('MAX(batches.expiry_date) as expiry_date')
                 )
-                ->whereDate('batches.created_at', $selectedDate)
+                ->when($selectedDate, function ($q) use ($selectedDate) {
+                    return $q->whereDate('batches.created_at', $selectedDate);
+                })
                 ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
-                ->orderBy('product_id', 'ASC');
+                // ->orderBy('product_id', 'ASC');
+                ->orderBy('first_created_at', 'DESC');
 
             $stocksList = $query->get();
-
+            // dd($stocksList);
             if ($productId) {
                 $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
             }
@@ -359,7 +362,7 @@ class StockController extends Controller
                         'provided_no_catons' => $stock->provided_no_cartons,
                     ];
                 });
-            });
+            })->sortKeys();
 
             return response()->json($groupedData);
         } catch (\Throwable $e) {
@@ -489,15 +492,110 @@ class StockController extends Controller
      * Update the specified resource in storage.
      */
 
+    // public function update(Request $request)
+    // {
+
+    //     try {
+
+    //         setDatabaseConnection();
+
+    //         $batches = $request->input('batches');
+    //         // dd($batches);
+    //         if (!$batches || !is_array($batches)) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid batches data.',
+    //             ], 400);
+    //         }
+
+    //         DB::beginTransaction();
+
+    //         $historyDetails = [];
+    //         // $invoice_number = $request->invoice;
+    //         //    dd($request->all());
+    //         foreach ($batches as $batch) {
+    //             $batchModel = Batch::firstOrNew(['batch_number' => $batch['batch_no']]);
+    //             $isNewBatch = !$batchModel->exists;
+    //             $batchModel->brand_id = $batch['brand_id'] ?: null;
+    //             $batchModel->product_id = $batch['product_id'] ?: null;
+    //             $batchModel->unit = $batch['unit'] ?: null;
+    //             $batchModel->manufacturing_date = $batch['manufacturing_date'] ?: null;
+    //             $batchModel->expiry_date = $batch['expiry_date'] ?: null;
+    //             $batchModel->base_price = $batch['base_price'];
+    //             $batchModel->exchange_rate = $batch['exchange_rate'];
+    //             $batchModel->buy_price = $batch['buy_price'];
+    //             $batchModel->no_of_units = $batch['no_of_units'];
+    //             $batchModel->quantity = $batch['quantity'];
+    //             $batchModel->invoice_no = $batch['invoice'];
+    //             $batchModel->notes = $batch['notes'];
+    //             $batchModel->save();
+
+    //             $cartonIds = [];
+    //             $batchDetails = [
+    //                 'batch_number' => $batchModel->batch_number,
+    //                 'product_id' => $batchModel->product_id,
+    //                 'unit' => $batchModel->unit,
+    //                 'manufacturing_date' => $batchModel->manufacturing_date,
+    //                 'expiry_date' => $batchModel->expiry_date,
+    //                 'base_price' => $batchModel->base_price,
+    //                 'exchange_rate' => $batchModel->exchange_rate,
+    //                 'buy_price' => $batchModel->buy_price,
+    //                 'no_of_units' => $batchModel->no_of_units,
+    //                 'quantity' => $batchModel->quantity,
+    //                 'is_new' => $isNewBatch,
+    //                 'cartons' => [],
+    //             ];
+
+    //             $historyDetails[] = $batchDetails; // Add batch and cartons to history
+    //         }
+    //         // dd($batches);
+
+    //         if (!empty($batch['hospitalPrice']) || !empty($batch['wholesalePrice']) || !empty($batch['retailPrice'])) {
+    //             foreach ($batches as $batch) {
+    //                 $batchModel = Sell::firstOrNew(['batch_id' => $batch['batch_id']]);
+    //                 $batchModel->sku  = $batch['product_id'];
+    //                 $batchModel->batch_no  = $batch['batch_no'];
+    //                 $batchModel->hospital_price  = $batch['hospitalPrice'];
+    //                 $batchModel->wholesale_price  = $batch['wholesalePrice'];
+    //                 $batchModel->retail_price  = $batch['retailPrice'];
+    //                 $batchModel->valid_from  = $batch['manufacturing_date'];
+    //                 $batchModel->valid_to  = $batch['expiry_date'];
+    //                 $batchModel->batch_id  = $batch['batch_id'];
+    //                 $batchModel->save();
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         // Record update history
+    //         Purchase_History::create([
+    //             'action' => 'Batch and Carton Update',
+    //             'details' => json_encode($historyDetails),
+    //             'user_id' => auth()->id(),
+    //             'batch_id' => $batchModel->id,
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Batches and cartons updated successfully, and history recorded.',
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         \Log::error('Error updating batches: ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An error occurred while updating batches and cartons.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function update(Request $request)
     {
-
         try {
-
             setDatabaseConnection();
 
             $batches = $request->input('batches');
-            // dd($batches);
             if (!$batches || !is_array($batches)) {
                 return response()->json([
                     'success' => false,
@@ -505,29 +603,51 @@ class StockController extends Controller
                 ], 400);
             }
 
+            $invoice = $batches[0]['invoice'] ?? null; // Get invoice number from first batch
+
             DB::beginTransaction();
 
             $historyDetails = [];
-            // $invoice_number = $request->invoice;
-            //    dd($request->all());
+
             foreach ($batches as $batch) {
+                // Ensure all batches belong to the same invoice
+                if ($invoice != $batch['invoice']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'All batches must belong to the same invoice.',
+                    ], 400);
+                }
+
                 $batchModel = Batch::firstOrNew(['batch_number' => $batch['batch_no']]);
                 $isNewBatch = !$batchModel->exists;
-                $batchModel->brand_id = $batch['brand_id'] ?: null;
-                $batchModel->product_id = $batch['product_id'] ?: null;
-                $batchModel->unit = $batch['unit'] ?: null;
-                $batchModel->manufacturing_date = $batch['manufacturing_date'] ?: null;
-                $batchModel->expiry_date = $batch['expiry_date'] ?: null;
+                $batchModel->brand_id = $batch['brand_id'] ?? null;
+                $batchModel->product_id = $batch['product_id'] ?? null;
+                $batchModel->unit = $batch['unit'] ?? null;
+                $batchModel->manufacturing_date = $batch['manufacturing_date'] ?? null;
+                $batchModel->expiry_date = $batch['expiry_date'] ?? null;
                 $batchModel->base_price = $batch['base_price'];
                 $batchModel->exchange_rate = $batch['exchange_rate'];
                 $batchModel->buy_price = $batch['buy_price'];
                 $batchModel->no_of_units = $batch['no_of_units'];
                 $batchModel->quantity = $batch['quantity'];
                 $batchModel->invoice_no = $batch['invoice'];
-                $batchModel->notes = $batch['notes'];
+                $batchModel->notes = $batch['notes'] ?? null;
                 $batchModel->save();
 
-                $cartonIds = [];
+                // Move the pricing information update inside the loop
+                if (!empty($batch['hospitalPrice']) || !empty($batch['wholesalePrice']) || !empty($batch['retailPrice'])) {
+                    $sellModel = Sell::firstOrNew(['batch_id' => $batchModel->id]);
+                    $sellModel->sku = $batch['product_id'];
+                    $sellModel->batch_no = $batch['batch_no'];
+                    $sellModel->hospital_price = $batch['hospitalPrice'] ?? null;
+                    $sellModel->wholesale_price = $batch['wholesalePrice'] ?? null;
+                    $sellModel->retail_price = $batch['retailPrice'] ?? null;
+                    $sellModel->valid_from = $batch['manufacturing_date'] ?? null;
+                    $sellModel->valid_to = $batch['expiry_date'] ?? null;
+                    $sellModel->batch_id = $batchModel->id; // Use the model's ID, not batch_id from request
+                    $sellModel->save();
+                }
+
                 $batchDetails = [
                     'batch_number' => $batchModel->batch_number,
                     'product_id' => $batchModel->product_id,
@@ -540,48 +660,32 @@ class StockController extends Controller
                     'no_of_units' => $batchModel->no_of_units,
                     'quantity' => $batchModel->quantity,
                     'is_new' => $isNewBatch,
-                    'cartons' => [],
                 ];
 
-                $historyDetails[] = $batchDetails; // Add batch and cartons to history
+                $historyDetails[] = $batchDetails;
             }
-            // dd($batches);
 
-            if (!empty($batch['hospitalPrice']) || !empty($batch['wholesalePrice']) || !empty($batch['retailPrice'])) {
-                foreach ($batches as $batch) {
-                    $batchModel = Sell::firstOrNew(['batch_id' => $batch['batch_id']]);
-                    $batchModel->sku  = $batch['product_id'];
-                    $batchModel->batch_no  = $batch['batch_no'];
-                    $batchModel->hospital_price  = $batch['hospitalPrice'];
-                    $batchModel->wholesale_price  = $batch['wholesalePrice'];
-                    $batchModel->retail_price  = $batch['retailPrice'];
-                    $batchModel->valid_from  = $batch['manufacturing_date'];
-                    $batchModel->valid_to  = $batch['expiry_date'];
-                    $batchModel->batch_id  = $batch['batch_id'];
-                    $batchModel->save();
-                }
-            }
+            // Record update history for the entire invoice
+            Purchase_History::create([
+                'action' => 'Invoice Batches Update',
+                'details' => json_encode($historyDetails),
+                'user_id' => auth()->id(),
+                'invoice_no' => $invoice,
+                'batch_id' => $batchModel->id, // Don't associate with a specific batch since this is for multiple batches
+            ]);
 
             DB::commit();
 
-            // Record update history
-            Purchase_History::create([
-                'action' => 'Batch and Carton Update',
-                'details' => json_encode($historyDetails),
-                'user_id' => auth()->id(),
-                'batch_id' => $batchModel->id,
-            ]);
-
             return response()->json([
                 'success' => true,
-                'message' => 'Batches and cartons updated successfully, and history recorded.',
+                'message' => 'Invoice batches updated successfully, and history recorded.',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error updating batches: ' . $e->getMessage());
+            \Log::error('Error updating invoice batches: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while updating batches and cartons.',
+                'message' => 'An error occurred while updating invoice batches.',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -666,74 +770,163 @@ class StockController extends Controller
         }
     }
 
-    public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits)
+    // public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits)
+    // {
+    //     $product = Product::find($productId);
+    //     $brand = Brand::find($product->brand_id);
+    //     $createdAt = base64_decode($encodedCreatedAt);
+    //     // dd($totalNoOfUnits);
+    //     $databaseName = Session::get('db_name');
+
+    //     if (!$databaseName) {
+    //         return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+    //     }
+
+    //     config(['database.connections.pgsql.database' => $databaseName]);
+    //     DB::purge('pgsql');
+    //     DB::connection('pgsql')->getPdo();
+
+    //     // dd($invoice);
+    //     $data = DB::table('batches')
+    //         ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
+    //         ->leftJoin('sell', 'batches.batch_number', '=', 'sell.batch_no')
+    //         ->select(
+    //             'batches.batch_number',
+    //             'batches.product_id',
+    //             'batches.brand_id',
+    //             'batches.unit',
+    //             'batches.base_price',
+    //             'batches.buy_price',
+    //             'batches.quantity as batch_quantity',
+    //             'batches.no_of_units',
+    //             'batches.invoice_no',
+    //             'batches.created_at',
+    //             'batches.expiry_date',
+    //             'sell_counter.price',
+    //             'sell_counter.customer_type',
+    //             'sell.retail_price',
+    //             'sell.wholesale_price',
+    //             'sell.hospital_price',
+    //             DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
+    //             DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
+    //             DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
+    //         )
+    //         // ->where(['batches.invoice_no'=> $invoice])
+    //         ->where(['batches.product_id' => $productId])
+    //         ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
+    //         ->where(['batches.no_of_units' => $totalNoOfUnits])
+    //         ->groupBy(
+    //             'batches.id',
+    //             'batches.batch_number',
+    //             'batches.product_id',
+    //             'batches.brand_id',
+    //             'batches.unit',
+    //             'batches.no_of_units',
+    //             'batches.base_price',
+    //             'batches.buy_price',
+    //             'batches.quantity',
+    //             'batches.invoice_no',
+    //             'batches.created_at',
+    //             'batches.expiry_date',
+    //             'sell_counter.price',
+    //             'sell_counter.customer_type',
+    //             'sell.retail_price',
+    //             'sell.wholesale_price',
+    //             'sell.hospital_price',
+    //         )
+    //         ->get();
+
+    //     // dd($data);
+
+    //     return view('stock.details', compact('data', 'product', 'brand', 'createdAt'));
+    // }
+
+    public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits, $invoice)
     {
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-        // dd($totalNoOfUnits);
-        $databaseName = Session::get('db_name');
 
+        // Configure database connection
+        $databaseName = Session::get('db_name');
         if (!$databaseName) {
             return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
         }
-
         config(['database.connections.pgsql.database' => $databaseName]);
         DB::purge('pgsql');
         DB::connection('pgsql')->getPdo();
 
-        // dd($invoice);
-        $data = DB::table('batches')
-            ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
-            ->leftJoin('sell', 'batches.batch_number', '=', 'sell.batch_no')
+        // Get batch data
+        $batches = DB::table('batches')
+            ->where('product_id', $productId)
+            ->whereRaw('DATE(created_at) = ?', [$createdAt])
+            ->where('no_of_units', $totalNoOfUnits)
+            ->where('invoice_no', $invoice)
             ->select(
-                'batches.batch_number',
-                'batches.product_id',
-                'batches.brand_id',
-                'batches.unit',
-                'batches.base_price',
-                'batches.buy_price',
-                'batches.quantity as batch_quantity',
-                'batches.no_of_units',
-                'batches.invoice_no',
-                'batches.created_at',
-                'batches.expiry_date',
-                'sell_counter.price',
-                'sell_counter.customer_type',
-                'sell.retail_price',
-                'sell.wholesale_price',
-                'sell.hospital_price',
-                DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
-                DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
-                DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
-            )
-            // ->where(['batches.invoice_no'=> $invoice])
-            ->where(['batches.product_id' => $productId])
-            ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
-            ->where(['batches.no_of_units' => $totalNoOfUnits])
-            ->groupBy(
-                'batches.id',
-                'batches.batch_number',
-                'batches.product_id',
-                'batches.brand_id',
-                'batches.unit',
-                'batches.no_of_units',
-                'batches.base_price',
-                'batches.buy_price',
-                'batches.quantity',
-                'batches.invoice_no',
-                'batches.created_at',
-                'batches.expiry_date',
-                'sell_counter.price',
-                'sell_counter.customer_type',
-                'sell.retail_price',
-                'sell.wholesale_price',
-                'sell.hospital_price',
+                'id',
+                'batch_number',
+                'product_id',
+                'brand_id',
+                'unit',
+                'base_price',
+                'buy_price',
+                'quantity',
+                'no_of_units',
+                'invoice_no',
+                'created_at',
+                'expiry_date'
             )
             ->get();
 
-        // dd($data);
+        // Process each batch to get its sales information
+        $batchWiseData = [];
+        foreach ($batches as $batch) {
+            // Get sales counter data for this batch
+            $salesData = DB::table('sell_counter')
+                ->where('batch_id', $batch->id)
+                ->select(
+                    'price',
+                    'customer_type',
+                    'provided_no_of_cartons'
+                )
+                ->get();
 
-        return view('stock.details', compact('data', 'product', 'brand', 'createdAt'));
+            // Get pricing information
+            $pricingData = DB::table('sell')
+                ->where('batch_no', $batch->batch_number)
+                ->select('retail_price', 'wholesale_price', 'hospital_price')
+                ->first();
+
+            // Calculate quantities
+            $soldCartons = $salesData->sum('provided_no_of_cartons') ?? 0;
+            $purchaseQuantity = $batch->quantity + $soldCartons;
+            $remainingQuantity = $batch->quantity - $soldCartons;
+
+            // Prepare batch data with sales information
+            $batchWiseData[] = [
+                'batch_number' => $batch->batch_number,
+                'product_id' => $batch->product_id,
+                'brand_id' => $batch->brand_id,
+                'unit' => $batch->unit,
+                'base_price' => $batch->base_price,
+                'buy_price' => $batch->buy_price,
+                'batch_quantity' => $batch->quantity,
+                'no_of_units' => $batch->no_of_units,
+                'invoice_no' => $batch->invoice_no,
+                'created_at' => $batch->created_at,
+                'expiry_date' => $batch->expiry_date,
+                'price' => $salesData->isNotEmpty() ? $salesData->first()->price : null,
+                'customer_type' => $salesData->isNotEmpty() ? $salesData->first()->customer_type : null,
+                'retail_price' => $pricingData ? $pricingData->retail_price : null,
+                'wholesale_price' => $pricingData ? $pricingData->wholesale_price : null,
+                'hospital_price' => $pricingData ? $pricingData->hospital_price : null,
+                'purchase_quantity' => $purchaseQuantity,
+                'sold_cartons' => $soldCartons,
+                'remaining_quantity' => $remainingQuantity,
+                'sales_details' => $salesData // Additional detailed sales information per batch
+            ];
+        }
+        //  dd($batchWiseData);
+        return view('stock.details', compact('batchWiseData', 'product', 'brand', 'createdAt'));
     }
 }
