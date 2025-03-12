@@ -154,28 +154,37 @@
                                                 <td></td>
                                                 <td>{{ $customer->opening_balance ?? 0 }}</td>
                                             </tr>
-                                            @foreach ($transactions as $transaction)
                                             @php
-                                           
-                                            $creditAmount = ltrim($transaction->amount, '-');
-                                            echo $creditAmount;
+                                            $newAmount = $customer->opening_balance;
+                                        @endphp
+                                        
+                                        <tr>
+                                            <td>Opening Balance</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{{ number_format($newAmount, 2, '.', '') }}</td>
+                                        </tr>
+                                        
+                                        @foreach ($transactions as $transaction)
+                                            @php
+                                                $creditAmount = abs($transaction->amount); // Ensure it's a positive value
+                                                $newAmount += $creditAmount; // Accumulate balance
                                             @endphp
-                                                <tr>
-                                                    <td>{{ $transaction->created_at }}</td>
-                                                    <td>
-                                                        @if ($transaction->order_id)
-                                                            Sale ({{ $transaction->order_id }})
-                                                        @else
-                                                            Payment Made
-                                                        @endif
-                                                    </td>
-                                                    {{-- <td>{{  $transaction->previous_credit_limit }}</td> --}}
-                                                    <td>{{   $creditAmount }}</td>
-                                                    <td>{{ 0 }}</td>
-                                                    {{-- <td>{{ $transaction->new_credit_limit}}</td> --}}
-                                                    <td>{{ number_format($customer->opening_balance + $creditAmount, 2, '.', '') }}</td>
-                                                </tr>
-                                            @endforeach
+                                            <tr>
+                                                <td>{{ $transaction->created_at }}</td>
+                                                <td>
+                                                    @if ($transaction->order_id)
+                                                        Sale ({{ $transaction->order_id }})
+                                                    @else
+                                                        Payment Made
+                                                    @endif
+                                                </td>
+                                                <td>{{ number_format($creditAmount, 2, '.', '') }}</td>
+                                                <td>0</td>
+                                                <td>{{ number_format($newAmount, 2, '.', '') }}</td>
+                                            </tr>
+                                        @endforeach
+                                        
                                         </tbody>
                                     </table>
                                 </div>
