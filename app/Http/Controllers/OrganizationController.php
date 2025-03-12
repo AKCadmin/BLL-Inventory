@@ -304,7 +304,7 @@ class OrganizationController extends Controller
 
             // Fetch the database details for the selected organization
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
-            session(['db_name' => $organization->name]);
+            // session(['db_name' => $organization->name]);
             session(['organization_id' => $organizationId]);
             return response()->json(['message' => 'Switched to ' . $organization->name . ' database.']);
 

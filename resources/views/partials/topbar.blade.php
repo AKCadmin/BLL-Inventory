@@ -459,7 +459,7 @@
     $(document).ready(function() {
         // $('#organization-filter').val("");
         let selectedOrganization = "{{ session('organization_id') }}"; // Get session value
-console.log(selectedOrganization,"selectedOrganization");
+        console.log(selectedOrganization,"selectedOrganization");
         if (selectedOrganization) {
             let $organizationFilter = $('#organization-filter');
 
