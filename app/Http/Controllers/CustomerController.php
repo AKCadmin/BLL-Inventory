@@ -74,8 +74,9 @@ class CustomerController extends Controller
                 $retail_shop = true;
             }
 
-
-
+            $customer = Customer::first();
+            dd($customer->getAttributes());
+            
             $saleUser = Customer::create([
                 'organization_id' => $organizationId,
                 'name' => $request->input('name'),
