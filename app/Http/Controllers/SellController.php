@@ -43,7 +43,8 @@ class SellController extends Controller
                 abort(403);
             }
             setDatabaseConnection();
-            // Validate the incoming request data
+            //   Validate the incoming request data
+            
             $validatedData = $request->validate([
                 'sku' => 'required|string',
                 'batch_no' => 'required|string',
