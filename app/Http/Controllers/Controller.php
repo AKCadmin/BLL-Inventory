@@ -9,11 +9,11 @@ abstract class Controller
 {
     protected function setupDatabaseConnection()
     {
-
+dd(Session::has('db_name'));
         if (Session::has('db_name')) {
             $dbName = session('db_name');
             
-dd($dbName);
+
             if ($dbName) {
 
                 config(['database.connections.pgsql.database' => $dbName]);
