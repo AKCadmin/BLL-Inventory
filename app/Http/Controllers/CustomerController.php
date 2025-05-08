@@ -75,8 +75,8 @@ class CustomerController extends Controller
             }
 
             $customer = Customer::first();
-            dd(DB::connection()->getConfig());
-            dd($customer->getAttributes());
+            // dd(DB::connection()->getConfig());
+            // dd($customer->getAttributes());
             
             $saleUser = Customer::create([
                 'organization_id' => $organizationId,
