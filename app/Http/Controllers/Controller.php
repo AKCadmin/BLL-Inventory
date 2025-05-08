@@ -13,7 +13,7 @@ abstract class Controller
         if (Session::has('db_name')) {
             $dbName = session('db_name');
             
-
+dd($dbName);
             if ($dbName) {
 
                 config(['database.connections.pgsql.database' => $dbName]);
