@@ -227,6 +227,7 @@
                 </div>
             </form> --}}
             @php
+            dd(config('session.driver'));
                 config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
