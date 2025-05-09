@@ -227,33 +227,14 @@
                 </div>
             </form> --}}
             @php
-            
+            dd(Session::get('organization_id'));
                 config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
                 use Illuminate\Support\Facades\Session;
                 $selectedOrganization = Session::get('organization_id');
-
-
-                $paths = [
-        'storage' => storage_path(),
-        'storage/framework' => storage_path('framework'),
-        'storage/framework/sessions' => storage_path('framework/sessions'),
-        'bootstrap/cache' => base_path('bootstrap/cache'),
-    ];
-
-    $results = [];
-
-    foreach ($paths as $label => $path) {
-        $results[$label] = [
-            'path' => $path,
-            'is_writable' => is_writable($path),
-            'is_readable' => is_readable($path),
-        ];
-    }
-
-                dd($results,$selectedOrganization);
+                dd(Session::get('organization_id'));
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
