@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class OrganizationController extends Controller
 {
@@ -304,8 +305,8 @@ class OrganizationController extends Controller
 
             // Fetch the database details for the selected organization
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
-            session(['db_name' => $organization->name]);
-            session(['organization_id' => $organizationId]);
+            Session::put('db_name', $organization->name);
+            Session::put('organization_id', $organizationId);
             return response()->json(['message' => 'Switched to ' . $organization->name . ' database.']);
 
         } catch (\Exception $e) {
