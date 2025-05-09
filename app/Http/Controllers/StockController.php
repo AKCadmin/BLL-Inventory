@@ -846,7 +846,7 @@ class StockController extends Controller
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-
+dd(Session::get('db_name'));
         // Configure database connection
         $databaseName = Session::get('db_name');
         if (!$databaseName) {
