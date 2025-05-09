@@ -307,7 +307,14 @@ class OrganizationController extends Controller
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
             Session::put('db_name', $organization->name);
             Session::put('organization_id', $organizationId);
-            return response()->json(['message' => 'Switched to ' . $organization->name . ' database.']);
+            $storedName = Session::get('db_name');
+            $storedOrgId = Session::get('organization_id');
+            
+            return response()->json([
+                'message' => 'Switched to ' . $organization->name . ' database.',
+                'stored_db_name' => $storedName,
+                'stored_organization_id' => $storedOrgId
+            ]);            
 
         } catch (\Exception $e) {
             return response()->json([
