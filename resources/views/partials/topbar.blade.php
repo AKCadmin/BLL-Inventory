@@ -234,7 +234,26 @@
                 $organizations = App\Models\Organization::all();
                 use Illuminate\Support\Facades\Session;
                 $selectedOrganization = Session::get('organization_id');
-                dd($organizations,$selectedOrganization);
+
+
+                $paths = [
+        'storage' => storage_path(),
+        'storage/framework' => storage_path('framework'),
+        'storage/framework/sessions' => storage_path('framework/sessions'),
+        'bootstrap/cache' => base_path('bootstrap/cache'),
+    ];
+
+    $results = [];
+
+    foreach ($paths as $label => $path) {
+        $results[$label] = [
+            'path' => $path,
+            'is_writable' => is_writable($path),
+            'is_readable' => is_readable($path),
+        ];
+    }
+
+                dd($results,$selectedOrganization);
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
