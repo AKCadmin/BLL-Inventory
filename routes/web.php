@@ -52,6 +52,11 @@ Route::get('/optimize', function () {
     return response()->json(['success' => true]);
 })->name('optimize');
 
+Route::get('/optimize-clear', function () {
+    Artisan::call('optimize:clear');
+    return response()->json(['success' => true]);
+})->name('optimize-clear');
+
 // Guest middleware for unauthenticated users
 Route::group(['middleware' => 'guest'], function () {
 

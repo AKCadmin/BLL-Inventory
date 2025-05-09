@@ -234,6 +234,7 @@
                 $organizations = App\Models\Organization::all();
                 use Illuminate\Support\Facades\Session;
                 $selectedOrganization = Session::get('organization_id');
+                
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
