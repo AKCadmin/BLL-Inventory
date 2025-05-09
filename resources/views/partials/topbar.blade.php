@@ -227,14 +227,14 @@
                 </div>
             </form> --}}
             @php
-            dd(Session::get('organization_id'),"before change database");
+            echo Session::get('organization_id'),"before change database";
                 config(['database.connections.pgsql.database' => env('DB_DATABASE')]);
                 DB::purge('pgsql');
                 DB::connection('pgsql')->getPdo();
                 $organizations = App\Models\Organization::all();
                 use Illuminate\Support\Facades\Session;
                 $selectedOrganization = Session::get('organization_id');
-                dd(Session::get('organization_id'), "after change database");
+            echo Session::get('organization_id'), "after change database"
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
