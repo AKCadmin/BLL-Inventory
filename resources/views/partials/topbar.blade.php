@@ -459,7 +459,7 @@
 <script>
     $(document).ready(function() {
         // $('#organization-filter').val("");
-        let selectedOrganization = "{{ Session::get('organization_id') }}"; // Get session value
+        let selectedOrganization = @json(Session::get('organization_id'));
         console.log(selectedOrganization,"selectedOrganization");
         if (selectedOrganization) {
             let $organizationFilter = $('#organization-filter');
