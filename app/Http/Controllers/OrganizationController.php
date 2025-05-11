@@ -300,28 +300,55 @@ class OrganizationController extends Controller
     public function switchOrganization(Request $request)
     {
         try {
-
             $organizationId = $request->input('organization');
-
-            // Fetch the database details for the selected organization
+    
+            // Validate request
+            if (!$organizationId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Organization ID is required.',
+                ], 400);
+            }
+    
+            // Fetch organization
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
+    
+            if (!$organization) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Organization not found.',
+                ], 404);
+            }
+    
+            // Store in session
             Session::put('db_name', $organization->name);
             Session::put('organization_id', $organizationId);
+    
+            // Validate session
             $storedName = Session::get('db_name');
             $storedOrgId = Session::get('organization_id');
-            
+    
+            if (!$storedName || !$storedOrgId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to store session data.',
+                ], 500);
+            }
+    
             return response()->json([
-                'message' => 'Switched to ' . $organization->name . ' database.',
+                'success' => true,
+                'message' => 'Switched to ' . $storedName . ' database.',
                 'stored_db_name' => $storedName,
-                'stored_organization_id' => $storedOrgId
-            ]);            
-
+                'stored_organization_id' => $storedOrgId,
+            ]);
+    
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while fetching products.',
+                'message' => 'An error occurred while switching organization.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+    
 }
