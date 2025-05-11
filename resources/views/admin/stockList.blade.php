@@ -279,11 +279,12 @@
                         }
 
                         const previousQuantity = stock.total_quantity == 0 ? stock.provided_no_catons : stock.total_quantity
+                        let db_name = @json(session()->get('db_name'));
                         const stockCreatedAt = safeBase64Encode(stock
                             ?.created_at
                             .toString())
                         var viewButton =
-                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}/${stock.invoice}" class="btn btn-sm btn-warning view-stock-btn">View</a>`;
+                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}/${stock.invoice}/${db_name}" class="btn btn-sm btn-warning view-stock-btn">View</a>`;
 
                         //  var totalQuantity = stock.total_quantity.replace(/-/g, '');
                         var currentQuantity = stock.total_quantity == null ? 0 :  stock.total_quantity;

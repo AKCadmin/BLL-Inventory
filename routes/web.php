@@ -156,7 +156,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('stockList/byproduct', [StockController::class, 'listByProduct'])->name('stocks.byproduct');
     route::view('stockEdit', 'admin.edit')->name('stock.editStock');
     route::post('/stock/update/batch', [StockController::class, 'update'])->name('stock.batch.update');
-    route::get('/stock/details/{id}/{date}/{totalUnit}/{invoice}', [StockController::class, 'stockDetails'])->name('stockDetails');
+    route::get('/stock/details/{id}/{date}/{totalUnit}/{invoice}/{dbName}', [StockController::class, 'stockDetails'])->name('stockDetails');
    
 
     // Sell Management routes

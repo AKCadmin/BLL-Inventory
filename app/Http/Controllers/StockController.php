@@ -841,17 +841,18 @@ class StockController extends Controller
     //     return view('stock.details', compact('data', 'product', 'brand', 'createdAt'));
     // }
 
-    public function stockDetails($productId, $encodedCreatedAt, $totalNoOfUnits, $invoice)
+    public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits, $invoice, $databaseName)
     {
+        
         // setDatabaseConnection();
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-        $sessionData = session()->all();
+        // $sessionData = session()->all();
 
-        dd($sessionData); // or print_r($sessionData);
+        // dd($sessionData); // or print_r($sessionData);
         // Configure database connection
-        $databaseName = Session::get('db_name');
+        // $databaseName = Session::get('db_name');
         if (!$databaseName) {
             return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
         }
