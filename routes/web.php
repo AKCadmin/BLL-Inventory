@@ -52,6 +52,11 @@ Route::get('/optimize', function () {
     return response()->json(['success' => true]);
 })->name('optimize');
 
+Route::get('/config-clear', function () {
+    Artisan::call('config:clear');
+    return response()->json(['success' => true]);
+})->name('config-clear');
+
 Route::get('/optimize-clear', function () {
     Artisan::call('optimize:clear');
     return response()->json(['success' => true]);
