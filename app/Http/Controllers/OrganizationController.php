@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cache;
 
 class OrganizationController extends Controller
 {
@@ -103,7 +104,7 @@ class OrganizationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Failed to switch to the database: ' . $dbName]);
             }
 
-            
+
             $usersMigrationPath = 'database/migrations/0001_01_01_000000_create_users_table.php';
             $productMigrationPath = 'database/migrations/2024_12_03_101214_create_products_table.php';
             $batchMigrationPath = 'database/migrations/2024_12_03_101421_create_batches_table.php';
@@ -120,7 +121,7 @@ class OrganizationController extends Controller
             $updatesoftdeleteMigrationPath = 'database/migrations/2025_02_10_133512_create_softdelete_for_organization_table.php';
             // $customerRetailsMigrationPath = 'database/migrations/2025_02_03_071547_update_customer_table.php';
             $updatebatchMigrationPath = 'database/migrations/2025_02_03_082708_update_batch_table.php';
-            
+
 
 
             $migrations = [
@@ -146,17 +147,17 @@ class OrganizationController extends Controller
 
             foreach ($migrations as $migrationPath) {
                 set_time_limit(60);
-                
+
                 $exitCode = Artisan::call('migrate', [
                     '--path' => $migrationPath,
                     '--database' => 'pgsql',
                     '--force' => true
                 ]);
-            
+
                 if ($exitCode !== 0) {
                     return response()->json([
-                        'success' => false, 
-                        'message' => 'Failed to apply migrations.', 
+                        'success' => false,
+                        'message' => 'Failed to apply migrations.',
                         'error' => Artisan::output()
                     ]);
                 }
@@ -262,31 +263,29 @@ class OrganizationController extends Controller
 
     public function productDataGet(Request $request)
     {
-       
+
         try {
 
             if (auth()->user()->role == 1) {
-               
-                $products = Product::
-                select('products.*','products.id as productId','brands.id','brands.name as brand_name','organizations.id','organizations.name as organization_name')
-                ->join('brands','products.brand_id','=','brands.id')
+
+                $products = Product::select('products.*', 'products.id as productId', 'brands.id', 'brands.name as brand_name', 'organizations.id', 'organizations.name as organization_name')
+                    ->join('brands', 'products.brand_id', '=', 'brands.id')
                     // ->whereHas('brand', function($query) use ($request) {
                     //     $query->where('id', '=', $request->company);
                     // })
                     ->join('organizations', 'products.company_id', '=', 'organizations.id');
-                    if (!empty($request->company)) {
-                        $products->where('organizations.id', $request->company);
-                    }
-                    $products = $products->orderBy('productId', 'desc')->get();
-                   
+                if (!empty($request->company)) {
+                    $products->where('organizations.id', $request->company);
+                }
+                $products = $products->orderBy('productId', 'desc')->get();
             } else {
-                
+
                 // setDatabaseConnection();
                 $productBrand = Product::where('company_id', auth()->user()->organization_id)->first();
                 $products = Product::where('brand_id', $productBrand->brand_id)->orderBy('id', 'desc')
                     ->get();
             }
-           
+
             return response()->json(['products' => $products]);
         } catch (\Exception $e) {
             return response()->json([
@@ -301,7 +300,7 @@ class OrganizationController extends Controller
     {
         try {
             $organizationId = $request->input('organization');
-    
+
             // Validate request
             if (!$organizationId) {
                 return response()->json([
@@ -309,17 +308,17 @@ class OrganizationController extends Controller
                     'message' => 'Organization ID is required.',
                 ], 400);
             }
-    
+
             // Fetch organization
             $organization = DB::table('organizations')->where('id', $organizationId)->first();
-    
+
             if (!$organization) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Organization not found.',
                 ], 404);
             }
-           
+
             session()->forget('db_name');
             session()->forget('organization_id');
 
@@ -327,25 +326,25 @@ class OrganizationController extends Controller
             session(['db_name' => $organization->name]);
             // Session::put('db_name', $organization->name);
             Session::put('organization_id', $organizationId);
-            
+            Cache::put('db_name', $organization->name, now()->addMinutes(60));
+            Cache::put('organization_id', $organizationId, now()->addMinutes(60));
             // Validate session
             $storedName = Session::get('db_name');
             $storedOrgId = Session::get('organization_id');
-    
+
             if (!$storedName || !$storedOrgId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to store session data.',
                 ], 500);
             }
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Switched to ' . $storedName . ' database.',
                 'stored_db_name' => $storedName,
                 'stored_organization_id' => $storedOrgId,
             ]);
-    
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -354,5 +353,4 @@ class OrganizationController extends Controller
             ], 500);
         }
     }
-    
 }
