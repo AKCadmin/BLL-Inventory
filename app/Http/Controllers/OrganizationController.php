@@ -325,7 +325,7 @@ class OrganizationController extends Controller
             session(['db_name' => $organization->name]);
             // Session::put('db_name', $organization->name);
             Session::put('organization_id', $organizationId);
-            Artisan::call('optimize:clear');
+            
             // Validate session
             $storedName = Session::get('db_name');
             $storedOrgId = Session::get('organization_id');
