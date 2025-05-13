@@ -320,6 +320,8 @@ class OrganizationController extends Controller
                 ], 404);
             }
            
+            session()->forget('db_name');
+            session()->forget('organization_id');
 
             // Store in session
             session(['db_name' => $organization->name]);

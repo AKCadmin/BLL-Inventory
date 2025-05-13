@@ -8,10 +8,7 @@ use Illuminate\Support\Facades\Session;
 
 abstract class Controller
 {
-    public function __construct()
-    {
-        Artisan::call('optimize:clear');
-    }
+
     protected function setupDatabaseConnection()
     {
 
