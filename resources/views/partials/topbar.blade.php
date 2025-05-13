@@ -240,7 +240,7 @@
             @endphp
             @if (auth()->user()->role == 1)
                 <form class="app-search d-none d-lg-block" id="organizationSwitchForm" method="POST">
-                    <input type="text" id="selectedOrganization" value="{{$selectedOrganization}}">
+                    <input type="hidden" id="selectedOrganization" value="{{$selectedOrganization}}">
                     @csrf
                     <div class="input-group">
                         <select id="organization-filter" name="organization" class="form-control custom-select">
