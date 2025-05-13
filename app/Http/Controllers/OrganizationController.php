@@ -319,7 +319,8 @@ class OrganizationController extends Controller
                     'message' => 'Organization not found.',
                 ], 404);
             }
-           Artisan::call('optimize-clear');
+            Artisan::call('cache:clear');
+
             // Store in session
             session(['db_name' => $organization->name]);
             // Session::put('db_name', $organization->name);
