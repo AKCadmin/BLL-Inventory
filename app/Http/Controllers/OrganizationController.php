@@ -321,7 +321,8 @@ class OrganizationController extends Controller
             }
     
             // Store in session
-            Session::put('db_name', $organization->name);
+            session(['db_name' => $organization->name]);
+            // Session::put('db_name', $organization->name);
             Session::put('organization_id', $organizationId);
     
             // Validate session

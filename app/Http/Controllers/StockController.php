@@ -258,7 +258,7 @@ class StockController extends Controller
     {
 
         try {
-            if (auth()->user()->role == 1) {
+            // if (auth()->user()->role == 1) {
                 $companies = Company::all();
                 $brands = Brand::all();
                 setDatabaseConnection();
@@ -278,7 +278,7 @@ class StockController extends Controller
                     ->orderBy('batches.id', 'DESC')
                     ->get();
                 return view('admin.stockList', compact('stocks', 'companies', 'brands'));
-            }
+            // }
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),
