@@ -409,7 +409,7 @@
                 });
 
                 console.log(batches, "batches")
-                fetch('{{ route('stock.batch.update') }}', {
+                fetch('{{ route('stock.price.update') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

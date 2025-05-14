@@ -692,6 +692,106 @@ class StockController extends Controller
     }
 
 
+    public function updateStockPrice(Request $request)
+    {
+        try {
+            setDatabaseConnection();
+
+            $batches = $request->input('batches');
+            if (!$batches || !is_array($batches)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid batches data.',
+                ], 400);
+            }
+
+            $invoice = $batches[0]['invoice'] ?? null; // Get invoice number from first batch
+
+            DB::beginTransaction();
+
+            $historyDetails = [];
+
+            foreach ($batches as $batch) {
+                // Ensure all batches belong to the same invoice
+                if ($invoice != $batch['invoice']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'All batches must belong to the same invoice.',
+                    ], 400);
+                }
+
+                $batchModel = Batch::firstOrNew(['no_of_units' => $batch['no_of_units']]);
+                $isNewBatch = !$batchModel->exists;
+                $batchModel->brand_id = $batch['brand_id'] ?? null;
+                $batchModel->product_id = $batch['product_id'] ?? null;
+                $batchModel->unit = $batch['unit'] ?? null;
+                $batchModel->manufacturing_date = $batch['manufacturing_date'] ?? null;
+                $batchModel->expiry_date = $batch['expiry_date'] ?? null;
+                $batchModel->base_price = $batch['base_price'];
+                $batchModel->exchange_rate = $batch['exchange_rate'];
+                $batchModel->buy_price = $batch['buy_price'];
+                $batchModel->no_of_units = $batch['no_of_units'];
+                $batchModel->quantity = $batch['quantity'];
+                $batchModel->invoice_no = $batch['invoice'];
+                $batchModel->notes = $batch['notes'] ?? null;
+                $batchModel->save();
+
+                // Move the pricing information update inside the loop
+                if (!empty($batch['hospitalPrice']) || !empty($batch['wholesalePrice']) || !empty($batch['retailPrice'])) {
+                    $sellModel = Sell::firstOrNew(['batch_id' => $batchModel->id]);
+                    $sellModel->sku = $batch['product_id'];
+                    $sellModel->batch_no = $batch['batch_no'];
+                    $sellModel->hospital_price = $batch['hospitalPrice'] ?? null;
+                    $sellModel->wholesale_price = $batch['wholesalePrice'] ?? null;
+                    $sellModel->retail_price = $batch['retailPrice'] ?? null;
+                    $sellModel->valid_from = $batch['manufacturing_date'] ?? null;
+                    $sellModel->valid_to = $batch['expiry_date'] ?? null;
+                    $sellModel->batch_id = $batchModel->id; // Use the model's ID, not batch_id from request
+                    $sellModel->save();
+                }
+
+                $batchDetails = [
+                    'batch_number' => $batchModel->batch_number,
+                    'product_id' => $batchModel->product_id,
+                    'unit' => $batchModel->unit,
+                    'manufacturing_date' => $batchModel->manufacturing_date,
+                    'expiry_date' => $batchModel->expiry_date,
+                    'base_price' => $batchModel->base_price,
+                    'exchange_rate' => $batchModel->exchange_rate,
+                    'buy_price' => $batchModel->buy_price,
+                    'no_of_units' => $batchModel->no_of_units,
+                    'quantity' => $batchModel->quantity,
+                    'is_new' => $isNewBatch,
+                ];
+
+                $historyDetails[] = $batchDetails;
+            }
+
+            // Record update history for the entire invoice
+            Purchase_History::create([
+                'action' => 'Invoice Batches Update',
+                'details' => json_encode($historyDetails),
+                'user_id' => auth()->id(),
+                'invoice_no' => $invoice,
+                'batch_id' => $batchModel->id, // Don't associate with a specific batch since this is for multiple batches
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice batches updated successfully, and history recorded.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error updating invoice batches: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating invoice batches.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
 
 
