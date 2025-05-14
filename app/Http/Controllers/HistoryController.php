@@ -134,7 +134,10 @@ class HistoryController extends Controller
         setDatabaseConnection();
 
         $batchData = DB::table('batches')
-            ->leftjoin('sell', 'sell.batch_no', '=', 'batches.batch_number')
+        ->leftJoin('sell', function ($join) {
+            $join->on('sell.batch_no', '=', 'batches.batch_number')
+                 ->on('sell.no_of_units', '=', 'batches.no_of_units');
+        })
             ->select(
                 'sell.*',
                 'batches.id as batch_id',
@@ -155,6 +158,7 @@ class HistoryController extends Controller
             )
             ->where('product_id', $id)
             ->where(['batches.no_of_units' => $noOfcartoon])
+            // ->where(['sell.no_of_units' => $noOfcartoon])
             ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
             ->get();
 
@@ -196,7 +200,7 @@ class HistoryController extends Controller
                 })->values(),
             ];
         });
-
+       
         if (auth()->user()->role == 1) {
             return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
         }

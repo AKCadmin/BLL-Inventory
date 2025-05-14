@@ -592,6 +592,7 @@ class StockController extends Controller
 
     public function update(Request $request)
     {
+        dd($request->all(),"update");
         try {
             setDatabaseConnection();
 
@@ -695,6 +696,8 @@ class StockController extends Controller
     public function updateStockPrice(Request $request)
     {
         try {
+
+            // dd($request->all());
             setDatabaseConnection();
 
             $batches = $request->input('batches');
@@ -720,7 +723,10 @@ class StockController extends Controller
                     ], 400);
                 }
 
-                $batchModel = Batch::firstOrNew(['no_of_units' => $batch['no_of_units']]);
+                $batchModel = Batch::firstOrNew([
+                    'batch_number' => $batch['batch_no'],  
+                    'no_of_units' => $batch['no_of_units']
+                ]);
                 $isNewBatch = !$batchModel->exists;
                 $batchModel->brand_id = $batch['brand_id'] ?? null;
                 $batchModel->product_id = $batch['product_id'] ?? null;
@@ -738,7 +744,11 @@ class StockController extends Controller
 
                 // Move the pricing information update inside the loop
                 if (!empty($batch['hospitalPrice']) || !empty($batch['wholesalePrice']) || !empty($batch['retailPrice'])) {
-                    $sellModel = Sell::firstOrNew(['batch_id' => $batchModel->id]);
+                    $sellModel = Sell::firstOrNew([
+                        'batch_id' => $batchModel->id,
+                        'no_of_units' => $batch['no_of_units']
+                    ]);
+                
                     $sellModel->sku = $batch['product_id'];
                     $sellModel->batch_no = $batch['batch_no'];
                     $sellModel->hospital_price = $batch['hospitalPrice'] ?? null;
@@ -746,9 +756,11 @@ class StockController extends Controller
                     $sellModel->retail_price = $batch['retailPrice'] ?? null;
                     $sellModel->valid_from = $batch['manufacturing_date'] ?? null;
                     $sellModel->valid_to = $batch['expiry_date'] ?? null;
-                    $sellModel->batch_id = $batchModel->id; // Use the model's ID, not batch_id from request
+                    $sellModel->batch_id = $batchModel->id;
+                    $sellModel->no_of_units = $batch['no_of_units'];
                     $sellModel->save();
                 }
+                
 
                 $batchDetails = [
                     'batch_number' => $batchModel->batch_number,
