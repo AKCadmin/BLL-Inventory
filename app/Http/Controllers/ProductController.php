@@ -233,6 +233,7 @@ class ProductController extends Controller
 
     public function productDataGetById(Request $request)
     {
+        // dd($request->all());
         try{
             if($request->productId){
             $products = Product::where('id', $request->productId)->first();

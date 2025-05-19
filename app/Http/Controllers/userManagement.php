@@ -28,7 +28,7 @@ class userManagement extends Controller
         //     abort(403); 
         // }
         $roles = role::orderBy('id', 'asc')->get();
-        $organizations = Organization::all();
+        $organizations = Organization::where('status',1)->get();
         $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
         // dd($moduleusers[0]->roles->role_name);
 

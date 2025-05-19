@@ -419,12 +419,13 @@ class HistoryController extends Controller
     public function historyProducts(Request $request)
     {
         try {
+            // dd($request->all());
             $organization = Organization::where('id', '=', $request->company)->first();
             // config(['database.connections.pgsql.database' => $organization->name]);
             // DB::purge('pgsql');
             // DB::connection('pgsql')->getPdo();
             // dd($organization);
-            $products = Product::select('id', 'name')->get();
+            $products = Product::where('company_id','=',$request->company)->select('id', 'name')->get();
 
 
             return response()->json(['products' => $products]);

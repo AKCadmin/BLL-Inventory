@@ -43,8 +43,8 @@ if (!empty($_SESSION['lang'])) {
                         </li>
                     @endcan
                     @can('view-customer')
-                    <li><a href="{{ route('customer.index') }}" class=""><i
-                                class="bx bx-add-to-queue"></i>Customer</a></li>
+                    <li><a href="{{ route('customer.index') }}" key="t-role-manager" class=""><i
+                                class="bx bx-add-to-queue"></i><span key="t-products">Customer</span></a></li>
                     @endcan
 
                     @can('view-product')
