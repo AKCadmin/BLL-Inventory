@@ -43,21 +43,23 @@
                                         </div>
                                     </div>
                                 </div>
-                                @if(auth()->user()->role == 1)
-                                <div class="col-md-6">
-                                <label for="autoSizingSelect">Select Organization</label>
-                                
-                                    <select id="organizationName" name="organizationName" class="form-control custom-select">
-                                        <option value="">Select Organization</option>
-                                        @foreach ($organizations as $organization)
-                                            <option value="{{ $organization->name }}">{{ str_replace('_', ' ', $organization->name) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                @if (auth()->user()->role == 1)
+                                    <div class="col-md-6">
+                                        <label for="autoSizingSelect">Select Organization</label>
+
+                                        <select id="organizationName" name="organizationName"
+                                            class="form-control custom-select">
+                                            <option value="">Select Organization</option>
+                                            @foreach ($organizations as $organization)
+                                                <option value="{{ $organization->name }}">
+                                                    {{ str_replace('_', ' ', $organization->name) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 @else
-                                <div class="col-md-6">
-                                </div>
+                                    <div class="col-md-6">
+                                    </div>
                                 @endif
 
                                 <div class="col-md-6">
@@ -175,7 +177,26 @@
         var organizationId = null;
         $('#organizationName').change(function() {
             organizationId = $(this).val(); // Get selected value
-           customerList(organizationId);
+            customerList(organizationId);
+            if (organizationId) {
+                $.ajax({
+                    url: "{{ route('switch.organization') }}", // Your Laravel route
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}", // CSRF token
+                        organization: organizationId
+                    },
+                    success: function(response) {
+
+                    },
+                    error: function(xhr) {
+                        let error = xhr.responseJSON ? xhr.responseJSON.message :
+                            'An error occurred';
+                        $('#errorMessage').text(error).show(); // Show error message
+                        $('#successMessage').hide();
+                    }
+                });
+            }
         });
         GetSKU();
         customerList();
@@ -249,7 +270,9 @@
 
         function customerList(organizationId) {
             let url = `{{ route('customers.list') }}`;
-            ajaxRequest(url, 'GET', {organizationId},
+            ajaxRequest(url, 'GET', {
+                    organizationId
+                },
                 function(response) {
                     console.log(response, "response")
                     if (response.customers && response.customers.length > 0) {
@@ -316,7 +339,7 @@
 
                     if (response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
-                            console.log(batch.batch_id,"jjjaaj")
+                            console.log(batch.batch_id, "jjjaaj")
                             batchSelect.append('<option value="' + batch.batch_id +
                                 '">' + batch.batch_no + '</option>');
                         });
@@ -338,7 +361,7 @@
 
         $('.batchNoSelect').on('change', function() {
             var selectedBatch = $(this).val();
-              console.log(selectedBatch,"selectedBatch")
+            console.log(selectedBatch, "selectedBatch")
             if (selectedBatch) {
                 loadBatchData(selectedBatch);
             } else {
@@ -684,7 +707,7 @@
 
                     if (response.batches && response.batches.length > 0) {
                         response.batches.forEach(function(batch) {
-                            console.log(batch,"abcbatch")
+                            console.log(batch, "abcbatch")
                             $batchSelect.append(
                                 `<option value="${batch.batch_id}">${batch.batch_no} (${batch.valid_to})</option>`
                             );
@@ -798,7 +821,7 @@
                 body: JSON.stringify(formData),
             });
             const result = await response.json();
-            if (response.ok) {          
+            if (response.ok) {
                 toastr.success("Form submitted successfully!");
                 console.log(result);
                 window.location.href = "{{ route('sellCounter.index') }}";
