@@ -240,6 +240,7 @@ class CustomerController extends Controller
        
         try {
             $databaseName = $request->organizationId;
+            session()->put('db_name', $databaseName);
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
             }
