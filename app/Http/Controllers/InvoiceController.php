@@ -71,16 +71,16 @@ class InvoiceController extends Controller
     public function download($orderId)
     {
         try {
-           
+
             setDatabaseConnection();
-            
+
             $invoice = Invoice::with(['sellCounter' => function ($query) {
-                $query->with(['product', 'batch', 'company','customerList','sellPrice']);
+                $query->with(['product', 'batch', 'company', 'customerList', 'sellPrice']);
             }])
-            ->where('order_id', $orderId)
-            ->where('invoice_approved', true)
-            ->firstOrFail();
- dd($invoice);
+                ->where('order_id', $orderId)
+                ->where('invoice_approved', true)
+                ->firstOrFail();
+           
             // Get first sell counter record for company details
             $firstSellCounter = $invoice->sellCounter->first();
             if (!$firstSellCounter) {
@@ -121,17 +121,17 @@ class InvoiceController extends Controller
                 'invoice_number' => $invoice->invoice_number,
                 'order_id' => $invoice->order_id,
                 'date' => $invoice->created_at->format('Y-m-d'),
-                
+
                 // Organization/Company details
                 'company_name' => $organization->name,
                 'company_address' => $organization->address,
                 'company_email' => $organization->contact_email,
                 'company_phone' => $organization->phone_no,
-                
+
                 // Customer details
                 'customer_name' => $invoice->customer,
                 'customer_type' => $invoice->customer_type,
-                
+
                 // Products details
                 'products' => $products,
                 'total_amount' => $totalAmount
@@ -141,17 +141,18 @@ class InvoiceController extends Controller
 
             // Generate PDF
             $pdf = PDF::loadView('invoice.index', $invoiceData);
-            
+
             // Set filename
             $filename = 'invoice-' . $invoice->invoice_number . '.pdf';
 
             // Return the PDF for download
             return $pdf->download($filename);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to generate invoice',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
