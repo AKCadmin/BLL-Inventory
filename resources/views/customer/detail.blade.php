@@ -149,7 +149,8 @@
                                         <tbody>
                                             <tr>
                                                 <td></td>
-                                                <td>Opening Balance</td>
+                                                <td></td>
+                                                {{-- <td>Opening Balance</td> --}}
                                                 <td></td>
                                                 <td></td>
                                                 <td>{{ $customer->opening_balance ?? 0 }}</td>
