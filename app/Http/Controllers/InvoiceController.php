@@ -71,6 +71,7 @@ class InvoiceController extends Controller
     public function download($orderId)
     {
         try {
+           
             setDatabaseConnection();
             
             $invoice = Invoice::with(['sellCounter' => function ($query) {
@@ -79,7 +80,7 @@ class InvoiceController extends Controller
             ->where('order_id', $orderId)
             ->where('invoice_approved', true)
             ->firstOrFail();
-
+ dd($invoice);
             // Get first sell counter record for company details
             $firstSellCounter = $invoice->sellCounter->first();
             if (!$firstSellCounter) {
