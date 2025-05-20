@@ -86,7 +86,7 @@ class InvoiceController extends Controller
             if (!$firstSellCounter) {
                 throw new \Exception('No sell counter records found');
             }
-
+dd($firstSellCounter);
             // Get organization details
             $organization = $firstSellCounter->company;
 
