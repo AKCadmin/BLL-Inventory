@@ -178,28 +178,9 @@
         $('#organizationName').change(function() {
             organizationId = $(this).val(); // Get selected value
             customerList(organizationId);
-            if (organizationId) {
-                $.ajax({
-                    url: "{{ route('switch.organization') }}", // Your Laravel route
-                    method: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}", // CSRF token
-                        organization: organizationId
-                    },
-                    success: function(response) {
-
-                    },
-                    error: function(xhr) {
-                        let error = xhr.responseJSON ? xhr.responseJSON.message :
-                            'An error occurred';
-                        $('#errorMessage').text(error).show(); // Show error message
-                        $('#successMessage').hide();
-                    }
-                });
-            }
         });
         GetSKU();
-        customerList();
+        //customerList();
 
         function GetSKU() {
 
