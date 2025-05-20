@@ -271,13 +271,14 @@
 
         $('#customer').on('change', function() {
             let customerId = $(this).val();
-            GetCustomer(customerId);
+            $('#organizationName').val();
+            GetCustomer(customerId,organizationId);
         })
 
-        function GetCustomer(customerId) {
+        function GetCustomer(customerId,organizationId) {
             let url = `{{ route('customers.list') }}`;
             ajaxRequest(url, 'GET', {
-                    customerId
+                    customerId,organizationId
                 },
                 function(response) {
                     console.log(response, "responsennnnn")
