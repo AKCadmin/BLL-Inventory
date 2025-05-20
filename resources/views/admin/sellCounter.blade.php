@@ -172,7 +172,11 @@
 <script>
     $(document).ready(function() {
         $('#organization-filter').hide();
-
+        var organizationId = null;
+        $('#organizationName').change(function() {
+            organizationId = $(this).val(); // Get selected value
+           customerList(organizationId);
+        });
         GetSKU();
         customerList();
 
@@ -243,9 +247,9 @@
             }
         });
 
-        function customerList() {
+        function customerList(organizationId) {
             let url = `{{ route('customers.list') }}`;
-            ajaxRequest(url, 'GET', {},
+            ajaxRequest(url, 'GET', {organizationId},
                 function(response) {
                     console.log(response, "response")
                     if (response.customers && response.customers.length > 0) {

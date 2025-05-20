@@ -237,8 +237,9 @@ class CustomerController extends Controller
 
     public function customerList(Request $request)
     {
+       
         try {
-            $databaseName = Session::get('db_name');
+            $databaseName = $request->organizationId;
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
             }
