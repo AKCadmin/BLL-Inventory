@@ -116,7 +116,7 @@ class InvoiceController extends Controller
                     ]
                 ];
             }
-
+dd($organization);
             $invoiceData = [
                 'invoice_number' => $invoice->invoice_number,
                 'order_id' => $invoice->order_id,
