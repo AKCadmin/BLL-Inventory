@@ -123,7 +123,7 @@ class InvoiceController extends Controller
                 'date' => $invoice->created_at->format('Y-m-d'),
 
                 // Organization/Company details
-                'company_name' => $organization->name,
+                'company_name' => $organization->name != null ? $organization->name : 'N/A',
                 'company_address' => $organization->address,
                 'company_email' => $organization->contact_email,
                 'company_phone' => $organization->phone_no,
