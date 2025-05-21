@@ -8,6 +8,7 @@ use App\Models\SellCounter;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\Batch;
+use App\Models\Brand;
 use PDF;
 
 class InvoiceController extends Controller
@@ -86,7 +87,7 @@ class InvoiceController extends Controller
             if (!$firstSellCounter) {
                 throw new \Exception('No sell counter records found');
             }
-dd($firstSellCounter);
+
             // Get organization details
             $organization = $firstSellCounter->company;
 
@@ -116,17 +117,16 @@ dd($firstSellCounter);
                     ]
                 ];
             }
-dd($organization);
+
+            $companyDetails = Brand::where('id',1)->first();
             $invoiceData = [
                 'invoice_number' => $invoice->invoice_number,
                 'order_id' => $invoice->order_id,
                 'date' => $invoice->created_at->format('Y-m-d'),
-
-                // Organization/Company details
-                'company_name' => $organization->name != null ? $organization->name : 'N/A',
-                'company_address' => $organization->address,
-                'company_email' => $organization->contact_email,
-                'company_phone' => $organization->phone_no,
+                'company_name' => $companyDetails->name != null ? $companyDetails->name : 'N/A',
+                'company_address' => $companyDetails->address,
+                'company_email' => $companyDetails->contact_email,
+                'company_phone' => $companyDetails->phone_no,
 
                 // Customer details
                 'customer_name' => $invoice->customer,
