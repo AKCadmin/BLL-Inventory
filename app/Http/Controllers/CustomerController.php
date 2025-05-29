@@ -239,7 +239,7 @@ class CustomerController extends Controller
     {
        
         try {
-            $databaseName = $request->organizationId;
+            $databaseName = $request->db_name;
           
             if (!$databaseName) {
                 return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
