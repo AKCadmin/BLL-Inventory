@@ -257,7 +257,9 @@ class CustomerController extends Controller
             if ($request->company) {
 
                 $organization = Organization::where('id', $request->company)->first();
-            } else {
+            } 
+            
+            if($databaseName){
                 $organization = Organization::where('name', $databaseName)->first();
             }
 
