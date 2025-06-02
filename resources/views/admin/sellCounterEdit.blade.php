@@ -813,12 +813,18 @@
         //         }
         //     }
         // ];
+        $('#organization-filter').hide();
+        var organizationId = null;
+        $('#organizationName').change(function() {
+            organizationId = $(this).val(); // Get selected value
+            customerList(organizationId);
+        });
         const responseData = @json($responseData);
         console.log(responseData,"responseData")
 
-        function customerList() {
+        function customerList(organizationId) {
             let url = `{{ route('customers.list') }}`;
-            ajaxRequest(url, 'GET', {}, function(response) {
+            ajaxRequest(url, 'GET', {organizationId}, function(response) {
                 console.log(response, "response");
                 if (response.customers && response.customers.length > 0) {
                     $('.customer').html('<option selected disabled>Select Product Customer</option>');
