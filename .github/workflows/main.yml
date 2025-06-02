@@ -1,44 +1,162 @@
-name: Deploy Laravel to Digital Ocean
+name: Deploy Laravel Application
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to Contabo VPS
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pgsql, dom, filter, gd, json, mbstring, pdo
-        
-    - name: Install Dependencies
-      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-        
-    - name: Install sshpass
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y sshpass
-        
-    - name: Deploy to Digital Ocean
-      env:
-        SERVER_PASSWORD: 'mML*dh%kN!5j8&Th'
-        HOST: '139.59.17.81'
-        USERNAME: 'root'
-      run: |
-        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $USERNAME@$HOST '
-          cd /var/www/laravel &&
-          git pull origin main &&
-          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev &&
+        host: 94.136.184.76
+        username: root
+        password: ENV4GD5Qq9eQBhoHL2vj6ZXM3G
+        port: 22
+        timeout: 300s
+        command_timeout: 60m
+        script: |
+          set -e
           
-          php artisan route:cache &&
-          php artisan view:cache &&
-          php artisan migrate --force &&
-          chown -R www-data:www-data . &&
-          chmod -R 775 storage bootstrap/cache
-        '
+          PROJECT_PATH="/var/www/laravel/BLL-Inventory"
+          BACKUP_PATH="/tmp/env_backup_$(date +%Y%m%d_%H%M%S)"
+          GIT_REPO="https://github.com/AKCadmin/BLL-Inventory.git"
+          
+          echo "=== Starting Laravel Deployment ==="
+          echo "Project Path: $PROJECT_PATH"
+          echo "Repository: $GIT_REPO"
+          echo "Timestamp: $(date)"
+          
+          # Check if project directory exists
+          if [ ! -d "$PROJECT_PATH" ]; then
+              echo "ERROR: Project directory $PROJECT_PATH does not exist"
+              exit 1
+          fi
+          
+          # Navigate to project directory
+          cd "$PROJECT_PATH"
+          
+          # Backup .env file
+          echo "Backing up .env file..."
+          if [ -f ".env" ]; then
+              mkdir -p "$BACKUP_PATH"
+              cp .env "$BACKUP_PATH/.env"
+              echo "✓ .env file backed up to $BACKUP_PATH/.env"
+          else
+              echo "⚠️  WARNING: .env file not found in project directory"
+          fi
+          
+          # Navigate to parent directory and remove project
+          echo "Removing existing project directory..."
+          cd /var/www/laravel
+          rm -rf BLL-Inventory
+          echo "✓ Old project directory removed"
+          
+          # Clone the repository
+          echo "Cloning repository..."
+          git clone "$GIT_REPO"
+          echo "✓ Repository cloned successfully"
+          
+          # Enter project directory
+          cd BLL-Inventory
+          
+          # Restore .env file
+          echo "Restoring .env file..."
+          if [ -f "$BACKUP_PATH/.env" ]; then
+              cp "$BACKUP_PATH/.env" .env
+              echo "✓ .env file restored successfully"
+          else
+              echo "⚠️  WARNING: No .env backup found, you may need to recreate it"
+          fi
+          
+          # Check if composer is available
+          if ! command -v composer &> /dev/null; then
+              echo "❌ ERROR: Composer not found on server"
+              echo "Please install Composer on your server first"
+              exit 1
+          fi
+          
+          # Install composer dependencies
+          echo "Installing Composer dependencies..."
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          echo "✓ Composer dependencies installed successfully"
+          
+          # Set proper permissions
+          echo "Setting proper permissions..."
+          chown -R www-data:www-data "$PROJECT_PATH" || chown -R apache:apache "$PROJECT_PATH" || chown -R nginx:nginx "$PROJECT_PATH"
+          chmod -R 755 "$PROJECT_PATH"
+          chmod -R 775 "$PROJECT_PATH/storage" 2>/dev/null || echo "⚠️  Storage directory not found"
+          chmod -R 775 "$PROJECT_PATH/bootstrap/cache" 2>/dev/null || echo "⚠️  Bootstrap cache directory not found"
+          echo "✓ Permissions set successfully"
+          
+          # Clear Laravel caches
+          echo "Clearing Laravel caches..."
+          php artisan config:clear 2>/dev/null || echo "⚠️  Warning: Could not clear config cache"
+          php artisan cache:clear 2>/dev/null || echo "⚠️  Warning: Could not clear application cache"
+          php artisan view:clear 2>/dev/null || echo "⚠️  Warning: Could not clear view cache"
+          php artisan route:clear 2>/dev/null || echo "⚠️  Warning: Could not clear route cache"
+          echo "✓ Laravel caches cleared"
+          
+          # Generate application key if needed
+          if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
+              echo "Generating application key..."
+              php artisan key:generate --force
+              echo "✓ Application key generated"
+          fi
+          
+          # Optimize for production
+          echo "Optimizing for production..."
+          php artisan config:cache 2>/dev/null || echo "⚠️  Could not cache config"
+          php artisan route:cache 2>/dev/null || echo "⚠️  Could not cache routes"  
+          php artisan view:cache 2>/dev/null || echo "⚠️  Could not cache views"
+          echo "✓ Production optimization complete"
+          
+          # Run migrations (uncomment if needed)
+          # echo "Running database migrations..."
+          # php artisan migrate --force
+          # echo "✓ Database migrations completed"
+          
+          # Clean up backup
+          echo "Cleaning up temporary files..."
+          rm -rf "$BACKUP_PATH"
+          echo "✓ Cleanup completed"
+          
+          # Final status check
+          echo "Verifying deployment..."
+          if [ -f "$PROJECT_PATH/.env" ] && [ -d "$PROJECT_PATH/vendor" ]; then
+              echo "✓ Deployment verification successful"
+          else
+              echo "❌ Deployment verification failed"
+              exit 1
+          fi
+          
+          echo "=== Deployment completed successfully! ==="
+          echo "Application is now live at: $PROJECT_PATH"
+          echo "Deployed commit: ${{ github.sha }}"
+          
+    - name: Deployment Success Notification
+      if: success()
+      run: |
+        echo "🎉 Deployment completed successfully!"
+        echo "📅 Deployed at: $(date)"
+        echo "🔗 Repository: ${{ github.repository }}"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "🌐 Server: Contabo VPS"
+        
+    - name: Deployment Failure Notification
+      if: failure()
+      run: |
+        echo "❌ Deployment failed!"
+        echo "📅 Failed at: $(date)"
+        echo "🔗 Repository: ${{ github.repository }}"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "Please check the logs above for error details."
