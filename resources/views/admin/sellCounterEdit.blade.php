@@ -815,14 +815,15 @@
         // ];
         $('#organization-filter').hide();
        
-          var  organizationId = $('#organizationName').val(); // Get selected value
-            customerList(organizationId);
+        var company = $('#organization-filter').val(); // Get selected value
+        console.log(company,"orga")
+        customerList(company);
         const responseData = @json($responseData);
         console.log(responseData,"responseData")
 
-        function customerList(organizationId) {
+        function customerList(company) {
             let url = `{{ route('customers.list') }}`;
-            ajaxRequest(url, 'GET', {organizationId}, function(response) {
+            ajaxRequest(url, 'GET', {company}, function(response) {
                 console.log(response, "response");
                 if (response.customers && response.customers.length > 0) {
                     $('.customer').html('<option selected disabled>Select Product Customer</option>');

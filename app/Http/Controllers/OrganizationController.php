@@ -192,7 +192,7 @@ class OrganizationController extends Controller
     {
 
         try {
-            $companies = Organization::orderBy('id', 'desc')->get();
+            $companies = Organization::where('status',1)->orderBy('id', 'desc')->get();
             return response()->json(['companies' => $companies]);
         } catch (\Exception $e) {
             return response()->json([
@@ -273,7 +273,8 @@ class OrganizationController extends Controller
                     // ->whereHas('brand', function($query) use ($request) {
                     //     $query->where('id', '=', $request->company);
                     // })
-                    ->join('organizations', 'products.company_id', '=', 'organizations.id');
+                    ->join('organizations', 'products.company_id', '=', 'organizations.id')
+                    ->where('products.status','available');
                 if (!empty($request->company)) {
                     $products->where('organizations.id', $request->company);
                 }
