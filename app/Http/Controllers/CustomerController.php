@@ -77,7 +77,7 @@ class CustomerController extends Controller
             $customer = Customer::first();
             // dd(DB::connection()->getConfig());
             // dd($customer->getAttributes());
-            
+
             $saleUser = Customer::create([
                 'organization_id' => $organizationId,
                 'name' => $request->input('name'),
@@ -237,16 +237,22 @@ class CustomerController extends Controller
 
     public function customerList(Request $request)
     {
-       
+
         try {
-            $databaseName = $request->db_name;
-          
-            if (!$databaseName) {
-                return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+            if ($request->organizationId) {
+                $databaseName = $request->organizationId;
             }
-            config(['database.connections.pgsql.database' => $databaseName]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
+            if ($request->db_name) {
+
+                $databaseName = $request->db_name;
+
+                if (!$databaseName) {
+                    return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+                }
+                config(['database.connections.pgsql.database' => $databaseName]);
+                DB::purge('pgsql');
+                DB::connection('pgsql')->getPdo();
+            }
 
             if ($request->company) {
 
@@ -313,13 +319,13 @@ class CustomerController extends Controller
 
     public function detail(Customer $customer)
     {
-       
+
 
         $transactions = CustomerTransaction::where('customer_id', $customer->id)
             ->orderBy('created_at', 'asc')
             ->get();
 
-          
+
 
         return view('customer.detail', compact('customer', 'transactions'));
     }

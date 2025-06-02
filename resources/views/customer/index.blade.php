@@ -511,6 +511,7 @@
                         'change');
                     $('#name').val(response.customer.name);
                     $('#phone_number').val(response.customer.phone_number);
+                    $('#opening_balance').val(response.customer.opening_balance);
                     $('#address').val(response.customer.address);
                     $('#credit_limit').val(response.customer.credit_limit);
                     $('#payment_days').val(response.customer.payment_days);

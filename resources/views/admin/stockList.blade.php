@@ -26,7 +26,7 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title mb-4">Stock List {{session('db_name')}} jj</h4>
+                                <h4 class="card-title mb-4">Stock List</h4>
                                 <div class="row mb-3">
                                     {{-- <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
