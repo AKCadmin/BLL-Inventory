@@ -259,7 +259,7 @@ class CustomerController extends Controller
                 $organization = Organization::where('id', $request->company)->first();
             } 
             
-            if($databaseName){
+            if(!empty($databaseName)){
                 $organization = Organization::where('name', $databaseName)->first();
             }
 
