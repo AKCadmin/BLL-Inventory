@@ -814,11 +814,9 @@
         //     }
         // ];
         $('#organization-filter').hide();
-        var organizationId = null;
-        $('#organizationName').change(function() {
-            organizationId = $(this).val(); // Get selected value
+       
+          var  organizationId = $('#organizationName').val(); // Get selected value
             customerList(organizationId);
-        });
         const responseData = @json($responseData);
         console.log(responseData,"responseData")
 
@@ -1046,7 +1044,7 @@
             });
         }
 
-        customerList();
+       // customerList();
     });
 </script>
 
