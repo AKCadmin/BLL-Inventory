@@ -94,7 +94,7 @@ class InvoiceController extends Controller
             // Prepare products array and calculate total
             $products = [];
             $totalAmount = 0;
-
+dd($invoice->sellCounter);
             foreach ($invoice->sellCounter as $sellCounter) {
                 // dd($sellCounter->customerList);
                 $unitPrice = $this->getPriceByCustomerType($sellCounter);
