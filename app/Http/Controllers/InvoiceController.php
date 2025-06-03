@@ -101,6 +101,7 @@ class InvoiceController extends Controller
                 $amount = $sellCounter->provided_no_of_cartons * $unitPrice;
                 $totalAmount += $amount;
 
+                dd($unitPrice,$amount,$totalAmount);
                 $products[] = [
                     'name' => $sellCounter->product->name,
                     'description' => $sellCounter->product->description,
