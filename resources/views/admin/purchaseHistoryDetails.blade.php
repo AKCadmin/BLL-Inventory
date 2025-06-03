@@ -44,7 +44,7 @@
                                                     <p><strong>Expiry Date:</strong> {{ $item->expiry_date }}</p>
                                                     <p><strong>Base Price:</strong> {{ $item->base_price }}</p>
                                                     <p><strong>Exchange Rate:</strong> {{ $item->exchange_rate }}</p>
-                                                    <p><strong>Notes:</strong> {{ $item->notes }}</p>
+                                                    {{-- <p><strong>Notes:</strong> {{ $item->notes }}</p> --}}
 
         
                                                 </div>
