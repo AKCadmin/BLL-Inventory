@@ -94,14 +94,14 @@ class InvoiceController extends Controller
             // Prepare products array and calculate total
             $products = [];
             $totalAmount = 0;
-dd($invoice->sellCounter);
+
             foreach ($invoice->sellCounter as $sellCounter) {
-                // dd($sellCounter->customerList);
+               
                 $unitPrice = $this->getPriceByCustomerType($sellCounter);
                 $amount = $sellCounter->provided_no_of_cartons * $unitPrice;
                 $totalAmount += $amount;
 
-                dd($unitPrice,$amount,$totalAmount);
+               
                 $products[] = [
                     'name' => $sellCounter->product->name,
                     'description' => $sellCounter->product->description,
@@ -138,7 +138,6 @@ dd($invoice->sellCounter);
                 'total_amount' => $totalAmount
             ];
 
-            dd($invoiceData);
 
             // Generate PDF
             $pdf = PDF::loadView('invoice.index', $invoiceData);
@@ -160,6 +159,7 @@ dd($invoice->sellCounter);
 
     private function getPriceByCustomerType($sellCounter)
     {
+         
         if (!$sellCounter->sellPrice) {
             return 0;
         }
@@ -169,7 +169,7 @@ dd($invoice->sellCounter);
                 return $sellCounter->sellPrice->wholesale_price;
             case 'hospital':
                 return $sellCounter->sellPrice->hospital_price;
-            case 'retail':
+            case 'retailer':
                 return $sellCounter->sellPrice->retail_price;
             default:
                 return 0;
