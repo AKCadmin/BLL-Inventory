@@ -137,7 +137,7 @@ class InvoiceController extends Controller
                 'total_amount' => $totalAmount
             ];
 
-            // dd($invoiceData);
+            dd($invoiceData);
 
             // Generate PDF
             $pdf = PDF::loadView('invoice.index', $invoiceData);
