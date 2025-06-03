@@ -424,9 +424,9 @@
                     <td>${productDetails?.unit || "N/A"}</td>
                     <td>${productDetails?.total_buy_price || "N/A"}</td>
                     <td>${productDetails?.no_of_units || "N/A"}</td>
-                    <td>${productDetails?.previous_total_no_of_quantity}</td>
+                    <td>${productDetails?.total_quantity}</td>
                     <td>${productDetails?.invoice || "N/A"}</td>
-                    
+                    total_quantity
                         <td>
                             <a href="/purchase/details/${encodeURIComponent(productDetails?.product_id)}/${purchaseDetailsCreatedAt}/${productDetails?.no_of_units}" 
                                class="btn btn-sm btn-info" 

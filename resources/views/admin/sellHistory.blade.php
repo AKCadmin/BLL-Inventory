@@ -96,7 +96,8 @@
                                             <th>Id</th>
                                             <th>Order Id</th>
                                             <th>Customer Name</th>
-                                            <th>Total No. of Cartoons</th>
+                                            {{-- <th>Total No. of Cartoons</th> --}}
+                                            <th>Total No. of Item Per Cartoon</th>
                                             <th>Total Buy Price</th>
                                             <th>Action</th>
                                         </tr>
