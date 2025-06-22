@@ -162,8 +162,8 @@
                                         <tr>
                                             <td>Opening Balance</td>
                                             <td></td>
-                                            <td></td>
                                             <td>{{ number_format($newAmount, 2, '.', '') }}</td>
+                                            <td></td>
                                         </tr>
                                         
                                         @foreach ($transactions as $transaction)

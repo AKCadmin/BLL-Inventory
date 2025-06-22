@@ -41,6 +41,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
+          
 
             if (auth()->user()->cannot('add-product')) {
                 abort(403); 
