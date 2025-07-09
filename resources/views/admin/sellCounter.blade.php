@@ -49,15 +49,7 @@
                                     <!-- Left Column -->
                                     <div class="col-md-6">
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Sell Type</label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="internalPurchase"
-                                                    name="internal_purchase" value="1">
-                                                <label class="form-check-label" for="internalPurchase">Internal
-                                                    Sale</label>
-                                            </div>
-                                        </div>
+                                        
 
                                         <div class="mb-3">
                                             <label for="paymentStatus" class="form-label">Payment Status</label>

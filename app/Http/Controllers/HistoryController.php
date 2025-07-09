@@ -123,21 +123,20 @@ class HistoryController extends Controller
         }
     }
 
-    public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
-    {
-
-        $product = Product::where('id', $id)->first();
-        $brand = Brand::where('id', $product->brand_id)->first();
+public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
+{
+    try {
+        $product = Product::findOrFail($id);
+        $brand = Brand::findOrFail($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-        // $organization = Organization::select('id','name')->where('name',3)->first();
 
         setDatabaseConnection();
 
         $batchData = DB::table('batches')
-        ->leftJoin('sell', function ($join) {
-            $join->on('sell.batch_no', '=', 'batches.batch_number')
-                 ->on('sell.no_of_units', '=', 'batches.no_of_units');
-        })
+            ->leftJoin('sell', function ($join) {
+                $join->on('sell.batch_no', '=', 'batches.batch_number')
+                    ->on('sell.no_of_units', '=', 'batches.no_of_units');
+            })
             ->select(
                 'sell.*',
                 'batches.id as batch_id',
@@ -154,28 +153,25 @@ class HistoryController extends Controller
                 'batches.quantity',
                 'batches.created_at',
                 'batches.updated_at',
-                'batches.invoice_no',
+                'batches.invoice_no'
             )
-            ->where('product_id', $id)
-            ->where(['batches.no_of_units' => $noOfcartoon])
-            // ->where(['sell.no_of_units' => $noOfcartoon])
+            ->where('batches.product_id', $id)
+            ->where('batches.no_of_units', $noOfcartoon)
             ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
             ->get();
 
-        // Check if batch data is empty
         if ($batchData->isEmpty()) {
             return redirect()->route('stock.list')->with('error', 'No stock batches found for the selected product.');
         }
 
-        // Group cartons under their respective batches and then by product
         $groupedData = $batchData->groupBy('product_id')->map(function ($items) use ($brand) {
-            $product = $items->first(); // Common product details
+            $product = $items->first();
 
             return [
                 'product_id' => $product->product_id,
                 'brand_name' => $brand->name,
                 'batches' => $items->groupBy('batch_id')->map(function ($batchItems) {
-                    $batch = $batchItems->first(); // Common batch details for a specific batch
+                    $batch = $batchItems->first();
 
                     return [
                         'batch_id' => $batch->batch_id,
@@ -191,22 +187,31 @@ class HistoryController extends Controller
                         'notes' => $batch->notes,
                         'created_at' => $batch->created_at,
                         'updated_at' => $batch->updated_at,
-                        'hospital_price' => $batch->hospital_price,
-                        'wholesale_price' => $batch->wholesale_price,
-                        'retail_price' => $batch->retail_price,
+                        'hospital_price' => $batch->hospital_price ?? null,
+                        'wholesale_price' => $batch->wholesale_price ?? null,
+                        'retail_price' => $batch->retail_price ?? null,
                         'invoice_no' => $batch->invoice_no,
-
                     ];
                 })->values(),
             ];
         });
-       
+
         if (auth()->user()->role == 1) {
             return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
         }
-        // dd($groupedData);
+
         return view('admin.edit', compact('groupedData', 'brand'));
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        dd($e->getMessage());
+        return redirect()->route('stock.list')->with('error', 'Product or brand not found.');
+    } catch (\Exception $e) {
+        dd($e->getMessage());
+        \Log::error('Purchase History Error: ' . $e->getMessage());
+        return redirect()->route('stock.list')->with('error', 'Something went wrong. Please try again later.');
     }
+}
+
 
     public function detailHistory(Request $request, $productId, $encodedCreatedAt, $noOfcartoon)
     {
