@@ -27,10 +27,10 @@
                                 <div class="RoleTableHeader">
                                     <h4 class="card-title"></h4>
 
-                                    <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
+                                    {{-- <a href="#" class="btn btn-primary waves-effect waves-light btn-sm"
                                         id="openModalBtn">Create a Organization
                                         <i class="mdi mdi-arrow-right ms-1"></i>
-                                    </a>
+                                    </a> --}}
 
 
                                 </div><br>

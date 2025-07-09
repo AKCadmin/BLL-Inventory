@@ -156,10 +156,10 @@ if (!empty($_SESSION['lang'])) {
                                  <li><a href="{{ route('sellCounter.index') }}" class=""><i
                                             class="bx bx-list-check"></i> Sell List</a></li> 
                             @endcan
-                            @can('view-order')
+                            {{-- @can('view-order')
                                 <li><a href="{{ route('sell.orders.list') }}" class=""><i class="bx bx-receipt"></i>
                                         Order List</a></li> <!-- Receipt Icon -->
-                            @endcan
+                            @endcan --}}
                         </ul>
                     </li>
                     @endcan
