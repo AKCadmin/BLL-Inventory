@@ -104,7 +104,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //user management routes
     Route::get('/user-management', [userManagement::class, 'show'])->name('user.management');
-    Route::view('/user-management', 'usersManagement.index');
+    // Route::view('/user-management', 'usersManagement.index');
     Route::get('/user-list', [userManagement::class, 'list'])->name('users.list');
     Route::get('/purchase/history', [HistoryController::class, 'history'])->name('purchase.history');
     Route::get('/purchase/get/history', [HistoryController::class, 'getHistory'])->name('purchase.getHistory');

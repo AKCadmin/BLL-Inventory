@@ -22,19 +22,30 @@ class userManagement extends Controller
 
     public function show()
     {
+        try {
+            // Optional authorization check
+            // if (auth()->user()->cannot('view-user-management')) {
+            //     abort(403); 
+            // }
 
+            $roles = Role::orderBy('id', 'asc')->get();
+            $organizations = Organization::where('status', 1)->get();
+            $moduleusers = User::with('roles')
+                ->where('id', '!=', Auth::id())
+                ->orderBy('id', 'asc')
+                ->get();
 
-        // if (auth()->user()->cannot('view-user-management')) {
-        //     abort(403); 
-        // }
-        $roles = role::orderBy('id', 'asc')->get();
-        $organizations = Organization::where('status',1)->get();
-        $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
-        // dd($moduleusers[0]->roles->role_name);
-        // dd($roles,$organizations,$moduleusers);
+            return view('usersManagement.index', compact('roles', 'moduleusers', 'organizations'));
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            // Log the error for debugging
+            \Log::error('Error in UserManagementController@show: ' . $e->getMessage());
 
-        return view('usersManagement.index', compact('roles', 'moduleusers', 'organizations'));
+            // Redirect back with an error message
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+        }
     }
+
 
     public function create(Request $request)
     {
@@ -348,7 +359,7 @@ class userManagement extends Controller
             ]);
             $users = User::where('organization_id', '=', $request->company)
                 ->orderBy('id', 'asc')->get();
-                
+
             if ($users->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
