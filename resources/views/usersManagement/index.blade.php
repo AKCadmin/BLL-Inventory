@@ -66,7 +66,7 @@
                                                 <td>{{ $item->username }}</td>
                                                 <td>{{ $item->email }}</td>
                                                 <td>{{ $item->phone }}</td>
-                                                <td>{{ $item->roles->role_name }}</td>
+                                                <td>{{ optional($item->roles)->role_name ?? 'N/A' }}</td>
 
                                                 <td>
                                                     <label class="switch">
