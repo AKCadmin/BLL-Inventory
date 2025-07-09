@@ -89,7 +89,7 @@
                                     </div>
 
                                     <!-- Right Column -->
-                                    <div class="col-md-6 mt-2">
+                                    <div class="col-md-6">
 
                                         @if (auth()->user()->role == 1)
                                             <div class="mb-3">
