@@ -159,10 +159,10 @@ public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
             ->where('batches.no_of_units', $noOfcartoon)
             ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
             ->get();
-dd($batchData);
-        if ($batchData->isEmpty()) {
-            return redirect()->route('stock.list')->with('error', 'No stock batches found for the selected product.');
-        }
+// dd($batchData);
+        // if ($batchData->isEmpty()) {
+        //     return redirect()->route('stock.list')->with('error', 'No stock batches found for the selected product.');
+        // }
 
         $groupedData = $batchData->groupBy('product_id')->map(function ($items) use ($brand) {
             $product = $items->first();
