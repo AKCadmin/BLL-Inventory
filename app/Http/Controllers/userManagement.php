@@ -35,6 +35,7 @@ class userManagement extends Controller
                 ->orderBy('id', 'asc')
                 ->get();
 
+                dd($roles,$organizations,$moduleusers);
             return view('usersManagement.index', compact('roles', 'moduleusers', 'organizations'));
         } catch (\Exception $e) {
             dd($e->getMessage());
