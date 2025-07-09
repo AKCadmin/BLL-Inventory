@@ -123,6 +123,7 @@ class userManagement extends Controller
             $cartonsMigrationPath = '/database/migrations/2024_12_03_101422_create_cartons_table.php';
             $sellMigrationPath = '/database/migrations/2024_12_07_113412_create_sell_table.php';
             $purchaseHistoryMigrationPath = '/database/migrations/2024_12_24_124745_create_purchase_history_table.php';
+            $sellCounterUpdateMigrationPath = '/database/migrations/2025_06_24_133124_add_payment_status_to_sell_counter_table.php';
 
 
             $migrations = [
@@ -136,7 +137,8 @@ class userManagement extends Controller
                 $batchMigrationPath,
                 $cartonsMigrationPath,
                 $sellMigrationPath,
-                $purchaseHistoryMigrationPath
+                $purchaseHistoryMigrationPath,
+                $sellCounterUpdateMigrationPath
             ];
 
             foreach ($migrations as $migrationPath) {

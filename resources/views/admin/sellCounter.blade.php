@@ -10,7 +10,19 @@
     @include('partials.link')
     @include('partials.head-css')
 
+<style>
+    /* Optional: Align Select2 styling with Bootstrap 5 */
+.select2-container .select2-selection--single {
+    height: 38px;
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 24px;
+}
 
+</style>
 </head>
 
 @include('partials.body')
@@ -31,129 +43,132 @@
                 <form id="productForm">
                     <div id="skuRows">
                         <div class="skuRow">
-                            <div class="row">
-                                <!-- Customer and Customer Type in one column -->
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Sell Type</label>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" value="1"
-                                                id="internalPurchase" name="internal_purchase">
-                                            <label class="form-check-label" for="internalPurchase">Internal Sale</label>
+                            <div class="container-fluid">
+                                <div class="row g-4">
+
+                                    <!-- Left Column -->
+                                    <div class="col-md-6">
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Sell Type</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="internalPurchase"
+                                                    name="internal_purchase" value="1">
+                                                <label class="form-check-label" for="internalPurchase">Internal
+                                                    Sale</label>
+                                            </div>
                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="paymentStatus" class="form-label">Payment Status</label>
+                                            <select class="form-select" id="paymentStatus" name="payment_status"
+                                                required>
+                                                <option value="" disabled selected>Select Payment Status</option>
+                                                <option value="paid">Paid</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="unpaid">Unpaid</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="customer" class="form-label">Select Customer</label>
+                                            <select id="customer" name="customer"
+                                                class="form-select select2 customer sku-input">
+                                                <option selected disabled>Select Customer</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="SKU" class="form-label">Select Product</label>
+                                            <select id="SKU" name="SKU"
+                                                class="form-select select2 SKU sku-input">
+                                                <option selected disabled>Select Product</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="unitsPerCarton" class="form-label">Number of Units Per
+                                                Carton</label>
+                                            <input type="number" class="form-control" id="unitsPerCarton"
+                                                name="unitsPerCarton" readonly disabled
+                                                placeholder="Enter units per carton">
+                                        </div>
+
                                     </div>
-                                </div>
-                                @if (auth()->user()->role == 1)
+
+                                    <!-- Right Column -->
+                                    <div class="col-md-6 mt-2">
+
+                                        @if (auth()->user()->role == 1)
+                                            <div class="mb-3">
+                                                <label for="organizationName" class="form-label">Select
+                                                    Organization</label>
+                                                <select id="organizationName" name="organizationName"
+                                                    class="form-control custom-select">
+                                                    <option value="">Select Organization</option>
+                                                    @foreach ($organizations as $organization)
+                                                        <option value="{{ $organization->name }}">
+                                                            {{ str_replace('_', ' ', $organization->name) }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
+
+                                        <div class="mb-3">
+                                            <label for="customerTypeName" class="form-label">Select Customer
+                                                Type</label>
+                                            <input type="hidden" id="customerType" class="customer-type">
+                                            <input type="text" readonly disabled class="form-control"
+                                                id="customerTypeName">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="batchNoSelect" class="form-label">Batch No</label>
+                                            <select id="batchNoSelect"
+                                                class="form-select select2 batchNoSelect batch-input">
+                                                <option value="" disabled selected>Select an option</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="availableQtyCarton" class="form-label">Available Total No of
+                                                Carton</label>
+                                            <input type="number" class="form-control" readonly disabled
+                                                id="availableQtyCarton" name="availableQtyCarton"
+                                                placeholder="Enter available no of carton">
+                                        </div>
+
+
+
+                                    </div>
+
                                     <div class="col-md-6">
-                                        <label for="autoSizingSelect">Select Organization</label>
-
-                                        <select id="organizationName" name="organizationName"
-                                            class="form-control custom-select">
-                                            <option value="">Select Organization</option>
-                                            @foreach ($organizations as $organization)
-                                                <option value="{{ $organization->name }}">
-                                                    {{ str_replace('_', ' ', $organization->name) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @else
-                                    <div class="col-md-6">
-                                    </div>
-                                @endif
-
-                                <div class="col-md-6">
-
-                                    <div class="mb-3">
-                                        <label for="customer" class="form-label">Select Customer</label>
-                                        <select id="customer" name="customer"
-                                            class="form-select select2 customer sku-input">
-                                            <option selected disabled>Select Customer</option>
-                                        </select>
-                                    </div>
-
-
-                                    <div class="mb-3">
-                                        <label for="selectSku" class="form-label">Select Product</label>
-                                        <select id="SKU" name="SKU" class="form-select select2 SKU sku-input">
-                                            <option selected disabled>Select Product</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <!-- SKU and Batch in one column -->
-                                <div class="col-md-6">
-
-                                    <div class="mb-3">
-                                        <label for="customerType" class="form-label">Select Customer Type</label>
-                                        <input type="hidden" id="customerType" class="customer-type">
-                                        <input type="text" disabled readonly class="form-control"
-                                            id="customerTypeName">
-                                        {{-- <select class="form-select customer-type" id="customerType" required> --}}
-                                        {{-- <option value="" disabled selected>Select customer type</option> --}}
-                                        {{-- <option value="hospital">hospital</option>
-                                            <option value="wholesale">wholesaler</option>
-                                            <option value="retailer">retailer</option> --}}
-                                        {{-- </select> --}}
-                                    </div>
-
-
-
-                                    <div class="mb-3 batch-row">
-                                        <label for="batchNoSelect" class="form-label">Batch No</label>
-                                        <select id="batchNoSelect"
-                                            class="form-select select2 batchNoSelect batch-input">
-                                            <option value="" disabled selected>Batch No</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label" for="unitsPerCarton">Number of Unit Per
-                                            Carton</label>
-                                        <input type="number" class="form-control" id="unitsPerCarton"
-                                            name="unitsPerCarton" readonly placeholder="Enter units per carton"
-                                            disabled>
-                                    </div>
-                                    <div class="mb-3">
-
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label" for="availableQtyCarton">Available Total No of
-                                            Carton</label>
-                                        <input type="number" class="form-control" readonly id="availableQtyCarton"
-                                            name="availableQtyCarton" placeholder="Enter available no of carton"
-                                            disabled>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <div class="mb-3">
-                                        {{-- <label class="form-label">Select Packaging Type</label> --}}
-                                        <div class="form-check">
-                                            <input class="form-check-input packaging-type byCarton" type="checkbox"
-                                                id="byCarton" name="packagingType" value="byCarton">
-                                            <label class="form-check-label" for="byCarton">
-                                                Sale
-                                            </label>
-                                            <div id="quantityBox" style="display: none; width:20%; margin-top: 10px;">
-                                                <label class="form-label" for="quantity">Enter Number of Carton</label>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input packaging-type byCarton" type="checkbox"
+                                                    id="byCarton" name="packagingType" value="byCarton">
+                                                <label class="form-check-label" for="byCarton">Sale</label>
+                                            </div>
+                                            <div id="quantityBox" class="mt-2" style="display: none;">
+                                                <label for="quantity" class="form-label">Enter Number of Carton</label>
                                                 <input type="number" class="form-control" id="quantity"
                                                     name="quantity" placeholder="Enter carton">
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Buttons -->
+                                    <div class="col-12 text-start">
+                                        <button type="button" class="btn btn-primary add-row me-2">Add More</button>
+                                        <button type="submit" id="sellSubmit"
+                                            class="btn btn-primary">Submit</button>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary add-row">Add More</button>
-                    <button type="submit" id="sellSubmit" class="btn btn-primary">Submit</button>
                 </form>
+
             </div> <!-- container-fluid -->
         </div>
         <!-- End Page-content -->
@@ -272,13 +287,14 @@
         $('#customer').on('change', function() {
             let customerId = $(this).val();
             $('#organizationName').val();
-            GetCustomer(customerId,organizationId);
+            GetCustomer(customerId, organizationId);
         })
 
-        function GetCustomer(customerId,organizationId) {
+        function GetCustomer(customerId, organizationId) {
             let url = `{{ route('customers.list') }}`;
             ajaxRequest(url, 'GET', {
-                    customerId,organizationId
+                    customerId,
+                    organizationId
                 },
                 function(response) {
                     console.log(response, "responsennnnn")
@@ -745,7 +761,8 @@
         const commonData = {
             customer: $("#customer").val(),
             customerType: $("#customerType").val(),
-            customerTypeName: $("#customerTypeName").val()
+            customerTypeName: $("#customerTypeName").val(),
+            paymentStatus: $("#paymentStatus").val()
         };
 
         // Loop through each SKU row

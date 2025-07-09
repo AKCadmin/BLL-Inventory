@@ -99,6 +99,7 @@
                                             {{-- <th>Total No. of Cartoons</th> --}}
                                             <th>Total No. of Item Per Cartoon</th>
                                             <th>Total Buy Price</th>
+                                            <th>Payment Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -280,6 +281,7 @@
                         <td>${productDetails?.customer_name || "N/A"}</td>
                         <td>${productDetails?.total_no_of_unit || "N/A"}</td>
                         <td>${productDetails?.total_buy_price || "N/A"}</td>
+                        <td>${productDetails?.payment_status || "N/A"}</td>
                         <td>${actionButtons} ${AppoveBtn}</td>
                     </tr>
                 `;

@@ -121,6 +121,7 @@ class OrganizationController extends Controller
             $updatesoftdeleteMigrationPath = 'database/migrations/2025_02_10_133512_create_softdelete_for_organization_table.php';
             // $customerRetailsMigrationPath = 'database/migrations/2025_02_03_071547_update_customer_table.php';
             $updatebatchMigrationPath = 'database/migrations/2025_02_03_082708_update_batch_table.php';
+            $sellCounterUpdateMigrationPath = '/database/migrations/2025_06_24_133124_add_payment_status_to_sell_counter_table.php';
 
 
 
@@ -141,7 +142,8 @@ class OrganizationController extends Controller
                 $modifySellCartonMigrationPath,
                 $updatesoftdeleteMigrationPath,
                 // $customerRetailsMigrationPath,
-                $updatebatchMigrationPath
+                $updatebatchMigrationPath,
+                $sellCounterUpdateMigrationPath
 
             ];
 

@@ -182,6 +182,7 @@ class SellCornerController extends Controller
                 // $sellCounter->provided_no_of_cartons = $currentQuantity; // Use $quantity directly
                 $sellCounter->provided_no_of_cartons = $quantity; // Use $quantity directly
                 $sellCounter->price = $itemTotal; // Store the individual item total, not cumulative
+                $sellCounter->payment_status = $item['paymentStatus'];
                 $sellCounter->save();
                 $sellCounterIds[] = $sellCounter->id;
 
@@ -389,6 +390,7 @@ class SellCornerController extends Controller
                 $sellCounter->packaging_type = true;
                 $sellCounter->provided_no_of_cartons = $quantity;
                 $sellCounter->price = $itemTotal;
+                $sellCounter->payment_status = $item['paymentStatus'];
                 $sellCounter->save();
                 $sellCounterIds[] = $sellCounter->id;
 

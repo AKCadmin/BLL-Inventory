@@ -323,10 +323,10 @@ class HistoryController extends Controller
             DB::connection('pgsql')->getPdo();
 
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', 'order_id', 'status', 'deleted_at','customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
+                ->select('batch_id', 'order_id', 'status','payment_status', 'deleted_at','customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
                 ->whereDate('created_at', $selectedDate)
                 ->where('sell_counter.deleted_at', null)
-                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'customer_id','customer_type');
+                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status','payment_status', 'customer_id','customer_type');
 
             $query = DB::table('batches')
                 ->JoinSub($sellCounterSubquery, 'sc', function ($join) {
@@ -349,6 +349,7 @@ class HistoryController extends Controller
                     DB::raw('MAX(batches.expiry_date) as expiry_date'),
                     DB::raw('MAX(sc.customer_id) as customer_id'),
                     DB::raw('MAX(sc.customer_type) as customer_type'),
+                    DB::raw('MAX(sc.payment_status) as payment_status'),
                     DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
                 )
                 ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id', 'sc.status')
@@ -406,7 +407,8 @@ class HistoryController extends Controller
                     'customer_type' => $stock->customer_type,
                     'hospital_price' => $stock->hospital_price,
                     'wholesale_price' => $stock->wholesale_price,
-                    'retail_price' => $stock->retail_price
+                    'retail_price' => $stock->retail_price,
+                    'payment_status' => $stock->payment_status
                 ];
             });
 
