@@ -31,6 +31,7 @@ class userManagement extends Controller
         $organizations = Organization::where('status',1)->get();
         $moduleusers = User::with('roles')->whereNot('id', Auth::user()->id)->orderBy('id', 'asc')->get();
         // dd($moduleusers[0]->roles->role_name);
+        dd($roles,$organizations,$moduleusers);
 
         return view('usersManagement.index', compact('roles', 'moduleusers', 'organizations'));
     }
