@@ -984,7 +984,7 @@ class StockController extends Controller
             ->where('product_id', $productId)
             ->whereRaw('DATE(created_at) = ?', [$createdAt])
             ->where('no_of_units', $totalNoOfUnits)
-            ->where('invoice_no', $invoice)
+            // ->where('invoice_no', $invoice)
             ->select(
                 'id',
                 'batch_number',
