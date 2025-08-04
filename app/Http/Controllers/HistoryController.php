@@ -57,10 +57,16 @@ class HistoryController extends Controller
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
 
+
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
-                ->whereDate('created_at', $selectedDate)
-                ->groupBy('batch_id');
+                ->select('batch_id', DB::raw('SUM(provided_no_of_cartons) as total_provided'));
+
+
+            if ($selectedDate) {
+                $sellCounterSubquery = $sellCounterSubquery->whereDate('created_at', $selectedDate);
+            }
+
+            $sellCounterSubquery = $sellCounterSubquery->groupBy('batch_id');
 
             $query = DB::table('batches')
                 ->leftJoinSub($sellCounterSubquery, 'sc', function ($join) {
@@ -77,10 +83,14 @@ class HistoryController extends Controller
                     DB::raw('MAX(batches.invoice_no) as invoice'),
                     DB::raw('MAX(batches.expiry_date) as expiry_date'),
                     DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
-                )
-                ->whereDate('batches.created_at', $selectedDate)
-                ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
-                // ->orderBy('product_id', 'ASC');
+                );
+
+
+            if ($selectedDate) {
+                $query = $query->whereDate('batches.created_at', $selectedDate);
+            }
+
+            $query = $query->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
                 ->orderBy('first_created_at', 'DESC');
 
             $stocksList = $query->get();
@@ -123,94 +133,94 @@ class HistoryController extends Controller
         }
     }
 
-public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
-{
-    try {
-        $product = Product::findOrFail($id);
-        $brand = Brand::findOrFail($product->brand_id);
-        $createdAt = base64_decode($encodedCreatedAt);
 
-        setDatabaseConnection();
+    public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $brand = Brand::findOrFail($product->brand_id);
+            $createdAt = base64_decode($encodedCreatedAt);
 
-        $batchData = DB::table('batches')
-            ->leftJoin('sell', function ($join) {
-                $join->on('sell.batch_no', '=', 'batches.batch_number')
-                    ->on('sell.no_of_units', '=', 'batches.no_of_units');
-            })
-            ->select(
-                'sell.*',
-                'batches.id as batch_id',
-                'batches.unit',
-                'batches.batch_number',
-                'batches.product_id',
-                'batches.manufacturing_date',
-                'batches.expiry_date',
-                'batches.base_price',
-                'batches.exchange_rate',
-                'batches.buy_price',
-                'batches.notes',
-                'batches.no_of_units',
-                'batches.quantity',
-                'batches.created_at',
-                'batches.updated_at',
-                'batches.invoice_no'
-            )
-            ->where('batches.product_id', $id)
-            ->where('batches.no_of_units', $noOfcartoon)
-            ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
-            ->get();
-// dd($batchData);
-        // if ($batchData->isEmpty()) {
-        //     return redirect()->route('stock.list')->with('error', 'No stock batches found for the selected product.');
-        // }
+            setDatabaseConnection();
 
-        $groupedData = $batchData->groupBy('product_id')->map(function ($items) use ($brand) {
-            $product = $items->first();
+            $batchData = DB::table('batches')
+                ->leftJoin('sell', function ($join) {
+                    $join->on('sell.batch_no', '=', 'batches.batch_number')
+                        ->on('sell.no_of_units', '=', 'batches.no_of_units');
+                })
+                ->select(
+                    'sell.*',
+                    'batches.id as batch_id',
+                    'batches.unit',
+                    'batches.batch_number',
+                    'batches.product_id',
+                    'batches.manufacturing_date',
+                    'batches.expiry_date',
+                    'batches.base_price',
+                    'batches.exchange_rate',
+                    'batches.buy_price',
+                    'batches.notes',
+                    'batches.no_of_units',
+                    'batches.quantity',
+                    'batches.created_at',
+                    'batches.updated_at',
+                    'batches.invoice_no'
+                )
+                ->where('batches.product_id', $id)
+                ->where('batches.no_of_units', $noOfcartoon)
+                ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
+                ->get();
+            // dd($batchData);
+            // if ($batchData->isEmpty()) {
+            //     return redirect()->route('stock.list')->with('error', 'No stock batches found for the selected product.');
+            // }
 
-            return [
-                'product_id' => $product->product_id,
-                'brand_name' => $brand->name,
-                'batches' => $items->groupBy('batch_id')->map(function ($batchItems) {
-                    $batch = $batchItems->first();
+            $groupedData = $batchData->groupBy('product_id')->map(function ($items) use ($brand) {
+                $product = $items->first();
 
-                    return [
-                        'batch_id' => $batch->batch_id,
-                        'unit' => $batch->unit,
-                        'batch_number' => $batch->batch_number,
-                        'manufacturing_date' => $batch->manufacturing_date,
-                        'expiry_date' => $batch->expiry_date,
-                        'base_price' => $batch->base_price,
-                        'exchange_rate' => $batch->exchange_rate,
-                        'buy_price' => $batch->buy_price,
-                        'no_of_units' => $batch->no_of_units,
-                        'quantity' => $batch->quantity,
-                        'notes' => $batch->notes,
-                        'created_at' => $batch->created_at,
-                        'updated_at' => $batch->updated_at,
-                        'hospital_price' => $batch->hospital_price ?? null,
-                        'wholesale_price' => $batch->wholesale_price ?? null,
-                        'retail_price' => $batch->retail_price ?? null,
-                        'invoice_no' => $batch->invoice_no,
-                    ];
-                })->values(),
-            ];
-        });
+                return [
+                    'product_id' => $product->product_id,
+                    'brand_name' => $brand->name,
+                    'batches' => $items->groupBy('batch_id')->map(function ($batchItems) {
+                        $batch = $batchItems->first();
 
-        if (auth()->user()->role == 1) {
-            return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
+                        return [
+                            'batch_id' => $batch->batch_id,
+                            'unit' => $batch->unit,
+                            'batch_number' => $batch->batch_number,
+                            'manufacturing_date' => $batch->manufacturing_date,
+                            'expiry_date' => $batch->expiry_date,
+                            'base_price' => $batch->base_price,
+                            'exchange_rate' => $batch->exchange_rate,
+                            'buy_price' => $batch->buy_price,
+                            'no_of_units' => $batch->no_of_units,
+                            'quantity' => $batch->quantity,
+                            'notes' => $batch->notes,
+                            'created_at' => $batch->created_at,
+                            'updated_at' => $batch->updated_at,
+                            'hospital_price' => $batch->hospital_price ?? null,
+                            'wholesale_price' => $batch->wholesale_price ?? null,
+                            'retail_price' => $batch->retail_price ?? null,
+                            'invoice_no' => $batch->invoice_no,
+                        ];
+                    })->values(),
+                ];
+            });
+
+            if (auth()->user()->role == 1) {
+                return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
+            }
+
+            return view('admin.edit', compact('groupedData', 'brand'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            dd($e->getMessage());
+            return redirect()->route('stock.list')->with('error', 'Product or brand not found.');
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            \Log::error('Purchase History Error: ' . $e->getMessage());
+            return redirect()->route('stock.list')->with('error', 'Something went wrong. Please try again later.');
         }
-
-        return view('admin.edit', compact('groupedData', 'brand'));
-
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        dd($e->getMessage());
-        return redirect()->route('stock.list')->with('error', 'Product or brand not found.');
-    } catch (\Exception $e) {
-        dd($e->getMessage());
-        \Log::error('Purchase History Error: ' . $e->getMessage());
-        return redirect()->route('stock.list')->with('error', 'Something went wrong. Please try again later.');
     }
-}
 
 
     public function detailHistory(Request $request, $productId, $encodedCreatedAt, $noOfcartoon)
@@ -328,16 +338,18 @@ public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
             DB::connection('pgsql')->getPdo();
 
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', 'order_id', 'status','payment_status', 'deleted_at','customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
-                ->whereDate('created_at', $selectedDate)
-                ->where('sell_counter.deleted_at', null)
-                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status','payment_status', 'customer_id','customer_type');
+                ->select('batch_id', 'order_id', 'status', 'payment_status', 'deleted_at', 'customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
+                ->when($selectedDate, function ($q) use ($selectedDate) {
+                    return $q->whereDate('created_at', $selectedDate);
+                })
+                ->whereNull('sell_counter.deleted_at')
+                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'payment_status', 'customer_id', 'customer_type');
 
             $query = DB::table('batches')
-                ->JoinSub($sellCounterSubquery, 'sc', function ($join) {
+                ->joinSub($sellCounterSubquery, 'sc', function ($join) {
                     $join->on('batches.id', '=', 'sc.batch_id');
                 })
-                ->join('sell','batches.batch_number','=','sell.batch_no')
+                ->join('sell', 'batches.batch_number', '=', 'sell.batch_no')
                 ->select(
                     'batches.product_id',
                     'batches.unit',
@@ -357,12 +369,16 @@ public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
                     DB::raw('MAX(sc.payment_status) as payment_status'),
                     DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
                 )
+                ->when($selectedDate, function ($q) use ($selectedDate) {
+                    return $q->whereDate('batches.created_at', $selectedDate);
+                })
                 ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id', 'sc.status')
                 ->orderBy('product_id', 'ASC');
 
+
             $stocksList = $query->get();
 
-          
+
             $customerIds = $stocksList->pluck('customer_id')->unique();
 
             // Query the 'customers' table from the 'pgsqlmain' connection
@@ -432,7 +448,7 @@ public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)
             // DB::purge('pgsql');
             // DB::connection('pgsql')->getPdo();
             // dd($organization);
-            $products = Product::where('company_id','=',$request->company)->select('id', 'name')->get();
+            $products = Product::where('company_id', '=', $request->company)->select('id', 'name')->get();
 
 
             return response()->json(['products' => $products]);

@@ -259,25 +259,25 @@ class StockController extends Controller
 
         try {
             // if (auth()->user()->role == 1) {
-                $companies = Company::all();
-                $brands = Brand::all();
-                setDatabaseConnection();
-                $stocks = DB::table('batches')
-                    //->join('products', 'batches.product_id', '=', 'products.id')
-                    ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
-                    ->select(
-                        // 'products.sku',
-                        'batches.batch_number as batch_no',
-                        'batches.buy_price',
-                        DB::raw('COUNT(cartons.id) as cartons'),
-                        DB::raw('SUM(cartons.no_of_items_inside) as total_items'),
-                        DB::raw('SUM(cartons.missing_items) as missing_items'),
-                        'batches.id as batch_id'
-                    )
-                    ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price')
-                    ->orderBy('batches.id', 'DESC')
-                    ->get();
-                return view('admin.stockList', compact('stocks', 'companies', 'brands'));
+            $companies = Company::all();
+            $brands = Brand::all();
+            setDatabaseConnection();
+            $stocks = DB::table('batches')
+                //->join('products', 'batches.product_id', '=', 'products.id')
+                ->join('cartons', 'batches.id', '=', 'cartons.batch_id')
+                ->select(
+                    // 'products.sku',
+                    'batches.batch_number as batch_no',
+                    'batches.buy_price',
+                    DB::raw('COUNT(cartons.id) as cartons'),
+                    DB::raw('SUM(cartons.no_of_items_inside) as total_items'),
+                    DB::raw('SUM(cartons.missing_items) as missing_items'),
+                    'batches.id as batch_id'
+                )
+                ->groupBy('batches.id', 'batches.batch_number', 'batches.buy_price')
+                ->orderBy('batches.id', 'DESC')
+                ->get();
+            return view('admin.stockList', compact('stocks', 'companies', 'brands'));
             // }
         } catch (\Throwable $e) {
             return response()->json([
@@ -304,7 +304,9 @@ class StockController extends Controller
 
             $sellCounterSubquery = DB::table('sell_counter')
                 ->select('batch_id', 'provided_no_of_cartons', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
-                ->whereDate('created_at', $selectedDate)
+                ->when($selectedDate, function ($q) use ($selectedDate) {
+                    return $q->whereDate('created_at', $selectedDate);
+                })
                 ->groupBy('batch_id', 'provided_no_of_cartons');
 
             $query = DB::table('batches')
@@ -592,7 +594,7 @@ class StockController extends Controller
 
     public function update(Request $request)
     {
-        dd($request->all(),"update");
+        dd($request->all(), "update");
         try {
             setDatabaseConnection();
 
@@ -724,7 +726,7 @@ class StockController extends Controller
                 }
 
                 $batchModel = Batch::firstOrNew([
-                    'batch_number' => $batch['batch_no'],  
+                    'batch_number' => $batch['batch_no'],
                     'no_of_units' => $batch['no_of_units']
                 ]);
                 $isNewBatch = !$batchModel->exists;
@@ -748,7 +750,7 @@ class StockController extends Controller
                         'batch_id' => $batchModel->id,
                         'no_of_units' => $batch['no_of_units']
                     ]);
-                
+
                     $sellModel->sku = $batch['product_id'];
                     $sellModel->batch_no = $batch['batch_no'];
                     $sellModel->hospital_price = $batch['hospitalPrice'] ?? null;
@@ -760,7 +762,7 @@ class StockController extends Controller
                     $sellModel->no_of_units = $batch['no_of_units'];
                     $sellModel->save();
                 }
-                
+
 
                 $batchDetails = [
                     'batch_number' => $batchModel->batch_number,
@@ -953,13 +955,18 @@ class StockController extends Controller
     //     return view('stock.details', compact('data', 'product', 'brand', 'createdAt'));
     // }
 
-    public function stockDetails(Request $request, $productId, $encodedCreatedAt, $totalNoOfUnits, $invoice, $databaseName)
+    public function stockDetails(Request $request, $encodedProductId, $encodedCreatedAt, $encodedTotalNoOfUnits, $encodedInvoice, $encodedDatabaseName)
     {
-        
+
         // setDatabaseConnection();
+        $productId = base64_decode($encodedProductId);
+        $totalNoOfUnits = base64_decode($encodedTotalNoOfUnits);
+        $databaseName = base64_decode($encodedDatabaseName);
+        $createdAt = base64_decode($encodedCreatedAt);
+        $invoice = base64_decode($encodedInvoice);
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
-        $createdAt = base64_decode($encodedCreatedAt);
+
         // $sessionData = session()->all();
 
         // dd($sessionData); // or print_r($sessionData);

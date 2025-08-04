@@ -194,7 +194,7 @@
         }
 
         var brandName = "";
-        var selectedDate = new Date().toISOString().split('T')[0];
+        var selectedDate = null;
         $('#datePicker').attr('max', selectedDate);
         var productId = "";
         var brandId = "";

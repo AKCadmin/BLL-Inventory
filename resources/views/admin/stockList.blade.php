@@ -69,7 +69,7 @@
                                             <th>Product Name</th>
 
                                             <th>Unit</th>
-                                            
+
                                             <th>Total No. of Unit</th>
                                             <th>Total No of Cartoons</th>
                                             {{-- <th>Purchased sales</th> --}}
@@ -257,50 +257,54 @@
                     // Append new rows
                     $.each(data, function(index, stocks) {
                         $.each(stocks, function(index, stock) {
-                        let indexId = index+1;
-                        console.log(stock, "stocks");
-                        const today = new Date().toISOString().split("T")[0];
-                        const stockCreatedAtDate = stock?.created_at ? stock.created_at.split(" ")[0] : "N/A";
-                        // var batchExists = stock.batch_no ? true : false;
+                            let indexId = index + 1;
+                            console.log(stock, "stocks");
+                            const today = new Date().toISOString().split("T")[0];
+                            const stockCreatedAtDate = stock?.created_at ? stock
+                                .created_at.split(" ")[0] : "N/A";
+                            // var batchExists = stock.batch_no ? true : false;
 
-                        // `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
-                        var editButton =
-                            `<a href="/stock/${stock.product_id}" class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
+                            // `<a href="#" class="btn btn-sm btn-warning edit-stock-btn" style="pointer-events: none; opacity: 0.6;" disabled>Edit</a>` :
+                            var editButton =
+                                `<a href="/stock/${stock.product_id}" class="btn btn-sm btn-warning edit-stock-btn">Edit</a>`;
 
-                        var deleteButton =
-                            // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
-                            `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.product_id}">Delete</button>`;
+                            var deleteButton =
+                                // `<button class="btn btn-sm btn-danger delete-stock-btn" disabled>Delete</button>` :
+                                `<button class="btn btn-sm btn-danger delete-stock-btn" data-id="${stock.product_id}">Delete</button>`;
 
-                        const created_at = stock?.created_at?.split(" ")[0] ||
-                            "N/A";
+                            const created_at = stock?.created_at?.split(" ")[0] ||
+                                "N/A";
 
-                        function safeBase64Encode(str) {
-                            return btoa(unescape(encodeURIComponent(str)));
-                        }
+                            function safeBase64Encode(str) {
+                                return btoa(unescape(encodeURIComponent(str)));
+                            }
 
-                        const previousQuantity = stock.total_quantity == 0 ? stock.provided_no_catons : stock.total_quantity
-                        let db_name = @json(session()->get('db_name'));
-                        const stockCreatedAt = safeBase64Encode(stock
-                            ?.created_at
-                            .toString())
-                        var viewButton =
-                            `<a href="/stock/details/${encodeURIComponent(stock.product_id)}/${stockCreatedAt}/${stock.no_of_units}/${stock.invoice}/${db_name}" class="btn btn-sm btn-warning view-stock-btn">View</a>`;
+                            const previousQuantity = stock.total_quantity == 0 ?
+                                stock.provided_no_catons : stock.total_quantity
+                            let db_name = @json(session()->get('db_name'));
+                            const stockCreatedAt = safeBase64Encode(stock
+                                ?.created_at
+                                .toString())
+                            var viewButton =
+                                `<a href="/stock/details/${base64Encode(stock.product_id)}/${stockCreatedAt}/${base64Encode(stock.no_of_units)}/${base64Encode(stock.invoice)}/${base64Encode(db_name)}" class="btn btn-sm btn-warning view-stock-btn">View</a>`;
 
-                        //  var totalQuantity = stock.total_quantity.replace(/-/g, '');
-                        var currentQuantity = stock.total_quantity == null ? 0 :  stock.total_quantity;
-                        var quantity =  stockCreatedAtDate == today ? currentQuantity : previousQuantity
-                        table.row.add([
-                            indexId,
-                            stock.brand_name,
-                            stock.product_name,
-                            stock.unit,
-                            stock.total_no_of_unit,
-                            `${quantity}`,
-                            stock.status,
-                            `${viewButton}`
-                            // `${editButton} ${deleteButton}`
-                        ]);
-                    });
+                            //  var totalQuantity = stock.total_quantity.replace(/-/g, '');
+                            var currentQuantity = stock.total_quantity == null ? 0 :
+                                stock.total_quantity;
+                            var quantity = stockCreatedAtDate == today ?
+                                currentQuantity : previousQuantity
+                            table.row.add([
+                                indexId,
+                                stock.brand_name,
+                                stock.product_name,
+                                stock.unit,
+                                stock.total_no_of_unit,
+                                `${quantity}`,
+                                stock.status,
+                                `${viewButton}`
+                                // `${editButton} ${deleteButton}`
+                            ]);
+                        });
                     });
 
                     // Redraw the table
@@ -377,6 +381,10 @@
             //         table.column(2).search('').draw();
             //     }
             // });
+        }
+
+        function base64Encode(str) {
+            return btoa(encodeURIComponent(str));
         }
 
     });

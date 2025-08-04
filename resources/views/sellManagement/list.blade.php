@@ -42,7 +42,7 @@
                                             </div>
                                         </div> --}}
 
-                                        {{-- <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="col-md-4 col-sm-6 col-12">
                                             <div class="input-group">
                                                 <select id="product-filter" class="form-control custom-select">
                                                     <option value="">Select Product</option>
@@ -54,7 +54,7 @@
                                             <div class="input-group">
                                                 <input type="date" id="datePicker" class="form-control">
                                             </div>
-                                        </div> --}}
+                                        </div>
                                     </div>
                                     {{-- <div class="col-md-4 col-sm-6 col-12">
                                         <div class="input-group">
@@ -166,7 +166,7 @@
         //     e.preventDefault();
 
         // });
-        var companyName = "{{Session::get('db_name')}}";
+         let companyName = $('#organization-filter').val();
         fetchHistory(null, null, null, selectedDate)
         productsList(companyName)
 

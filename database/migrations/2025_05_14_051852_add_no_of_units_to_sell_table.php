@@ -9,20 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('sell', function (Blueprint $table) {
-            $table->integer('no_of_units')->after('batch_id')->nullable();
-        });
-    }
+    // public function up(): void
+    // {
+    //     Schema::table('sell', function (Blueprint $table) {
+    //         $table->integer('no_of_units')->after('batch_id')->nullable();
+    //     });
+    // }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('sell', function (Blueprint $table) {
-            $table->dropColumn('no_of_units');
-        });
-    }
+    // /**
+    //  * Reverse the migrations.
+    //  */
+    // public function down(): void
+    // {
+    //     Schema::table('sell', function (Blueprint $table) {
+    //         $table->dropColumn('no_of_units');
+    //     });
+    // }
 };

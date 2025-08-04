@@ -369,6 +369,7 @@ class userManagement extends Controller
             }
             return response()->json(['data' => $users]);
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while fetching users.',
