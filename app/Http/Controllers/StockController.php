@@ -288,89 +288,89 @@ class StockController extends Controller
         }
     }
 
-    public function listByCompany(Request $request)
-    {
-        try {
-            $organization = Organization::where('id', $request->company)->first();
-            $selectedDate = $request->selectedDate;
-            $productId = $request->productId;
-            $brandId = $request->brandId;
+public function listByCompany(Request $request)
+{
+    try {
+        $organization = Organization::where('id', $request->company)->first();
+        $selectedDate = $request->selectedDate;
+        $productId = $request->productId;
+        $brandId = $request->brandId;
 
-            $products = Product::with('brand')->get();
+        $products = Product::with('brand')->get();
 
-            config(['database.connections.pgsql.database' => $organization->name]);
-            DB::purge('pgsql');
-            DB::connection('pgsql')->getPdo();
+        config(['database.connections.pgsql.database' => $organization->name]);
+        DB::purge('pgsql');
+        DB::connection('pgsql')->getPdo();
 
-            $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', 'provided_no_of_cartons', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
-                ->when($selectedDate, function ($q) use ($selectedDate) {
-                    return $q->whereDate('created_at', $selectedDate);
-                })
-                ->groupBy('batch_id', 'provided_no_of_cartons');
+        $sellCounterSubquery = DB::table('sell_counter')
+            ->select('batch_id', 'provided_no_of_cartons', DB::raw('SUM(provided_no_of_cartons) as total_provided'))
+            ->when($selectedDate, function ($q) use ($selectedDate) {
+                return $q->whereDate('created_at', '<=', $selectedDate);  // updated to <=
+            })
+            ->groupBy('batch_id', 'provided_no_of_cartons');
 
-            $query = DB::table('batches')
-                ->leftJoinSub($sellCounterSubquery, 'sc', function ($join) {
-                    $join->on('batches.id', '=', 'sc.batch_id');
-                })
-                ->select(
-                    'batches.product_id',
-                    'batches.unit',
-                    'batches.no_of_units',
-                    DB::raw('SUM(sc.provided_no_of_cartons) as provided_no_cartons'),
-                    DB::raw('SUM(batches.quantity) as total_quantity'),
-                    DB::raw('MAX(batches.no_of_units) as total_no_of_unit'),
-                    // DB::raw('SUM(batches.buy_price) as total_buy_price'),
-                    DB::raw('MAX(batches.created_at) as first_created_at'),
-                    DB::raw('MAX(batches.invoice_no) as invoice'),
-                    DB::raw('MAX(batches.expiry_date) as expiry_date')
-                )
-                ->when($selectedDate, function ($q) use ($selectedDate) {
-                    return $q->whereDate('batches.created_at', $selectedDate);
-                })
-                ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
-                // ->orderBy('product_id', 'ASC');
-                ->orderBy('first_created_at', 'DESC');
+        $query = DB::table('batches')
+            ->leftJoinSub($sellCounterSubquery, 'sc', function ($join) {
+                $join->on('batches.id', '=', 'sc.batch_id');
+            })
+            ->select(
+                'batches.product_id',
+                'batches.unit',
+                'batches.no_of_units',
+                DB::raw('SUM(sc.provided_no_of_cartons) as provided_no_cartons'),
+                DB::raw('SUM(batches.quantity) as total_quantity'),
+                DB::raw('MAX(batches.no_of_units) as total_no_of_unit'),
+                // DB::raw('SUM(batches.buy_price) as total_buy_price'),
+                DB::raw('MAX(batches.created_at) as first_created_at'),
+                DB::raw('MAX(batches.invoice_no) as invoice'),
+                DB::raw('MAX(batches.expiry_date) as expiry_date')
+            )
+            ->when($selectedDate, function ($q) use ($selectedDate) {
+                return $q->whereDate('batches.created_at', '<=', $selectedDate);  // updated to <=
+            })
+            ->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
+            ->orderBy('first_created_at', 'DESC');
 
-            $stocksList = $query->get();
-            // dd($stocksList);
-            if ($productId) {
-                $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
-            }
+        $stocksList = $query->get();
 
-            if ($brandId) {
-                $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
-                    $product = $products->firstWhere('id', $stock->product_id);
-                    return $product && $product->brand_id == $brandId;
-                });
-            }
-
-            $groupedData = $stocksList->groupBy(['product_id'])->map(function ($stocks, $productId) use ($products) {
-                return $stocks->map(function ($stock) use ($products, $productId) {
-                    $product = $products->firstWhere('id', $productId);
-                    return [
-                        'product_id' => $productId,
-                        'product_name' => $product->name ?? null,
-                        // 'total_buy_price' => $stock->total_buy_price ?? null,
-                        'brand_name' => $product->brand->name ?? null,
-                        'unit' => $product->unit,
-                        'no_of_units' => $stock->no_of_units,
-                        'total_quantity' => $stock->total_quantity,
-                        'total_no_of_unit' => $stock->total_no_of_unit,
-                        'status' => $product->status ?? null,
-                        'expiry_date' => $stock->expiry_date ?? null,
-                        'created_at' => $stock->first_created_at ?? null,
-                        'invoice' => $stock->invoice ?? null,
-                        'provided_no_catons' => $stock->provided_no_cartons,
-                    ];
-                });
-            })->sortKeys();
-
-            return response()->json($groupedData);
-        } catch (\Throwable $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($productId) {
+            $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
         }
+
+        if ($brandId) {
+            $stocksList = $stocksList->filter(function ($stock) use ($brandId, $products) {
+                $product = $products->firstWhere('id', $stock->product_id);
+                return $product && $product->brand_id == $brandId;
+            });
+        }
+
+        $groupedData = $stocksList->groupBy(['product_id'])->map(function ($stocks, $productId) use ($products) {
+            return $stocks->map(function ($stock) use ($products, $productId) {
+                $product = $products->firstWhere('id', $productId);
+                return [
+                    'product_id' => $productId,
+                    'product_name' => $product->name ?? null,
+                    // 'total_buy_price' => $stock->total_buy_price ?? null,
+                    'brand_name' => $product->brand->name ?? null,
+                    'unit' => $product->unit,
+                    'no_of_units' => $stock->no_of_units,
+                    'total_quantity' => $stock->total_quantity,
+                    'total_no_of_unit' => $stock->total_no_of_unit,
+                    'status' => $product->status ?? null,
+                    'expiry_date' => $stock->expiry_date ?? null,
+                    'created_at' => $stock->first_created_at ?? null,
+                    'invoice' => $stock->invoice ?? null,
+                    'provided_no_catons' => $stock->provided_no_cartons,
+                ];
+            });
+        })->sortKeys();
+
+        return response()->json($groupedData);
+    } catch (\Throwable $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
 
 
 

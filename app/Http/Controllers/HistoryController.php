@@ -57,13 +57,12 @@ class HistoryController extends Controller
             DB::purge('pgsql');
             DB::connection('pgsql')->getPdo();
 
-
             $sellCounterSubquery = DB::table('sell_counter')
                 ->select('batch_id', DB::raw('SUM(provided_no_of_cartons) as total_provided'));
 
-
+            // Changed here to <= for selecting records up to selectedDate
             if ($selectedDate) {
-                $sellCounterSubquery = $sellCounterSubquery->whereDate('created_at', $selectedDate);
+                $sellCounterSubquery = $sellCounterSubquery->whereDate('created_at', '<=', $selectedDate);
             }
 
             $sellCounterSubquery = $sellCounterSubquery->groupBy('batch_id');
@@ -85,15 +84,16 @@ class HistoryController extends Controller
                     DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
                 );
 
-
+            // Changed here to <= for selecting records up to selectedDate
             if ($selectedDate) {
-                $query = $query->whereDate('batches.created_at', $selectedDate);
+                $query = $query->whereDate('batches.created_at', '<=', $selectedDate);
             }
 
             $query = $query->groupBy('batches.product_id', 'batches.unit', 'batches.no_of_units')
                 ->orderBy('first_created_at', 'DESC');
 
             $stocksList = $query->get();
+
 
             if ($productId) {
                 $stocksList = $stocksList->filter(fn($stock) => $stock->product_id == $productId);
@@ -132,6 +132,7 @@ class HistoryController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 
     public function purchaseHistoryShow($id, $encodedCreatedAt, $noOfcartoon)

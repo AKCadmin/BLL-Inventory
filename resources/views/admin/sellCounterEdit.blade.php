@@ -29,7 +29,7 @@
 
                 <?php includeFileWithVariables('partials/page-title.php', ['pagetitle' => 'Tables', 'title' => 'Data Tables']); ?>
                 <form id="productForm">
-                    <input type="hidden" value="{{$orderId}}" name="orderId" id="orderId">
+                    <input type="hidden" value="{{ $orderId }}" name="orderId" id="orderId">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label">Purchase Type</label>
@@ -41,35 +41,44 @@
                         </div>
                     </div>
                     <div class="row">
-                    <div class="col-md-6">
-
                         <div class="mb-3">
-                            <label for="customer" class="form-label">Select Customer</label>
-                            <select id="customer" name="customer" class="form-select select2 customer sku-input">
-                                <option selected disabled>Select Customer</option>
+                            <label for="paymentStatus" class="form-label">Payment Status</label>
+                            <select class="form-select" id="paymentStatus" name="payment_status" required>
+                                <option value="" disabled selected>Select Payment Status</option>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="unpaid">Unpaid</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+                                <label for="customer" class="form-label">Select Customer</label>
+                                <select id="customer" name="customer" class="form-select select2 customer sku-input">
+                                    <option selected disabled>Select Customer</option>
+                                </select>
+                            </div>
 
 
-                        <div class="mb-3">
+                            <div class="mb-3">
 
+                            </div>
+                        </div>
+
+
+                        <!-- SKU and Batch in one column -->
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+                                <label for="customerType" class="form-label">Select Customer Type</label>
+                                <input type="hidden" id="customerType" class="customer-type">
+                                <input type="text" disabled readonly class="form-control" id="customerTypeName">
+
+                            </div>
+                            <div class="mb-3">
+                            </div>
                         </div>
                     </div>
-
-
-                    <!-- SKU and Batch in one column -->
-                    <div class="col-md-6">
-
-                        <div class="mb-3">
-                            <label for="customerType" class="form-label">Select Customer Type</label>
-                            <input type="hidden" id="customerType" class="customer-type">
-                            <input type="text" disabled readonly class="form-control" id="customerTypeName">
-
-                        </div>
-                        <div class="mb-3">
-                        </div>
-                    </div>
-                </div>
                     <div id="skuRows">
                         <div class="skuRow">
                             <div class="row">
@@ -153,7 +162,8 @@
                                                 By Carton
                                             </label>
                                             <div id="quantityBox" style="display: none; width:20%; margin-top: 10px;">
-                                                <label class="form-label" for="quantity">Enter Number of Carton</label>
+                                                <label class="form-label" for="quantity">Enter Number of
+                                                    Carton</label>
                                                 <input type="number" class="form-control" id="quantity"
                                                     name="quantity" placeholder="Enter carton">
                                             </div>
@@ -814,16 +824,18 @@
         //     }
         // ];
         $('#organization-filter').hide();
-       
+
         var company = $('#organization-filter').val(); // Get selected value
-        console.log(company,"orga")
+        console.log(company, "orga")
         customerList(company);
         const responseData = @json($responseData);
-        console.log(responseData,"responseData")
+        console.log(responseData, "responseData")
 
         function customerList(company) {
             let url = `{{ route('customers.list') }}`;
-            ajaxRequest(url, 'GET', {company}, function(response) {
+            ajaxRequest(url, 'GET', {
+                company
+            }, function(response) {
                 console.log(response, "response");
                 if (response.customers && response.customers.length > 0) {
                     $('.customer').html('<option selected disabled>Select Product Customer</option>');
@@ -1045,7 +1057,7 @@
             });
         }
 
-       // customerList();
+        // customerList();
     });
 </script>
 
@@ -1178,7 +1190,7 @@
 
                 if (selectedSku) {
                     loadBatchesAddMore(selectedSku,
-                    $batchSelect); // Load batches for the selected SKU
+                        $batchSelect); // Load batches for the selected SKU
                 } else {
                     // $batchSelect.empty().append(
                     //     '<option value="" disabled selected>Batch No</option>'); // Clear options
@@ -1283,7 +1295,7 @@
 
         // Loop through each SKU row
         $(".skuRow").each(function(index) {
-            console.log(index,"skuIndex");
+            console.log(index, "skuIndex");
             const rowData = {
                 ...commonData,
                 rowIndex: index,
@@ -1327,9 +1339,9 @@
         // Disable submit button to prevent multiple submissions
         submitButton.prop('disabled', true); // Changed to jQuery's prop method
         const isUpdate = orderId && orderId !== '';
-        const url = isUpdate 
-            ? `{{ route('sellCounter.update', '') }}/${orderId}`
-            : "{{ route('sellCounter.store') }}";
+        const url = isUpdate ?
+            `{{ route('sellCounter.update', '') }}/${orderId}` :
+            "{{ route('sellCounter.store') }}";
 
         try {
             const response = await fetch(url, {
