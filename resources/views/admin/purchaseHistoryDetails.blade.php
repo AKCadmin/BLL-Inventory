@@ -33,7 +33,7 @@
                                         <h3 class="product-name">{{ $brand->name }}</h3>
                                         <p><strong>Status:</strong> {{ ucfirst($product->status) }}</p>
 
-                                        @foreach($data as $index => $item)
+                                        {{-- @foreach($data as $index => $item)
                                             <div class="batch-details card mt-4">
                                                 <div class="card-header">
                                                     <h5 class="batch-title">Batch No: {{ $item->batch_number }}</h5>
@@ -44,12 +44,33 @@
                                                     <p><strong>Expiry Date:</strong> {{ $item->expiry_date }}</p>
                                                     <p><strong>Base Price:</strong> {{ $item->base_price }}</p>
                                                     <p><strong>Exchange Rate:</strong> {{ $item->exchange_rate }}</p>
-                                                    {{-- <p><strong>Notes:</strong> {{ $item->notes }}</p> --}}
 
         
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        @endforeach --}}
+
+                                         {{-- @foreach($data as $index => $item) --}}
+                                            <div class="batch-details card mt-4">
+                                                <div class="card-header">
+                                                    <h5 class="batch-title">Batch No: {{ $data[0]->batch_number }}</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p><strong>Customer Name:</strong> {{ $data[0]->customer_name }}</p>
+                                                    <p><strong>Customer Type:</strong> {{ $data[0]->customer_type }}</p>
+                                                    
+                                                    <p><strong>Buy Price:</strong> {{ number_format($data[0]->buy_price, 2) }}</p>
+                                                    <p><strong>Sell Price:</strong> {{ number_format($data[0]->sell_price, 2) }}</p>
+                                                    {{-- <p><strong>Sale Cartons:</strong> {{ $data[0]->sold_cartons }}</p> --}}
+                                                    <p><strong>Manufacturing Date:</strong> {{ $data[0]->manufacturing_date }}</p>
+                                                    <p><strong>Expiry Date:</strong> {{ $data[0]->expiry_date }}</p>
+                                                    <p><strong>Base Price:</strong> {{ $data[0]->base_price }}</p>
+                                                    <p><strong>Exchange Rate:</strong> {{ number_format($data[0]->base_price, 2) }}</p>
+
+        
+                                                </div>
+                                            </div>
+                                        {{-- @endforeach --}}
                                     </div>
                                
                             </div>

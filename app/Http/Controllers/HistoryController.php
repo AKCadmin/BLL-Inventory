@@ -318,6 +318,7 @@ class HistoryController extends Controller
             // if(auth()->user()->role == 1 && is_string($request->company)){
             //     return response()->json(['data' => []]);
             // }
+
             if (auth()->user()->role == 1) {
                 $organization = Organization::where('id', $request->company)->first();
             } else {
@@ -339,12 +340,12 @@ class HistoryController extends Controller
             DB::connection('pgsql')->getPdo();
 
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', 'order_id', 'status', 'payment_status', 'deleted_at', 'customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
+                ->select('batch_id', 'order_id', 'status', 'payment_status', 'deleted_at', 'price', 'customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
                 ->when($selectedDate, function ($q) use ($selectedDate) {
                     return $q->whereDate('created_at', $selectedDate);
                 })
                 ->whereNull('sell_counter.deleted_at')
-                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'payment_status', 'customer_id', 'customer_type');
+                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'payment_status', 'price', 'customer_id', 'customer_type');
 
             $query = DB::table('batches')
                 ->joinSub($sellCounterSubquery, 'sc', function ($join) {
@@ -368,6 +369,7 @@ class HistoryController extends Controller
                     DB::raw('MAX(sc.customer_id) as customer_id'),
                     DB::raw('MAX(sc.customer_type) as customer_type'),
                     DB::raw('MAX(sc.payment_status) as payment_status'),
+                    DB::raw('MAX(sc.price) as sell_price'),
                     DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
                 )
                 ->when($selectedDate, function ($q) use ($selectedDate) {
@@ -378,7 +380,6 @@ class HistoryController extends Controller
 
 
             $stocksList = $query->get();
-
 
             $customerIds = $stocksList->pluck('customer_id')->unique();
 
@@ -430,9 +431,12 @@ class HistoryController extends Controller
                     'hospital_price' => $stock->hospital_price,
                     'wholesale_price' => $stock->wholesale_price,
                     'retail_price' => $stock->retail_price,
-                    'payment_status' => $stock->payment_status
+                    'payment_status' => $stock->payment_status,
+                    'total_sell_price' => $stock->sell_price
                 ];
             });
+
+
 
             return response()->json(['data' => $groupedData]);
         } catch (\Throwable $e) {
@@ -462,23 +466,25 @@ class HistoryController extends Controller
 
     public function saleDetailHistory(Request $request, $productId, $encodedCreatedAt, $orderId)
     {
-
         $product = Product::find($productId);
         $brand = Brand::find($product->brand_id);
         $createdAt = base64_decode($encodedCreatedAt);
-        // dd($encodedCreatedAt);
 
         $databaseName = Session::get('db_name');
 
         if (!$databaseName) {
-            return response()->json(['success' => false, 'message' => 'Database name is required for insertion.'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Database name is required for insertion.'
+            ], 400);
         }
 
+        // Set tenant database connection
         config(['database.connections.pgsql.database' => $databaseName]);
         DB::purge('pgsql');
         DB::connection('pgsql')->getPdo();
 
-        // dd($invoice);
+        // Get sell counter data from tenant database
         $data = DB::table('batches')
             ->leftJoin('sell_counter', 'batches.id', '=', 'sell_counter.batch_id')
             ->leftJoin('sell', 'batches.batch_number', '=', 'sell.batch_no')
@@ -497,20 +503,22 @@ class HistoryController extends Controller
                 'batches.expiry_date',
                 'batches.exchange_rate',
                 'batches.notes',
-                'sell_counter.price',
+                'sell_counter.price as sell_price',
+                'sell_counter.customer as customer_id',
                 'sell_counter.customer_type',
+                'sell_counter.payment_status',
                 'sell.retail_price',
                 'sell.wholesale_price',
                 'sell.hospital_price',
                 'sell_counter.order_id',
                 DB::raw('(batches.quantity + COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as purchase_quantity'),
                 DB::raw('COALESCE(SUM(sell_counter.provided_no_of_cartons), 0) as sold_cartons'),
-                DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity'),
+                DB::raw('(batches.quantity - COALESCE(SUM(sell_counter.provided_no_of_cartons), 0)) as remaining_quantity')
             )
-            // ->where(['batches.invoice_no'=> $invoice])
-            ->where(['sell_counter.order_id' => $orderId])
-            ->where(['batches.product_id' => $productId])
+            ->where('sell_counter.order_id', $orderId)
+            ->where('batches.product_id', $productId)
             ->whereRaw('DATE(batches.created_at) = ?', [$createdAt])
+            ->whereNull('sell_counter.deleted_at')
             ->groupBy(
                 'batches.id',
                 'batches.batch_number',
@@ -527,17 +535,36 @@ class HistoryController extends Controller
                 'batches.expiry_date',
                 'batches.exchange_rate',
                 'batches.notes',
-                'sell_counter.price',
+                'sell_price',
+                'sell_counter.customer',
                 'sell_counter.customer_type',
+                'sell_counter.payment_status',
                 'sell.retail_price',
                 'sell.wholesale_price',
                 'sell.hospital_price',
-                'sell_counter.order_id'
+                'sell_counter.order_id',
             )
             ->get();
 
-        // dd($data);
+        // Get unique customer IDs
+        $customerIds = $data->pluck('customer_id')->unique()->filter();
 
+        // Fetch customer names from main database
+        $customers = collect();
+        if ($customerIds->isNotEmpty()) {
+            $customers = DB::connection('pgsqlmain')
+                ->table('customers')
+                ->whereIn('id', $customerIds)
+                ->pluck('name', 'id');
+        }
+
+        // Map customer names to the data
+        $data = $data->map(function ($item) use ($customers) {
+            $item->customer_name = $customers[$item->customer_id] ?? 'Unknown Customer';
+            return $item;
+        });
+
+// dd($data);
         return view('admin.purchaseHistoryDetails', compact('data', 'product', 'brand', 'createdAt'));
     }
 }

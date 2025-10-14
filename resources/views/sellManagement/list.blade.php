@@ -86,6 +86,7 @@
                                             <th>Product Name</th>
                                             <th>Unit</th>
                                             <th>Total Buy Price</th>
+                                             <th>Total Sell Price</th>
                                             <th>Total No. of Item Per Cartoon</th>
                                             <th>Total No. of Cartoons</th>
                                             <th>Order Id</th>
@@ -280,6 +281,7 @@
                         <td>${productDetails?.product_name || "N/A"}</td>
                         <td>${productDetails?.unit || "N/A"}</td>
                         <td>${productDetails?.total_buy_price || "N/A"}</td>
+                         <td>${productDetails?.total_sell_price || "N/A"}</td>
                         <td>${productDetails?.total_no_of_unit || "N/A"}</td>
                         <td>${productDetails?.total_quantity}</td>
                         <td>${productDetails?.order_id || "N/A"}</td>
