@@ -80,12 +80,11 @@
                                             </select>
                                         </div>
 
-                                                                                    <div class="mb-3">
-                                                <label for="saleDate" class="form-label">Sale Date</label>
-                                                <input type="date" class="form-control" id="saleDate"
-                                                    name="sale_date" max="{{ date('Y-m-d') }}"
-                                                    value="{{ date('Y-m-d') }}" required>
-                                            </div>
+                                        <div class="mb-3">
+                                            <label for="saleDate" class="form-label">Sale Date</label>
+                                            <input type="date" class="form-control" id="saleDate" name="sale_date"
+                                                max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}" required>
+                                        </div>
 
                                         <div class="mb-3">
                                             <label for="unitsPerCarton" class="form-label">Number of Units Per
@@ -115,6 +114,7 @@
                                             </div>
 
                                         @endif
+
 
                                         <div class="mb-3">
                                             <label for="customerTypeName" class="form-label">Select Customer
@@ -196,9 +196,18 @@
         var organizationId = null;
         $('#organizationName').change(function() {
             organizationId = $(this).val(); // Get selected value
+
+            console.log(organizationId, "organizationId")
             customerList(organizationId);
         });
         GetSKU();
+
+
+        if (!organizationId) {
+            organizationId = localStorage.getItem('db_name');
+            console.log(organizationId, "organizationId from localStorage");
+            customerList(organizationId);
+        }
         //customerList();
 
         function GetSKU() {
@@ -784,7 +793,7 @@
                 sku: $(`#SKU_${index}`).val() || $("#SKU").val(),
                 batchNo: $(`#batchNoSelect_${index}`).val() || $("#batchNoSelect").val(),
                 saleDate: $(`#saleDate_${index}`).val() || $("#saleDate")
-            .val(), // Get date for each row
+                    .val(), // Get date for each row
                 unitsPerCarton: $(`#unitsPerCarton_${index}`).val() || $("#unitsPerCarton")
                     .val(),
                 availableQtyCarton: $(`#availableQtyCarton_${index}`).val() || $(

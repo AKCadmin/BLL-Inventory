@@ -99,7 +99,7 @@
                                             {{-- <th>Total No. of Cartoons</th> --}}
                                             <th>Total No. of Item Per Cartoon</th>
                                             <th>Total Buy Price</th>
-                                             <th>Total Sell Price</th>
+                                            <th>Total Sell Price</th>
                                             <th>Payment Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -166,7 +166,13 @@
         var brandName = ""
         var productId = "";
         var selectedDate = new Date().toISOString().split('T')[0];
+       var  organizationId = localStorage.getItem('db_name');
+       console.log(organizationId);
         $('#datePicker').attr('max', selectedDate);
+
+        if (organizationId) {
+            fetchHistory(organizationId, null, null, selectedDate)
+        }
 
         $('#organization-filter').change(function(e) {
             e.preventDefault();
@@ -271,10 +277,11 @@
        >Details</a>`;
 
                         if (!productDetails?.approve_status) {
-    actionButtons += `
+                            actionButtons +=
+                            `
         <a href="${editUrl}" class="btn btn-sm btn-warning" >Edit</a>
         <button class="btn btn-sm btn-danger delete-stock-btn" data-id="${productDetails?.product_id}">Delete</button>`;
-}
+                        }
                         const row = `
                     <tr>
                         <td>${productDetails?.product_id || "N/A"}</td>

@@ -211,7 +211,7 @@ class HistoryController extends Controller
             });
 
             if (auth()->user()->role == 1) {
-               
+
                 return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
             }
 
@@ -343,12 +343,23 @@ class HistoryController extends Controller
             DB::connection('pgsql')->getPdo();
 
             $sellCounterSubquery = DB::table('sell_counter')
-                ->select('batch_id', 'order_id', 'status', 'payment_status', 'deleted_at', 'price', 'customer_type', DB::raw('SUM(provided_no_of_cartons) as total_provided'), 'customer as customer_id')
+                ->select(
+                    'batch_id',
+                    'order_id',
+                    'status',
+                    'payment_status',
+                    'deleted_at',
+                    'price',
+                    'customer_type',
+                    DB::raw('SUM(provided_no_of_cartons) as total_provided'),
+                    'customer as customer_id',
+                    DB::raw('created_at as sellcreatedat')
+                )
                 ->when($selectedDate, function ($q) use ($selectedDate) {
                     return $q->whereDate('created_at', $selectedDate);
                 })
                 ->whereNull('sell_counter.deleted_at')
-                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'payment_status', 'price', 'customer_id', 'customer_type');
+                ->groupBy('batch_id', 'order_id', 'deleted_at', 'status', 'payment_status', 'price', 'customer_id', 'customer_type', 'created_at');
 
             $query = DB::table('batches')
                 ->joinSub($sellCounterSubquery, 'sc', function ($join) {
@@ -373,16 +384,17 @@ class HistoryController extends Controller
                     DB::raw('MAX(sc.customer_type) as customer_type'),
                     DB::raw('MAX(sc.payment_status) as payment_status'),
                     DB::raw('MAX(sc.price) as sell_price'),
-                    DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity'),
+                    DB::raw('MAX(sc.sellcreatedat) as sellcreatedat'),  // ✅ fixed here
+                    DB::raw('SUM(batches.quantity) + COALESCE(SUM(sc.total_provided), 0) as previous_total_no_of_quantity')
                 )
                 ->when($selectedDate, function ($q) use ($selectedDate) {
-                    return $q->whereDate('batches.created_at', $selectedDate);
+                    return $q->whereDate('sc.sellcreatedat', $selectedDate); // ✅ fixed here
                 })
                 ->groupBy('batches.product_id', 'batches.unit', 'sc.order_id', 'sc.status')
                 ->orderBy('product_id', 'ASC');
 
-
             $stocksList = $query->get();
+
 
             $customerIds = $stocksList->pluck('customer_id')->unique();
 
@@ -567,7 +579,7 @@ class HistoryController extends Controller
             return $item;
         });
 
-// dd($data);
+        // dd($data);
         return view('admin.purchaseHistoryDetails', compact('data', 'product', 'brand', 'createdAt'));
     }
 }
