@@ -20,6 +20,7 @@ class Batch extends Model
         "brand_id",
         "no_of_units",
         "quantity",
-        "invoice_no"
+        "invoice_no",
+        'date'
     ];
 }

@@ -10,19 +10,19 @@
     @include('partials.link')
     @include('partials.head-css')
 
-<style>
-    /* Optional: Align Select2 styling with Bootstrap 5 */
-.select2-container .select2-selection--single {
-    height: 38px;
-    padding: 6px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
-}
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 24px;
-}
+    <style>
+        /* Optional: Align Select2 styling with Bootstrap 5 */
+        .select2-container .select2-selection--single {
+            height: 38px;
+            padding: 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
 
-</style>
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 24px;
+        }
+    </style>
 </head>
 
 @include('partials.body')
@@ -49,7 +49,7 @@
                                     <!-- Left Column -->
                                     <div class="col-md-6">
 
-                                        
+
 
                                         <div class="mb-3">
                                             <label for="paymentStatus" class="form-label">Payment Status</label>
@@ -61,6 +61,8 @@
                                                 <option value="unpaid">Unpaid</option>
                                             </select>
                                         </div>
+
+
 
                                         <div class="mb-3">
                                             <label for="customer" class="form-label">Select Customer</label>
@@ -77,6 +79,13 @@
                                                 <option selected disabled>Select Product</option>
                                             </select>
                                         </div>
+
+                                                                                    <div class="mb-3">
+                                                <label for="saleDate" class="form-label">Sale Date</label>
+                                                <input type="date" class="form-control" id="saleDate"
+                                                    name="sale_date" max="{{ date('Y-m-d') }}"
+                                                    value="{{ date('Y-m-d') }}" required>
+                                            </div>
 
                                         <div class="mb-3">
                                             <label for="unitsPerCarton" class="form-label">Number of Units Per
@@ -104,6 +113,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+
                                         @endif
 
                                         <div class="mb-3">
@@ -122,6 +132,7 @@
                                             </select>
                                         </div>
 
+
                                         <div class="mb-3">
                                             <label for="availableQtyCarton" class="form-label">Available Total No of
                                                 Carton</label>
@@ -135,6 +146,7 @@
                                     </div>
 
                                     <div class="col-md-6">
+
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input packaging-type byCarton" type="checkbox"
@@ -490,6 +502,13 @@
                         </select>
                     </div>
                 </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="saleDate_${rowIndex}" class="form-label">Sale Date</label>
+                    <input type="date" class="form-control saleDate" id="saleDate_${rowIndex}" name="saleDate" 
+                           max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
+                </div>
+            </div>
                                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="unitsPerCarton_${rowIndex}">Number of Unit Per
@@ -754,7 +773,7 @@
             customer: $("#customer").val(),
             customerType: $("#customerType").val(),
             customerTypeName: $("#customerTypeName").val(),
-            paymentStatus: $("#paymentStatus").val()
+            paymentStatus: $("#paymentStatus").val(),
         };
 
         // Loop through each SKU row
@@ -764,6 +783,8 @@
                 rowIndex: index,
                 sku: $(`#SKU_${index}`).val() || $("#SKU").val(),
                 batchNo: $(`#batchNoSelect_${index}`).val() || $("#batchNoSelect").val(),
+                saleDate: $(`#saleDate_${index}`).val() || $("#saleDate")
+            .val(), // Get date for each row
                 unitsPerCarton: $(`#unitsPerCarton_${index}`).val() || $("#unitsPerCarton")
                     .val(),
                 availableQtyCarton: $(`#availableQtyCarton_${index}`).val() || $(

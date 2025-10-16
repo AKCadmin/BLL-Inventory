@@ -115,6 +115,7 @@ class SellCornerController extends Controller
 
         try {
             $data = $request->all();
+            // dd($data);
             $totalAmount = 0;
             $sellCounterIds = [];
             $customerTypeName = "";
@@ -183,6 +184,7 @@ class SellCornerController extends Controller
                 $sellCounter->provided_no_of_cartons = $quantity; // Use $quantity directly
                 $sellCounter->price = $itemTotal; // Store the individual item total, not cumulative
                 $sellCounter->payment_status = $item['paymentStatus'];
+                $sellCounter->date = $item['saleDate'];
                 $sellCounter->save();
                 $sellCounterIds[] = $sellCounter->id;
 
@@ -300,6 +302,7 @@ class SellCornerController extends Controller
                 'batchId' => $item->batch_id,
                 'unitsPerCarton' => (string)$item->no_of_units,
                 'availableQtyCarton' => (string)$availableQtyCarton,
+                'date' => $item->date,
                 'packagingType' => [
                     'byCarton' => $item->packaging_type == 1,
                     'quantity' => (string)$item->provided_no_of_cartons
@@ -511,6 +514,7 @@ class SellCornerController extends Controller
                 $sellCounter->company_id = 1;
                 $sellCounter->product_id = $item['sku'];
                 $sellCounter->batch_id = $batch->id;
+                $sellCounter->date = $item['saleDate'];
                 $sellCounter->order_id = $orderId;
                 $sellCounter->customer = $item['customer'];
                 $sellCounter->customer_type = $customerType;

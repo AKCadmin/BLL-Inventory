@@ -165,7 +165,8 @@ class HistoryController extends Controller
                     'batches.quantity',
                     'batches.created_at',
                     'batches.updated_at',
-                    'batches.invoice_no'
+                    'batches.invoice_no',
+                    'batches.date'
                 )
                 ->where('batches.product_id', $id)
                 ->where('batches.no_of_units', $noOfcartoon)
@@ -203,12 +204,14 @@ class HistoryController extends Controller
                             'wholesale_price' => $batch->wholesale_price ?? null,
                             'retail_price' => $batch->retail_price ?? null,
                             'invoice_no' => $batch->invoice_no,
+                            'date' => $batch->date,
                         ];
                     })->values(),
                 ];
             });
 
             if (auth()->user()->role == 1) {
+               
                 return view('admin.purchaseHistoryEdit', compact('groupedData', 'brand'));
             }
 

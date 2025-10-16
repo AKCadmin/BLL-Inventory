@@ -11,10 +11,10 @@ abstract class Controller
 
     protected function setupDatabaseConnection()
     {
-
+       
         if (Session::has('db_name')) {
             $dbName = session('db_name');
-            
+           
 
             if ($dbName) {
 

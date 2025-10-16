@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 if (!function_exists('setDatabaseConnection')) {
     function setDatabaseConnection()
     {
+         
         // if (Auth::user()->role != '1') {
             $databaseName = Session::get('db_name');
             //    dd($databaseName);

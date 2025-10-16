@@ -23,8 +23,6 @@ class FrontController extends Controller
 
             $userRole =Auth::user()->role;
             $menus = Menu::all();
-
-
             return view('home', compact('userRole'), ['menus' => $menus]);
         }
 

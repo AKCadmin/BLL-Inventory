@@ -129,6 +129,12 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="mb-3">
+                                    <label for="saleDate" class="form-label">Sale Date</label>
+                                    <input type="date" class="form-control" id="saleDate" name="sale_date"
+                                        max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}" required>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="unitsPerCarton">Number of Item Per
@@ -266,6 +272,7 @@
         function populateForm(data) {
             $('#skuRows').empty();
             data.forEach((item, index) => {
+                console.log(item, index, "item index")
                 let row = $(
                     `<div class="skuRow">
                     <div class="row">
@@ -291,6 +298,14 @@
                                 </select>
                             </div>                         
                         </div>
+
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="saleDate${index}" class="form-label">Sale Date</label>
+                        <input type="date" class="form-control saleDate" id="saleDate_${index}" name="saleDate" 
+                               max="{{ date('Y-m-d') }}" value="${item.date ? item.date.split(' ')[0] : '{{ date('Y-m-d') }}'}">
+                    </div>
+                </div>
 
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -505,6 +520,13 @@
                         </select>
                     </div>
                 </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="saleDate_${rowIndex}" class="form-label">Sale Date</label>
+                    <input type="date" class="form-control saleDate" id="saleDate_${rowIndex}" name="saleDate" 
+                           max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
+                </div>
+            </div>
                                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="unitsPerCarton_${rowIndex}">Number of Unit Per
@@ -737,6 +759,7 @@
                 ...commonData,
                 rowIndex: index,
                 sku: $(`#SKU_${index}`).val() || $("#SKU").val(),
+                saleDate: $(`#saleDate_${index}`).val() || $("#saleDate").val(),
                 batchNo: $(`#batchNoSelect_${index}`).val() || $("#batchNoSelect").val(),
                 unitsPerCarton: $(`#unitsPerCarton_${index}`).val() || $("#unitsPerCarton")
                     .val(),

@@ -46,11 +46,10 @@
             <div class="container-fluid">
                 <div class="col-md-6 mb-3">
                     <label for="autoSizingSelect">Select Supplier</label>
-                    <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">             
-                            <option value="{{ $brand->id }}"
-                               selected>
-                                {{ $brand->name }}
-                            </option>                     
+                    <select class="form-select brand" id="brandId" id="autoSizingSelect" name="brand_id">
+                        <option value="{{ $brand->id }}" selected>
+                            {{ $brand->name }}
+                        </option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -83,6 +82,11 @@
                                 placeholder="Enter Batch No.">
                             <input type="text" class="form-control batchNo" id="batchNo"
                                 placeholder="Enter Batch No.">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" name="date" id="date" class="form-control date"
+                                max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col-md-3 mb-2">
                             <label for="manufacturingDate" class="form-label">Manufacturing Date</label>
@@ -122,14 +126,14 @@
 
     <script>
         $(document).ready(function() {
-            let user = "{{auth()->user()->role}}";
-            if(user == 1){
+            let user = "{{ auth()->user()->role }}";
+            if (user == 1) {
                 $('#organization-filter').prop('disabled', true).css('background-color', '#e0e0e0');
-            }else{
+            } else {
                 $('#organization-filter').hide();
             }
-            
-             
+
+
 
             function validateManufacturingDate(manufacturingDate) {
                 const today = new Date();
@@ -137,7 +141,7 @@
 
                 // Check if the date is in the future
                 if (selectedDate > today) {
-                    return true; 
+                    return true;
                 }
                 return false;
             }
@@ -151,11 +155,11 @@
                 if (selectedExpiryDate < selectedManufacturingDate) {
                     return true;
                 }
-                return false; 
+                return false;
             }
 
             function getProducts(id) {
-             
+
                 let url = `{{ route('product.getData') }}`;
                 ajaxRequest(url, 'GET', {},
                     function(response) {
@@ -166,7 +170,7 @@
                                     `<option value="${product.productId}">${product.name}</option>`
                                 );
                             });
-                            console.log(id,"idjj")
+                            console.log(id, "idjj")
                             $('#SKU').val(id).change();
                         }
                     }
@@ -185,17 +189,17 @@
             //     // Render existing cartons
             //     existingCartons.forEach((carton, index) => {
             //         let cartonRow = $(`
-            //     <div class="row cartonRow mb-3">
-            //         <div class="col-md-4">
-            //             <label class="form-label">No. of Items Inside</label>
-            //             <input type="number" class="form-control noOfItemsInside" name="carton[${index}][no_of_items_inside]" value="${carton.no_of_items_inside}" >
-            //         </div>
-            //         <div class="col-md-4">
-            //             <label class="form-label">Missing Items</label>
-            //             <input type="number" class="form-control missingItems" name="carton[${index}][missing_items]" value="${carton.missing_items}" >
-            //         </div>
-            //     </div>
-            // `);
+        //     <div class="row cartonRow mb-3">
+        //         <div class="col-md-4">
+        //             <label class="form-label">No. of Items Inside</label>
+        //             <input type="number" class="form-control noOfItemsInside" name="carton[${index}][no_of_items_inside]" value="${carton.no_of_items_inside}" >
+        //         </div>
+        //         <div class="col-md-4">
+        //             <label class="form-label">Missing Items</label>
+        //             <input type="number" class="form-control missingItems" name="carton[${index}][missing_items]" value="${carton.missing_items}" >
+        //         </div>
+        //     </div>
+        // `);
             //         cartonRowsContainer.append(cartonRow);
             //     });
 
@@ -204,17 +208,17 @@
             //     for (let i = 1; i <= numNewCartons; i++) {
             //         let newCartonIndex = currentCartonCount + i;
             //         let cartonRow = $(`
-            //     <div class="row cartonRow mb-3">
-            //         <div class="col-md-4">
-            //             <label class="form-label">No. of Items Inside</label>
-            //             <input type="number" class="form-control noOfItemsInside" name="carton[${newCartonIndex}][no_of_items_inside]" placeholder="Enter no of items">
-            //         </div>
-            //         <div class="col-md-4">
-            //             <label class="form-label">Missing Items</label>
-            //             <input type="number" class="form-control missingItems" name="carton[${newCartonIndex}][missing_items]" placeholder="Enter missing items">
-            //         </div>
-            //     </div>
-            // `);
+        //     <div class="row cartonRow mb-3">
+        //         <div class="col-md-4">
+        //             <label class="form-label">No. of Items Inside</label>
+        //             <input type="number" class="form-control noOfItemsInside" name="carton[${newCartonIndex}][no_of_items_inside]" placeholder="Enter no of items">
+        //         </div>
+        //         <div class="col-md-4">
+        //             <label class="form-label">Missing Items</label>
+        //             <input type="number" class="form-control missingItems" name="carton[${newCartonIndex}][missing_items]" placeholder="Enter missing items">
+        //         </div>
+        //     </div>
+        // `);
             //         cartonRowsContainer.append(cartonRow);
             //     }
             // }
@@ -223,23 +227,27 @@
             function renderBatchData(batchData) {
                 let purchaseContainer = $('#purchaseContainer');
                 purchaseContainer.empty();
-               
+
                 if (!Array.isArray(batchData)) {
                     batchData = Object.values(batchData);
                 }
-                console.log(batchData[0].product_id,"batch batch")
+                console.log(batchData[0].product_id, "batch batch")
                 getProducts(batchData[0].product_id)
                 batchData[0].batches.forEach((batch) => {
-                   
+
                     $('#unit').val(batch.unit)
                     $('#invoice').val(batch.invoice_no)
-                  
+
                     let batchRow = $(`
-                <div class="row rowTemplate border p-3 rounded mb-2">
+                   <div class="row rowTemplate border p-3 rounded mb-2">
+                     <div class="col-md-4 mb-2">
+                          <label class="form-label">Batch No.</label>
+                          <input type="hidden" class="form-control batchId" value="${batch.batch_id}" >
+                          <input type="text" class="form-control batchNo" value="${batch.batch_number}" >
+                    </div>
                     <div class="col-md-4 mb-2">
-                        <label class="form-label">Batch No.</label>
-                        <input type="hidden" class="form-control batchId" value="${batch.batch_id}" >
-                        <input type="text" class="form-control batchNo" value="${batch.batch_number}" >
+                         <label for="date" class="form-label">Date</label>
+                         <input type="date" class="form-control date" value="${batch.date}">
                     </div>
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Manufacturing Date</label>
@@ -310,11 +318,11 @@
 
                         // If Manufacturing Date is invalid (future date), disable the field
                         if (validateManufacturingDate(manufacturingDate)) {
-                            $(this).val(''); 
+                            $(this).val('');
                             expiryDateInput.prop('disabled', true);
                         } else {
                             expiryDateInput.prop('disabled', false);
-                           
+
                             if (manufacturingDate) {
                                 expiryDateInput.attr('min', manufacturingDate);
                             }
@@ -338,7 +346,7 @@
                         const buyPrice = basePrice * exchangeRate;
 
                         batchRow.find('.buyPrice').val(buyPrice.toFixed(
-                            2)); 
+                            2));
                     });
                 });
             }
@@ -372,7 +380,7 @@
 
             $('#updateButton').click(function() {
                 const batches = [];
-                let user = "{{auth()->user()->role}}";
+                let user = "{{ auth()->user()->role }}";
 
                 $('#purchaseContainer .row.border').each(function() {
                     const batch = {
@@ -381,6 +389,7 @@
                         unit: $('#unit').val(),
                         invoice: $('#invoice').val(),
                         batch_id: $(this).find('.batchId').val(),
+                        date: $(this).find('.date').val(),
                         batch_no: $(this).find('.batchNo').val(),
                         manufacturing_date: $(this).find('.manufacturingDate').val(),
                         expiry_date: $(this).find('.expiryDate').val(),
@@ -423,12 +432,12 @@
                     .then(responseData => {
                         if (responseData.success) {
                             toastr.success('Batches updated successfully!');
-                            if(user == 1){
+                            if (user == 1) {
                                 window.location.href =
-                                '{{ route('purchase.history') }}';
-                            }else{
-                            window.location.href =
-                                '{{ route('stock.list') }}';
+                                    '{{ route('purchase.history') }}';
+                            } else {
+                                window.location.href =
+                                    '{{ route('stock.list') }}';
                             }
                         } else {
                             toastr.error('Error: ' + responseData.message);
@@ -477,6 +486,10 @@
                     <label for="batchNo" class="form-label">Batch No.</label>
                     <input type="hidden" class="form-control batchId" placeholder="Enter Batch No.">
                     <input type="text" class="form-control batchNo" placeholder="Enter Batch No.">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control date" max="${currentDate}" value="${currentDate}">
                 </div>
                 <div class="col-md-4 mb-2">
                     <label for="manufacturingDate" class="form-label">Manufacturing Date</label>

@@ -399,12 +399,13 @@
                     const data = response.data || {};
                     const table = $('#stocktable').DataTable();
                     table.clear(); // Clear existing rows
-
+                   let counter = 1;
                     // Loop through the response data
                     for (const [key, productArray] of Object.entries(data)) {
+                       
                         if (Array.isArray(productArray)) {
                             productArray.forEach((productDetails) => {
-                              
+                               let indexId = counter++;
                                 const created_at = productDetails?.created_at?.split(" ")[
                                     0] || "N/A";
                                 const editUrl =
@@ -418,7 +419,7 @@
                                     productDetails?.created_at.toString());
                                 const row = `
                 <tr>
-                    <td>${productDetails?.product_id || "N/A"}</td>
+                    <td>${indexId || "N/A"}</td>
                     <td>${productDetails?.brand_name || "N/A"}</td>
                     <td>${productDetails?.product_name || "N/A"}</td>
                     <td>${productDetails?.unit || "N/A"}</td>

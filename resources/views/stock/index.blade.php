@@ -51,18 +51,20 @@
                         @csrf
                         <div class="row align-items-center">
 
-                            @if(auth()->user()->role == 1)
-                            <div class="col-md-6 mb-3">
-                            <label for="autoSizingSelect">Select Organization</label>
-                            
-                                <select id="organizationName" name="organizationName" class="form-control custom-select">
-                                    <option value="">Select Organization</option>
-                                    @foreach ($organizations as $organization)
-                                        <option value="{{ $organization->name }}">{{ str_replace('_', ' ', $organization->name) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            @if (auth()->user()->role == 1)
+                                <div class="col-md-6 mb-3">
+                                    <label for="autoSizingSelect">Select Organization</label>
+
+                                    <select id="organizationName" name="organizationName"
+                                        class="form-control custom-select">
+                                        <option value="">Select Organization</option>
+                                        @foreach ($organizations as $organization)
+                                            <option value="{{ $organization->name }}">
+                                                {{ str_replace('_', ' ', $organization->name) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             @endif
                             <div class="col-md-6 mb-3">
                                 <label for="autoSizingSelect">Select Supplier</label>
@@ -124,6 +126,13 @@
                                     <input type="text" name="batchNo" id="batchNo" class="form-control batchNo"
                                         placeholder="Enter Batch No.">
                                 </div>
+
+                                <div class="col-md-4 mb-2">
+                                    <label for="date" class="form-label">Date</label>
+                                    <input type="date" name="date" id="date" class="form-control date"
+                                        max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
+                                </div>
+
                                 <div class="col-md-4 mb-2">
                                     <label for="manufacturingDate" class="form-label">Manufacturing
                                         Date</label>
@@ -138,8 +147,8 @@
 
                                 <div class="col-md-4 mb-2">
                                     <label for="basePrice" class="form-label">Base Price</label>
-                                    <input type="text" name="basePrice" id="basePrice" class="form-control basePrice"
-                                        placeholder="Enter Base Price">
+                                    <input type="text" name="basePrice" id="basePrice"
+                                        class="form-control basePrice" placeholder="Enter Base Price">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label for="exchangeRate" class="form-label">Exchange Rate</label>
@@ -284,6 +293,7 @@
             $('#batchRows .rowTemplate').each(function(index) {
                 var batchData = {
                     batchNo: $(this).find('.batchNo').val(),
+                     date: $(this).find('.date').val(),
                     manufacturingDate: $(this).find('.manufacturingDate').val(),
                     expiryDate: $(this).find('.expiryDate').val(),
                     basePrice: $(this).find('.basePrice').val(),
@@ -323,13 +333,13 @@
                 .then(data => {
                     if (data.success) {
                         toastr.success('Form submitted successfully!');
-                        let user = "{{auth()->user()->role}}";
-                        if(user == 1){
-                        window.location.href =
-                            '{{ route('stock.list') }}';
-                        }else{
+                        let user = "{{ auth()->user()->role }}";
+                        if (user == 1) {
                             window.location.href =
-                            '{{ route('purchase.list') }}';
+                                '{{ route('stock.list') }}';
+                        } else {
+                            window.location.href =
+                                '{{ route('purchase.list') }}';
                         }
                     } else {
                         toastr.error('Submission failed: ' + data.message);
@@ -399,6 +409,10 @@
                     <label for="batchNo" class="form-label">Batch No.</label>
                     <input type="text" class="form-control batchNo" placeholder="Enter Batch No.">
                 </div>
+                        <div class="col-md-4 mb-2">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control date" max="${currentDate}" value="${currentDate}">
+        </div>
                 <div class="col-md-4 mb-2">
                     <label for="manufacturingDate" class="form-label">Manufacturing Date</label>
                     <input type="date" class="form-control manufacturingDate">

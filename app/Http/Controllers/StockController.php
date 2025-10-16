@@ -94,6 +94,7 @@ class StockController extends Controller
 
                 $batchModel = new Batch();
                 $batchModel->batch_number = $batch['batchNo'];
+                $batchModel->date = $request->date;
                 $batchModel->product_id = $product->id;
                 $batchModel->brand_id = $request->brand_id;
                 $batchModel->unit = $request->unit;

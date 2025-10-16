@@ -255,9 +255,11 @@
                     table.clear();
 
                     // Append new rows
-                    $.each(data, function(index, stocks) {
-                        $.each(stocks, function(index, stock) {
-                            let indexId = index + 1;
+                    let counter = 1;
+
+                    $.each(data, function(_, stocks) {
+                        $.each(stocks, function(_, stock) {
+                            let indexId = counter++;
                             console.log(stock, "stocks");
                             const today = new Date().toISOString().split("T")[0];
                             const stockCreatedAtDate = stock?.created_at ? stock
